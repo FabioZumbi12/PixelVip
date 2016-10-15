@@ -1,0 +1,68 @@
+name: ${project.name}
+main: ${project.groupId}.${project.artifactId}.${project.name}
+version: ${project.version}
+author: FabioZumbi12
+description: ${project.description}
+softdepend: [Vault]
+commands:
+  pixelvip:
+    description: "Main command for PixelVip."
+    permission: "pixelvip.cmd.pixelvip"
+    usage: "/pixelvip reload"
+  newkey:
+    description: "Generate new vip key for groups."
+    permission: "pixelvip.cmd.newkey"
+    usage: "/newkey <vip group> <days> [uses]"
+    aliases: [genkey, gerarkey]
+  listkeys:
+    description: "List all available keys."
+    permission: "pixelvip.cmd.listkeys"
+    usage: "/listkeys"
+    aliases: [listarkeys]
+  usekey:
+    description: "Use a key to activate the Vip."
+    permission: "pixelvip.cmd.player"
+    usage: "/usekey <key>"
+    aliases: [usarkey]
+  viptime:
+    description: "Use to check the vip time."
+    permission: "pixelvip.cmd.player"
+    usage: "/viptime"
+    aliases: [tempovip]
+  removevip:
+    description: "Use to remove a vip of player."
+    permission: "pixelvip.cmd.removevip"
+    usage: "/removevip <player> [vip group]"
+    aliases: [delvip]
+  setactive:
+    description: "Use to change your active VIP, if more keys activated."
+    permission: "pixelvip.cmd.player"
+    usage: "/setactive <vip group>"
+    aliases: [changevip, trocarvip]
+  addvip:
+    description: "Use to add a vip for a player without key."
+    permission: "pixelvip.cmd.addvip"
+    usage: "/addvip <player> <vip group> <days>"
+    aliases: [givevip, darvip]
+  setvip:
+    description: "Use to set a vip without activation and without key."
+    permission: "pixelvip.cmd.setvip"
+    usage: "/setvip <player> <vip group> <days>"
+    aliases: []
+permissions:
+  pixelvip.normal:
+    description: "Player commands."
+    default: true
+    children:
+      pixelvip.cmd.player: true
+  pixelvip.admin:
+    description: "Admin commands."
+    default: op
+    children:
+      pixelvip.cmd.player: true
+      pixelvip.cmd.player.others: true
+      pixelvip.cmd.newkey: true
+      pixelvip.cmd.listkeys: true
+      pixelvip.cmd.removevip: true
+      pixelvip.cmd.addvip: true
+      pixelvip.cmd.setvip: true

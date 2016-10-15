@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>br.net.fabiozumbi12</groupId>
+  <artifactId>PixelVip</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>PixelVip</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+    <dependencies>
+    
+        <dependency>
+          <groupId>org.spigotmc</groupId>
+          <artifactId>spigot-api</artifactId>
+          <version>1.10-R0.1-SNAPSHOT</version>
+        </dependency>       
+        
+        <dependency>
+           <groupId>net.milkbowl.vault</groupId>
+           <artifactId>VaultAPI</artifactId>            
+           <version>LATEST</version>
+           <scope>provided</scope>
+        </dependency>
+         
+  </dependencies>
+  <repositories>
+     <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+     </repository>
+     <repository>
+            <id>vault-repo</id>
+            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
+        </repository>
+  </repositories>
+  
+  <build>
+    <finalName>${project.name}-${project.version}</finalName>
+    <defaultGoal>clean install</defaultGoal>
+    <resources>
+        <resource>
+            <targetPath>.</targetPath>
+            <filtering>true</filtering>
+            <directory>src/main/resources/</directory>
+        </resource>
+    </resources>
+    
+    <plugins>
+      
+      <!-- Parse Version to plugin.yml -->
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.10</version>
+          <executions>
+              <execution>
+                  <id>parse-version</id>
+                  <goals>
+                      <goal>parse-version</goal>
+                  </goals>
+              </execution>
+          </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>        
+      </plugin>
+      
+      <!-- 
+    <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <format>${project.version}-b{0,number}</format>
+          <items>
+            <item>buildNumber0</item>
+          </items>
+        </configuration>
+      </plugin>
+            -->
+            
+    </plugins>
+  </build>
+  <description>A plugin to manage vips on your server!</description>
+</project>
