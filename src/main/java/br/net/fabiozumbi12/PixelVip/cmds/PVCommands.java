@@ -37,13 +37,13 @@ public class PVCommands implements CommandExecutor, TabCompleter {
     @Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 
-    	if (cmd.getName().equalsIgnoreCase("newkey") && args.length == 0){
+    	if (cmd.getName().equalsIgnoreCase("newkey") && args.length == 1){
     		List<String> list = new ArrayList<String>();
     		list.addAll(plugin.getPVConfig().getGroupList());
 			return list;
 		}
     	
-    	if (cmd.getName().equalsIgnoreCase("pixelvip") && args.length == 0){
+    	if (cmd.getName().equalsIgnoreCase("pixelvip") && args.length == 1){
 			return Arrays.asList("reload");
 		}
     	
@@ -125,7 +125,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    		return true;
 	    	}
 	    	String key = plugin.getUtil().genKey(plugin.getPVConfig().getInt(10,"configs.key-size"));
-	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), 1);	
+	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), 1, "");	
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+group));
@@ -161,7 +161,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    		return true;
 	    	}
 	    	String key = plugin.getUtil().genKey(plugin.getPVConfig().getInt(10,"configs.key-size"));
-	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), uses);	
+	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), uses, "");	
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+group));
@@ -241,7 +241,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		if (args.length == 1){
 			OfflinePlayer optp = Bukkit.getOfflinePlayer(args[0]);
 	    	if (optp != null){
-	    		plugin.getPVConfig().removeVip(optp, Optional.empty());
+	    		plugin.getPVConfig().removeVip(optp, Optional.empty(), "");
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipsRemoved")));	    		
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));	 
@@ -257,7 +257,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 			} 
 			
 	    	if (optp != null){
-	    		plugin.getPVConfig().removeVip(optp, group);
+	    		plugin.getPVConfig().removeVip(optp, group, "");
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipsRemoved")));	    		
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));	 
@@ -287,7 +287,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		    	if (vipInfo.size() > 0){				    		
 		    		for (String[] vip:vipInfo){
 		    			if (vip[1].equalsIgnoreCase(group)){				    				
-		    				plugin.getPVConfig().setActive(p.getUniqueId().toString(), vip[1], vip[2]);
+		    				plugin.getPVConfig().setActiveCmd(p, vip[1], vip[2], "");
 		    				p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","activeVipSetTo")+vip[1]));
 		    				return true;
 		    			}
@@ -328,6 +328,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    		return false;
 	    	}
 	    	plugin.getPVConfig().activateVip(p, "", group, days);
+	    	return true;
 		}
 		return false;
 	}
@@ -356,7 +357,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	} catch (NumberFormatException ex){
 	    		return false;
 	    	}
-	    	plugin.getPVConfig().setVip(p, group, plugin.getUtil().dayToMillis(days));		
+	    	plugin.getPVConfig().setVip(p, group, plugin.getUtil().dayToMillis(days), "");		
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipSet")));
 	    	return true;
 		}

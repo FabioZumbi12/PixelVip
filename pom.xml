@@ -4,7 +4,7 @@
 
   <groupId>br.net.fabiozumbi12</groupId>
   <artifactId>PixelVip</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <packaging>jar</packaging>
 
   <name>PixelVip</name>
@@ -41,8 +41,16 @@
         </repository>
   </repositories>
   
+
+  <scm>
+     <connection>scm:git:git@github.com:FabioZumbi12/PixelVip-Spigot.git</connection>
+     <developerConnection>scm:git:git@github.com:FabioZumbi12/PixelVip-Spigot.git</developerConnection>
+     <url>https://github.com/FabioZumbi12/PixelVip-Spigot/tree/master</url>
+     <tag>${project.version}</tag>
+  </scm>
+    
   <build>
-    <finalName>${project.name}-${project.version}</finalName>
+    <finalName>${project.name}-${buildNumber}</finalName>
     <defaultGoal>clean install</defaultGoal>
     <resources>
         <resource>
@@ -79,7 +87,6 @@
         </configuration>        
       </plugin>
       
-      <!-- 
     <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
@@ -99,7 +106,6 @@
           </items>
         </configuration>
       </plugin>
-            -->
             
     </plugins>
   </build>

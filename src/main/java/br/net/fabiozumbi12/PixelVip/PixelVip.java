@@ -11,14 +11,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import br.net.fabiozumbi12.Bungee.PixelVipBungee;
 import br.net.fabiozumbi12.PixelVip.cmds.PVCommands;
 
-public class PixelVip extends JavaPlugin {
+public class PixelVip extends JavaPlugin implements Listener {
 	
 	public PixelVip plugin;
 	public Server serv;
@@ -49,14 +54,27 @@ public class PixelVip extends JavaPlugin {
 		logger.sucess(util.toColor("PixelVip reloaded"));
 	}
 	
-	private PermsAPI permApi;
+	private PermsAPI permApi;	
 	public PermsAPI getPerms(){
 		return this.permApi;
+	}
+	
+	private PixelVipBungee pvBungee;
+	public PixelVipBungee getPVBungee(){
+		return this.pvBungee;
 	}
 	
 	public void onEnable(){		
 		plugin = this;
 		serv = getServer();
+		serv.getPluginManager().registerEvents(this, this);
+		
+		//register bungee
+		pvBungee = new PixelVipBungee(this);
+		serv.getPluginManager().registerEvents(pvBungee, this);
+		serv.getMessenger().registerOutgoingPluginChannel(this,"PixelVipBungee");
+		serv.getMessenger().registerIncomingPluginChannel(this, "PixelVipBungee", pvBungee);
+		
 		logger = new PVLogger();
         pdf = getDescription();
         mainPath = "plugins" + File.separator + pdf.getName() + File.separator;
@@ -122,7 +140,7 @@ public class PixelVip extends JavaPlugin {
 								config.runChangeVipCmds(uuid, vipInfo[1], permApi.getGroup(p));
 							}
 							if (dur <= util.getNowMillis()){
-								getPVConfig().removeVip(p, Optional.of(vipInfo[1]));
+								getPVConfig().removeVip(p, Optional.of(vipInfo[1]), "");
 								if (p.isOnline()){
 									p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
 								}
@@ -135,6 +153,27 @@ public class PixelVip extends JavaPlugin {
 			
 		}, 0, 20*60);
 		logger.info("-> Task started");
+	}
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent e){
+		Player p = e.getPlayer();
+		
+		if (getPVConfig().queueCmds()){
+			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
+				@Override
+				public void run() {					
+					getPVConfig().getQueueCmds(p.getUniqueId().toString()).forEach((cmd)->{
+						plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
+							@Override
+							public void run() {
+								plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd);
+							}
+						}, 10);
+					});						
+				}
+			}, 60);			
+		}
 	}
 	
 	//check if plugin Vault is installed

@@ -21,6 +21,35 @@ public class PVConfig {
 	public PVConfig(PixelVip plugin, String defDir, File defConfig){
 		this.plugin = plugin;
 		
+		plugin.getConfig().options().header("=============== PixelVip Configuration Options ================\n"
+				+ "\n"
+				+ "This is the default configuration and some information about some configurations.\n"
+				+ "\n"
+				+ "In \"groups\" on \"commands\" and \"cmdChances\"(Lists) you can use this placeholders:\n"
+				+ "- {p} = Players Name\n"
+				+ "- {vip} = Vip Group\n"
+				+ "- {playergroup} = Player Group before Vip activation\n"
+				+ "- {days} = Days of activated Vip\n"
+				+ "\n"
+				+ "In \"groups\" > \"cmdChances\"(List) you can add commands to run based on a % chance. \n"
+				+ "Use numbers below 0-100 like the example on \"vip1\".\n"
+				+ "\n"
+				+ "In \"configs\" > \"cmdOnRemoveVip\"(String) you can use this placeholders:\n"
+				+ "- {p} = Player Name\n"
+				+ "- {vip} = Name of Vip Removed\n"
+				+ "\n"
+				+ "In \"configs\" > \"commandsToRunOnChangeVip\"(List) you can use this placeholders:\n"
+				+ "- {p} = Player Name\n"
+				+ "- {newvip} = Name of Vip the player is changing to\n"
+				+ "- {oldvip} = Name of Vip the player is changing from\n"
+				+ "\n"
+				+ "In \"configs\" > \"commandsToRunOnVipFinish\"(List) you can use this placeholders:\n"
+				+ "- {p} = Player Name\n"
+				+ "- {vip} = Name of Vip\n"
+				+ "- {playergroup} = Player Group before Vip activation\n"
+				+ "\n"
+				+ "");
+				
         if (!plugin.getConfig().contains("groups")){
         	plugin.getConfig().set("groups.vip1.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays","give {p} minecraft:diamond 10", "eco give {p} 10000"));
         	plugin.getConfig().set("groups.vip1.cmdChances.50", Arrays.asList("give {p} minecraft:diamond_block 5"));
@@ -35,7 +64,10 @@ public class PVConfig {
         plugin.getConfig().set("configs.cmdOnRemoveVip", getObj("","configs.cmdOnRemoveVip"));        
         plugin.getConfig().set("configs.commandsToRunOnVipFinish", getObj(new ArrayList<String>(), "configs.commandsToRunOnVipFinish"));
         plugin.getConfig().set("configs.commandsToRunOnChangeVip", getObj(new ArrayList<String>(),"configs.commandsToRunOnChangeVip"));
-        
+        plugin.getConfig().set("configs.queueCmdsForOfflinePlayers", getObj(false,"configs.queueCmdsForOfflinePlayers"));
+        plugin.getConfig().set("bungee.enableSync", getObj(false,"bungee.enableSync"));
+        plugin.getConfig().set("bungee.serverID", getObj("server1","bungee.serverID"));
+                
         if (!plugin.getConfig().contains("keys")){
         	plugin.getConfig().set("keys", new ArrayList<String>());
         }
@@ -45,12 +77,6 @@ public class PVConfig {
         	plugin.getConfig().set("configs.commandsToRunOnVipFinish", 
         			Arrays.asList("nick {p} off"));
         }   
-        /*
-        if (getListString("configs.commandsToRunOnChangeVip").size() == 0){	        	
-        	plugin.getConfig().set("configs.commandsToRunOnChangeVip",
-        			Arrays.asList("pex user {p} goup set {newvip}"));
-        }
-        */
         
         //strings
         plugin.getConfig().set("strings._pluginTag", getObj("&7[&6PixelVip&7] ","strings._pluginTag"));	
@@ -88,15 +114,45 @@ public class PVConfig {
         plugin.saveConfig();
 	}
 	
-	public void addKey(String key, String group, long millis, int uses){		
+	public boolean bungeeSyncEnabled(){
+		return getBoolean(false, "bungee.enableSync");
+	}
+	
+	public boolean queueCmds(){
+		return getBoolean(false, "configs.queueCmdsForOfflinePlayers");
+	}
+	
+	public List<String> getQueueCmds(String uuid){
+		List<String> cmds = new ArrayList<String>();
+		if (plugin.getConfig().contains("joinCmds."+uuid+".cmds")){
+			cmds.addAll(plugin.getConfig().getStringList("joinCmds."+uuid+".cmds"));
+		}
+		if (plugin.getConfig().contains("joinCmds."+uuid+".chanceCmds")){
+			cmds.addAll(plugin.getConfig().getStringList("joinCmds."+uuid+".chanceCmds"));
+		}
+		plugin.getConfig().set("joinCmds."+uuid, null);
+		plugin.saveConfig();
+		return cmds;
+	}
+	
+	private void setJoinCmds(String uuid, List<String> cmds, List<String> chanceCmds) {
+		plugin.getConfig().set("joinCmds."+uuid+".cmds", cmds);
+		plugin.getConfig().set("joinCmds."+uuid+".chanceCmds", chanceCmds);
+		plugin.saveConfig();
+	}
+	
+	public void addKey(String key, String group, long millis, int uses, String bungeeID){
+		plugin.getPVBungee().sendBungeeMessage(null, new String[] {key, group, String.valueOf(millis), String.valueOf(uses)}, "addkey", bungeeID);
+		
 		plugin.getConfig().set("keys."+key+".group", group);
-		//plugin.getConfig().set("keys."+key+".duration").setComment("Duration in days: "+plugin.getUtil().millisToDay(millis));
 		plugin.getConfig().set("keys."+key+".duration", String.valueOf(millis));
 		plugin.getConfig().set("keys."+key+".uses", String.valueOf(uses));
 		plugin.saveConfig();
 	}
 	
-	public boolean delKey(String key, int uses){	
+	public boolean delKey(String key, int uses, String bungeeID){		
+		plugin.getPVBungee().sendBungeeMessage(null, new String[] {key, String.valueOf(uses)}, "delkey", bungeeID);
+		
 		if (uses <= 1){
 			plugin.getConfig().set("keys."+key, null);
 		} else {
@@ -118,16 +174,16 @@ public class PVConfig {
 			String[] keyinfo = getKeyInfo(key);
 			int uses = Integer.parseInt(keyinfo[2]);
 			
-			delKey(key, uses);
+			delKey(key, uses, "");
 			
 			p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			if (uses-1 > 0){				
 				p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","usesLeftActivation").replace("{uses}", ""+(uses-1))));
 			}			
-			enableVip(p, keyinfo[0], new Long(keyinfo[1]));				
+			enableVip(p, keyinfo[0], new Long(keyinfo[1]), "");				
 			return true;
 		} else if (!group.equals("")){			
-			enableVip(p, group, plugin.getUtil().dayToMillis(days));
+			enableVip(p, group, plugin.getUtil().dayToMillis(days), "");
 			return true;
 		} else {
 			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","invalidKey")));	
@@ -135,7 +191,10 @@ public class PVConfig {
 		}		
 	}
 	
-	private void enableVip(OfflinePlayer p, String group, long durMillis){		
+	//public for bungee
+	public void enableVip(OfflinePlayer p, String group, long durMillis, String bungeeID){
+		plugin.getPVBungee().sendBungeeMessage(p, new String[] {group, String.valueOf(durMillis)}, "enablevip", bungeeID);
+		
 		int count = 0;
 		long durf = durMillis;	
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
@@ -156,17 +215,25 @@ public class PVConfig {
 		if (!vips.isEmpty()){
 			pGroup = vips.get(0)[2];
 		}
-					
+		
+		
+		List<String> normCmds = new ArrayList<String>();
+		List<String> chanceCmds = new ArrayList<String>();
+		
 		//run command from vip
 		getListString("groups."+group+".commands").forEach((cmd)->{
 			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 				@Override
 				public void run() {
-					plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), 
-						cmd.replace("{p}", p.getName())
-						.replace("{vip}", group)
-						.replace("{playergroup}", pdGroup)
-						.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf))));
+					String cmdf = cmd.replace("{p}", p.getName())
+							.replace("{vip}", group)
+							.replace("{playergroup}", pdGroup)
+							.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
+					if (p.isOnline()){
+						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
+					} else {
+						normCmds.add(cmdf);
+					}						
 				}
 			}, delay*5);			
 			delay++;
@@ -184,21 +251,35 @@ public class PVConfig {
 					plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 						@Override
 						public void run() {
-							plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), 
-								cmd.replace("{p}", p.getName())
-								.replace("{vip}", group)
-								.replace("{playergroup}", pdGroup)
-								.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf))));
+							String cmdf = cmd.replace("{p}", p.getName())
+									.replace("{vip}", group)
+									.replace("{playergroup}", pdGroup)
+									.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
+							if (p.isOnline()){
+								plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
+							} else {
+								chanceCmds.add(cmdf);
+							}
 						}
 					}, delay*5);			
 					delay++;
 				});
 			}						
-		});	
+		});
+		
+		if (queueCmds()){	
+			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
+				@Override
+				public void run() {
+					plugin.getLogger().info("Queued cmds for player "+p.getName()+" to run on join.");
+					plugin.getPVConfig().setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
+				}
+			}, delay*5);			
+		}		
 		
 		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);
 		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);
-		setActive(p.getUniqueId().toString(),group,pdGroup);
+		setActive(p,group,pdGroup);
 		
 		if (p.isOnline()){
 			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipActivated")));
@@ -208,7 +289,9 @@ public class PVConfig {
 		}
 	}
 	
-	public void setVip(OfflinePlayer p, String group, long durMillis){
+	public void setVip(OfflinePlayer p, String group, long durMillis, String bungeeID){
+		plugin.getPVBungee().sendBungeeMessage(p, new String[] {group, String.valueOf(durMillis)}, "setvip", bungeeID);
+		
 		int count = 0;
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
 			if (k[1].equals(group)){	
@@ -229,13 +312,18 @@ public class PVConfig {
 		}					
 		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);	
 		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);			
-		setActive(p.getUniqueId().toString(),group,pGroup);
+		setActive(p,group,pGroup);
 	}
 	
-	public void setActive(String uuid, String group, String pgroup){
+	public void setActiveCmd(OfflinePlayer p, String group, String pgroup, String bungeeID){	
+		plugin.getPVBungee().sendBungeeMessage(p, new String[]{group, pgroup}, "setactive", bungeeID);
+		setActive(p,group,pgroup);
+	}
+
+	public void setActive(OfflinePlayer p, String group, String pgroup){
+		String uuid = p.getUniqueId().toString();
 		String newVip = group;
-		String oldVip = pgroup;
-		
+		String oldVip = pgroup;		
 		for (Object key:getGroupList()){
 			if (plugin.getConfig().isConfigurationSection("activeVips."+key+"."+uuid)){
 				if (key.toString().equals(group)){						
@@ -312,7 +400,13 @@ public class PVConfig {
 		} 
 	}
 	
-	public void removeVip(OfflinePlayer p, Optional<String> optg){
+	public void removeVip(OfflinePlayer p, Optional<String> optg, String bungeeID){
+		if (optg.isPresent()){
+			plugin.getPVBungee().sendBungeeMessage(p, new String[] {optg.get()},"removevip", bungeeID);
+		} else {
+			plugin.getPVBungee().sendBungeeMessage(p, new String[] {"!"},"removevip", bungeeID);
+		}
+		
 		String uuid = p.getUniqueId().toString();
 		List<String[]> vipInfo = plugin.getPVConfig().getVipInfo(uuid);
 		boolean id = false;
@@ -326,7 +420,7 @@ public class PVConfig {
 						if (optg.get().equals(group)){
 							plugin.getPVConfig().removeVip(p, group);			    							
 						} else if (!id){
-							plugin.getPVConfig().setActive(uuid, group, "");
+							plugin.getPVConfig().setActive(p, group, "");
 							id = true;
 						}			    						
 	    			} else {	    				
