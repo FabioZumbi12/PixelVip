@@ -110,6 +110,7 @@ public class PVConfig {
         plugin.getConfig().set("strings.lessThan", getObj("&6Less than one minute to end your vip...","strings.lessThan"));
         plugin.getConfig().set("strings.vipsRemoved", getObj("&aVip(s) of player removed with success!","strings.vipsRemoved"));
         plugin.getConfig().set("strings.vipSet", getObj("&aVip set with success for this player!","strings.vipSet"));
+        plugin.getConfig().set("strings.sync-groups", getObj("&aGroup configs send to all servers!","strings.sync-groups"));
         
         plugin.saveConfig();
 	}
@@ -141,24 +142,26 @@ public class PVConfig {
 		plugin.saveConfig();
 	}
 	
-	public void addKey(String key, String group, long millis, int uses, String bungeeID){
-		plugin.getPVBungee().sendBungeeMessage(null, new String[] {key, group, String.valueOf(millis), String.valueOf(uses)}, "addkey", bungeeID);
-		
+	public void addKey(String key, String group, long millis, int uses){
 		plugin.getConfig().set("keys."+key+".group", group);
-		plugin.getConfig().set("keys."+key+".duration", String.valueOf(millis));
-		plugin.getConfig().set("keys."+key+".uses", String.valueOf(uses));
-		plugin.saveConfig();
+		plugin.getConfig().set("keys."+key+".duration", millis);
+		plugin.getConfig().set("keys."+key+".uses", uses);
+		saveConfigAll();
 	}
 	
-	public boolean delKey(String key, int uses, String bungeeID){		
-		plugin.getPVBungee().sendBungeeMessage(null, new String[] {key, String.valueOf(uses)}, "delkey", bungeeID);
+	private void saveConfigAll(){
+		plugin.saveConfig();
+		plugin.getPVBungee().sendBungeeSync();
+	}
+	
+	public boolean delKey(String key, int uses){
 		
 		if (uses <= 1){
 			plugin.getConfig().set("keys."+key, null);
 		} else {
 			plugin.getConfig().set("keys."+key+".uses", String.valueOf(uses-1));
-		}		
-		plugin.saveConfig();
+		}
+		saveConfigAll();
 		return plugin.getConfig().contains("keys."+key);
 	}
 	
@@ -174,16 +177,16 @@ public class PVConfig {
 			String[] keyinfo = getKeyInfo(key);
 			int uses = Integer.parseInt(keyinfo[2]);
 			
-			delKey(key, uses, "");
+			delKey(key, uses);
 			
 			p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			if (uses-1 > 0){				
 				p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","usesLeftActivation").replace("{uses}", ""+(uses-1))));
 			}			
-			enableVip(p, keyinfo[0], new Long(keyinfo[1]), "");				
+			enableVip(p, keyinfo[0], new Long(keyinfo[1]));				
 			return true;
 		} else if (!group.equals("")){			
-			enableVip(p, group, plugin.getUtil().dayToMillis(days), "");
+			enableVip(p, group, plugin.getUtil().dayToMillis(days));
 			return true;
 		} else {
 			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","invalidKey")));	
@@ -192,9 +195,7 @@ public class PVConfig {
 	}
 	
 	//public for bungee
-	public void enableVip(OfflinePlayer p, String group, long durMillis, String bungeeID){
-		plugin.getPVBungee().sendBungeeMessage(p, new String[] {group, String.valueOf(durMillis)}, "enablevip", bungeeID);
-		
+	public void enableVip(OfflinePlayer p, String group, long durMillis){
 		int count = 0;
 		long durf = durMillis;	
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
@@ -289,9 +290,7 @@ public class PVConfig {
 		}
 	}
 	
-	public void setVip(OfflinePlayer p, String group, long durMillis, String bungeeID){
-		plugin.getPVBungee().sendBungeeMessage(p, new String[] {group, String.valueOf(durMillis)}, "setvip", bungeeID);
-		
+	public void setVip(OfflinePlayer p, String group, long durMillis){		
 		int count = 0;
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
 			if (k[1].equals(group)){	
@@ -315,11 +314,6 @@ public class PVConfig {
 		setActive(p,group,pGroup);
 	}
 	
-	public void setActiveCmd(OfflinePlayer p, String group, String pgroup, String bungeeID){	
-		plugin.getPVBungee().sendBungeeMessage(p, new String[]{group, pgroup}, "setactive", bungeeID);
-		setActive(p,group,pgroup);
-	}
-
 	public void setActive(OfflinePlayer p, String group, String pgroup){
 		String uuid = p.getUniqueId().toString();
 		String newVip = group;
@@ -344,7 +338,7 @@ public class PVConfig {
 			}
 		}			
 		runChangeVipCmds(uuid, newVip, oldVip);				
-		plugin.saveConfig();
+		saveConfigAll();
 	}
 	
 	public void runChangeVipCmds(String puuid, String newVip, String oldVip){
@@ -400,13 +394,7 @@ public class PVConfig {
 		} 
 	}
 	
-	public void removeVip(OfflinePlayer p, Optional<String> optg, String bungeeID){
-		if (optg.isPresent()){
-			plugin.getPVBungee().sendBungeeMessage(p, new String[] {optg.get()},"removevip", bungeeID);
-		} else {
-			plugin.getPVBungee().sendBungeeMessage(p, new String[] {"!"},"removevip", bungeeID);
-		}
-		
+	public void removeVip(OfflinePlayer p, Optional<String> optg){				
 		String uuid = p.getUniqueId().toString();
 		List<String[]> vipInfo = plugin.getPVConfig().getVipInfo(uuid);
 		boolean id = false;
@@ -450,7 +438,7 @@ public class PVConfig {
 		} else {
 			reloadPerms();
 		}
-		plugin.saveConfig();
+		saveConfigAll();
 	}
 	
 	public void reloadPerms(){

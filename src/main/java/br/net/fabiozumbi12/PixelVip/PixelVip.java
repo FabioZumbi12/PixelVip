@@ -140,7 +140,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 								config.runChangeVipCmds(uuid, vipInfo[1], permApi.getGroup(p));
 							}
 							if (dur <= util.getNowMillis()){
-								getPVConfig().removeVip(p, Optional.of(vipInfo[1]), "");
+								getPVConfig().removeVip(p, Optional.of(vipInfo[1]));
 								if (p.isOnline()){
 									p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
 								}

@@ -5,10 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -45,109 +42,50 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 			public void run() {	
 				
 				DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-				OfflinePlayer p = null;
-				String thisID = plugin.getPVConfig().getString("server1", "bungee.serverID");
-						
 				try {
-					String op = in.readUTF();
-					
-					try {
-						p = plugin.serv.getOfflinePlayer(UUID.fromString(in.readUTF()));
-					} catch (IllegalArgumentException|IOException ex){}
-					
-					if (p != null && op.equalsIgnoreCase("setvip")){	
-						String a = in.readUTF();
-						String b = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){
-							plugin.getPVConfig().setVip(p, a, Long.parseLong(b), id);
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
-					}			
-					if (op.equalsIgnoreCase("addkey")){	
-						String a = in.readUTF();
-						String b = in.readUTF();
-						String c = in.readUTF();
-						String d = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){
-							plugin.getPVConfig().addKey(a, b, Long.parseLong(c), Integer.parseInt(d), id);
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
+					String op = in.readUTF();					
+					if (op.equals("receive")){						
+						while (in.available() > 0){
+							String a = in.readUTF();
+							String b = in.readUTF();
+							
+							try {
+								plugin.getConfig().set(a,Long.parseLong(b));
+							} catch (NumberFormatException ex){
+								if (b.equals("true") || b.equals("false")){
+									plugin.getConfig().set(a,Boolean.valueOf(b));
+								} else {
+									plugin.getConfig().set(a,b);
+								}								
+							}							
+						}						
+						plugin.saveConfig();						
 					}
-					if (op.equalsIgnoreCase("delkey")){	
-						String a = in.readUTF();
-						String b = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){
-							plugin.getPVConfig().delKey(a, Integer.parseInt(b), id);
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
-					}
-					if (p != null && op.equalsIgnoreCase("enablevip")){	
-						String a = in.readUTF();
-						String b = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){
-							plugin.getPVConfig().enableVip(p, a, Long.parseLong(b), id);
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
-					}
-					if (p != null && op.equalsIgnoreCase("removevip")){	
-						String a = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){					
-							if (a.equals("!")){
-								plugin.getPVConfig().removeVip(p, Optional.empty(), id);
-							} else {
-								plugin.getPVConfig().removeVip(p, Optional.of(a), id);
-							}
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
-					}
-					if (p != null && op.equalsIgnoreCase("setactive")){		
-						String a = in.readUTF();
-						String b = in.readUTF();
-						String id = in.readUTF();
-						if (!id.equals(thisID)){
-							plugin.getPVConfig().setActive(p, a, b);
-							plugin.getLogger().info("Bungee Request: "+op);
-						}				
-					}
-					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}	
 				
 			}
-		}, 40);
-		
-				
+		}, 20);
 	}
 	
-	public void sendBungeeMessage(OfflinePlayer p, String[] info, String operation, String bungeeID){
+	public void sendBungeeSync(){
 		if (!plugin.getPVConfig().bungeeSyncEnabled()){
 			return;
-		}
-		
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF(operation);
-		if (p != null){
-			out.writeUTF(p.getUniqueId().toString());
-		} else {
-			out.writeUTF("!");
 		}		
 		
-		for (String s:info){
-			out.writeUTF(s);
-		}        	
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();		
+		//this id
+		out.writeUTF(plugin.getPVConfig().getString("server1", "bungee.serverID"));
+		//operation
+		out.writeUTF("send");
 		
-		if (bungeeID.equals("")){
-			out.writeUTF(plugin.getPVConfig().getString("server1", "bungee.serverID"));
-		} else {
-			out.writeUTF(bungeeID);
+		for (String key:plugin.getConfig().getKeys(true)){
+			if ((key.startsWith("keys.") || key.startsWith("activeVips.")) && !plugin.getConfig().isConfigurationSection(key)){
+				out.writeUTF(key);
+				out.writeUTF(plugin.getConfig().getString(key));
+			}			
 		}
-		
 		sendPendentBungee(out.toByteArray());	
 	}
 	
