@@ -1,6 +1,7 @@
 package br.net.fabiozumbi12.PixelVip;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,14 +13,21 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class PVConfig {	
 	
 	private PixelVip plugin;
+	private YamlConfiguration vipsFile;
 	private int delay = 0;
 	
 	public PVConfig(PixelVip plugin, String defDir, File defConfig){
 		this.plugin = plugin;
+		
+		//load vips.yml file
+		reloadVips();
+		
+		/*----------------------------------------------------------------------------------*/
 		
 		plugin.getConfig().options().header("=============== PixelVip Configuration Options ================\n"
 				+ "\n"
@@ -51,13 +59,12 @@ public class PVConfig {
 				+ "");
 				
         if (!plugin.getConfig().contains("groups")){
+        	plugin.getConfig().set("groups.vip1.essentials-kit", "vip1");
         	plugin.getConfig().set("groups.vip1.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays","give {p} minecraft:diamond 10", "eco give {p} 10000"));
         	plugin.getConfig().set("groups.vip1.cmdChances.50", Arrays.asList("give {p} minecraft:diamond_block 5"));
-        	plugin.getConfig().set("groups.vip1.cmdChances.30", Arrays.asList("give {p} minecraft:mob_spawner 1"));
-        }        
-        if (!plugin.getConfig().contains("activeVips")){
-        	plugin.getConfig().set("activeVips", new ArrayList<String>());
-        }
+        	plugin.getConfig().set("groups.vip1.cmdChances.30", Arrays.asList("give {p} minecraft:mob_spawner 1"));        	
+        } 
+                
         plugin.getConfig().set("configs.key-size", getObj(10,"configs.key-size"));
         plugin.getConfig().set("configs.useVault-toChangePlayerGroup", getObj(true ,"configs.useVault-toChangePlayerGroup"));
         plugin.getConfig().set("configs.cmdToReloadPermPlugin", getObj("pex reload","configs.cmdToReloadPermPlugin"));
@@ -70,8 +77,10 @@ public class PVConfig {
                 
         if (!plugin.getConfig().contains("keys")){
         	plugin.getConfig().set("keys", new ArrayList<String>());
-        }
-        	
+        }        
+        if (!plugin.getConfig().contains("itemKeys")){
+        	plugin.getConfig().set("itemKeys", new ArrayList<String>());
+        }        	
         
         if (getListString("configs.commandsToRunOnVipFinish").size() == 0){	        	
         	plugin.getConfig().set("configs.commandsToRunOnVipFinish", 
@@ -82,8 +91,9 @@ public class PVConfig {
         plugin.getConfig().set("strings._pluginTag", getObj("&7[&6PixelVip&7] ","strings._pluginTag"));	
         plugin.getConfig().set("strings.noPlayersByName", getObj("&cTheres no players with this name!","strings.noPlayersByName"));	
         plugin.getConfig().set("strings.onlyPlayers", getObj("&cOnly players ca use this command!","strings.onlyPlayers"));	
-        plugin.getConfig().set("strings.noKeys", getObj("&aTheres no available keys! Use &6/newkey &ato generate one.","strings.noKeys"));
+        plugin.getConfig().set("strings.noKeys", getObj("&aTheres no available keys! Use &6/newkey &aor &6/newikey &ato generate one.","strings.noKeys"));
         plugin.getConfig().set("strings.listKeys", getObj("&aList of Keys:","strings.listKeys"));
+        plugin.getConfig().set("strings.listItemKeys", getObj("&aList of Item Keys:","strings.listItemKeys"));
         plugin.getConfig().set("strings.vipInfoFor", getObj("&aVip info for ","strings.vipInfoFor"));
         plugin.getConfig().set("strings.playerNotVip", getObj("&cThis player(or you) is not VIP!","strings.playerNotVip"));
         plugin.getConfig().set("strings.moreThanZero", getObj("&cThis number need to be more than 0","strings.moreThanZero"));
@@ -111,8 +121,58 @@ public class PVConfig {
         plugin.getConfig().set("strings.vipsRemoved", getObj("&aVip(s) of player removed with success!","strings.vipsRemoved"));
         plugin.getConfig().set("strings.vipSet", getObj("&aVip set with success for this player!","strings.vipSet"));
         plugin.getConfig().set("strings.sync-groups", getObj("&aGroup configs send to all servers!","strings.sync-groups"));
+        plugin.getConfig().set("strings.list-of-vips", getObj("&aList of active VIPs: ","strings.list-of-vips"));
+        plugin.getConfig().set("strings.vipAdded", getObj("&aVip added with success for this player!","strings.vipAdded"));
+        plugin.getConfig().set("strings.item", getObj("&a-- Item: &b","strings.item"));
+        plugin.getConfig().set("strings.itemsGiven", getObj("&aGiven {items} item(s) using a key.","strings.itemsGiven"));
+        plugin.getConfig().set("strings.itemsAdded", getObj("&aItem(s) added to key:","strings.itemsAdded"));
+        plugin.getConfig().set("strings.keyRemoved", getObj("&aKey removed with success: &b","strings.keyRemoved"));
+        plugin.getConfig().set("strings.noKeyRemoved", getObj("&cTheres no keys to remove!","strings.noKeyRemoved"));
+        
+        /*---------------------------------------------------------*/
+        //move vips to new file if is in config.yml
+        
+        if (plugin.getConfig().contains("activeVips")){
+        	plugin.logger.warning("Active Vips moved to file 'vips.yml'");
+        	for (String key:plugin.getConfig().getKeys(true)){
+        		if (key.startsWith("activeVips.")){
+        			vipsFile.set(key, plugin.getConfig().get(key));
+        		}
+        	}
+        	plugin.getConfig().set("activeVips", null);
+        	saveVips();
+        }
+        
+        /*---------------------------------------------------------*/
         
         plugin.saveConfig();
+	}
+	
+	public YamlConfiguration getVips(){
+		return vipsFile;
+	}
+	
+	public void reloadVips() {
+		File fileVips = new File(plugin.getDataFolder()+File.separator+"vips.yml");
+		if (fileVips.exists()){
+			try {
+				fileVips.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		vipsFile = YamlConfiguration.loadConfiguration(fileVips);
+		saveVips();
+	}	
+
+	public void saveVips(){
+		File fileVips = new File(plugin.getDataFolder()+File.separator+"vips.yml");
+		try {
+			vipsFile.save(fileVips);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean bungeeSyncEnabled(){
@@ -149,20 +209,40 @@ public class PVConfig {
 		saveConfigAll();
 	}
 	
+	public void addItemKey(String key, List<String> cmds){
+		cmds.addAll(plugin.getConfig().getStringList("itemKeys."+key+".cmds"));
+		plugin.getConfig().set("itemKeys."+key+".cmds", cmds);
+		saveConfigAll();
+	}
+	
 	private void saveConfigAll(){
+		saveVips();
 		plugin.saveConfig();
 		plugin.getPVBungee().sendBungeeSync();
 	}
 	
-	public boolean delKey(String key, int uses){
-		
-		if (uses <= 1){
-			plugin.getConfig().set("keys."+key, null);
+	public boolean delItemKey(String key){	
+		if (plugin.getConfig().contains("itemKeys."+key)){
+			plugin.getConfig().set("itemKeys."+key, null);
+			saveConfigAll();
+			return true;
 		} else {
-			plugin.getConfig().set("keys."+key+".uses", String.valueOf(uses-1));
+			return false;
 		}
-		saveConfigAll();
-		return plugin.getConfig().contains("keys."+key);
+	}
+	
+	public boolean delKey(String key, int uses){	
+		if (plugin.getConfig().contains("keys."+key)){
+			if (uses <= 1){
+				plugin.getConfig().set("keys."+key, null);
+			} else {
+				plugin.getConfig().set("keys."+key+".uses", String.valueOf(uses-1));
+			}
+			saveConfigAll();
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public String[] getKeyInfo(String key){	
@@ -172,7 +252,32 @@ public class PVConfig {
 		return new String[0];
 	}
 		
-	public boolean activateVip(OfflinePlayer p, String key, String group, long days) {
+	public boolean activateVip(OfflinePlayer p, String key, String group, long days, String pname) {
+		boolean hasItemkey = key != null && plugin.getConfig().contains("itemKeys."+key);
+		if (hasItemkey){		
+			StringBuilder cmdsBuilder = new StringBuilder();
+			List<String> cmds = plugin.getConfig().getStringList("itemKeys."+key+".cmds");
+			for (String cmd:cmds){
+				cmdsBuilder.append(cmd+", ");
+				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
+					@Override
+					public void run() {
+						String cmdf = cmd.replace("{p}", p.getName());
+						if (p.isOnline()){
+							plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);							
+						} 					
+					}
+				}, delay*2);
+				delay++;
+			}		
+			plugin.getConfig().set("itemKeys."+key, null);
+			saveConfigAll();
+			
+			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","itemsGiven").replace("{items}", new String(cmds.size()+""))));		
+			
+			String cmdBuilded = cmdsBuilder.toString();
+			plugin.addLog("ItemKey | "+p.getName()+" | "+key+" | Cmds: "+cmdBuilded.substring(0, cmdBuilded.length()-2));
+		}
 		if (getKeyInfo(key).length == 3){
 			String[] keyinfo = getKeyInfo(key);
 			int uses = Integer.parseInt(keyinfo[2]);
@@ -181,21 +286,24 @@ public class PVConfig {
 			
 			p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			if (uses-1 > 0){				
-				p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","usesLeftActivation").replace("{uses}", ""+(uses-1))));
+				p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","usesLeftActivation").replace("{uses}", ""+(uses-1))));
 			}			
-			enableVip(p, keyinfo[0], new Long(keyinfo[1]));				
+			enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname);				
 			return true;
 		} else if (!group.equals("")){			
-			enableVip(p, group, plugin.getUtil().dayToMillis(days));
+			enableVip(p, group, plugin.getUtil().dayToMillis(days), pname);
 			return true;
 		} else {
-			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","invalidKey")));	
-			return false;
+			if (!hasItemkey){
+				p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","invalidKey")));	
+				return false;
+			}
+			return true;
 		}		
 	}
 	
 	//public for bungee
-	public void enableVip(OfflinePlayer p, String group, long durMillis){
+	public void enableVip(OfflinePlayer p, String group, long durMillis, String pname){		
 		int count = 0;
 		long durf = durMillis;	
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
@@ -212,7 +320,7 @@ public class PVConfig {
 		
 		String pGroup = plugin.getPerms().getGroup(p);
 		String pdGroup = pGroup;
-		List<String[]> vips = plugin.getPVConfig().getVipInfo(p.getUniqueId().toString());
+		List<String[]> vips = getVipInfo(p.getUniqueId().toString());
 		if (!vips.isEmpty()){
 			pGroup = vips.get(0)[2];
 		}
@@ -236,7 +344,7 @@ public class PVConfig {
 						normCmds.add(cmdf);
 					}						
 				}
-			}, delay*5);			
+			}, delay*2);			
 			delay++;
 		});		
 		
@@ -262,35 +370,41 @@ public class PVConfig {
 								chanceCmds.add(cmdf);
 							}
 						}
-					}, delay*5);			
+					}, delay*2);			
 					delay++;
 				});
 			}						
 		});
 		
-		if (queueCmds()){	
+		if (queueCmds() && (normCmds.size() > 0 || chanceCmds.size() > 0)){	
 			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 				@Override
 				public void run() {
 					plugin.getLogger().info("Queued cmds for player "+p.getName()+" to run on join.");
-					plugin.getPVConfig().setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
+					setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
 				}
-			}, delay*5);			
+			}, delay*2);			
 		}		
 		
-		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);
-		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);
+		delay = 0;
+		
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".nick", pname);
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".expires-on-exact", plugin.getUtil().expiresOn(durMillis));
+		
 		setActive(p,group,pdGroup);
 		
 		if (p.isOnline()){
-			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipActivated")));
-			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("activeVip").replace("{vip}", group)));
-			p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("activeDays").replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)))));
+			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","vipActivated")));
+			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("activeVip").replace("{vip}", group)));
+			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("activeDays").replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)))));
 			p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
-		}
+		}		
+		plugin.addLog("EnableVip | "+p.getName()+" | "+group+" | Expires on: "+plugin.getUtil().expiresOn(durMillis));
 	}
 	
-	public void setVip(OfflinePlayer p, String group, long durMillis){		
+	public void setVip(OfflinePlayer p, String group, long durMillis, String pname){
 		int count = 0;
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
 			if (k[1].equals(group)){	
@@ -305,13 +419,17 @@ public class PVConfig {
 		}
 		
 		String pGroup = plugin.getPerms().getGroup(p);
-		List<String[]> vips = plugin.getPVConfig().getVipInfo(p.getUniqueId().toString());
+		List<String[]> vips = getVipInfo(p.getUniqueId().toString());
 		if (!vips.isEmpty()){
 			pGroup = vips.get(0)[2];
 		}					
-		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);	
-		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);			
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".playerGroup", pGroup);	
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".duration", durMillis);	
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".nick", pname);
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString()+".expires-on-exact", plugin.getUtil().expiresOn(durMillis));
 		setActive(p,group,pGroup);
+		
+		plugin.addLog("SetVip | "+p.getName()+" | "+group+" | Expires on: "+plugin.getUtil().expiresOn(durMillis));
 	}
 	
 	public void setActive(OfflinePlayer p, String group, String pgroup){
@@ -319,31 +437,35 @@ public class PVConfig {
 		String newVip = group;
 		String oldVip = pgroup;		
 		for (Object key:getGroupList()){
-			if (plugin.getConfig().isConfigurationSection("activeVips."+key+"."+uuid)){
+			if (vipsFile.isConfigurationSection("activeVips."+key+"."+uuid)){
 				if (key.toString().equals(group)){						
-					if (!getBoolean(true, "activeVips."+key.toString()+"."+uuid+".active")){
+					if (!getVipBoolean(true, "activeVips."+key.toString()+"."+uuid+".active")){
 						newVip = key.toString();
-						long total = getLong(0,"activeVips."+key.toString()+"."+uuid+".duration")+plugin.getUtil().getNowMillis();
-						plugin.getConfig().set("activeVips."+key+"."+uuid+".duration", total);
+						long total = getVipLong(0,"activeVips."+key.toString()+"."+uuid+".duration")+plugin.getUtil().getNowMillis();
+						vipsFile.set("activeVips."+key+"."+uuid+".duration", total);
 					}
-					plugin.getConfig().set("activeVips."+key+"."+uuid+".active", true);						
+					vipsFile.set("activeVips."+key+"."+uuid+".active", true);						
 				} else {	
-					if (getBoolean(false, "activeVips."+key.toString()+"."+uuid+".active")){
+					if (getVipBoolean(false, "activeVips."+key.toString()+"."+uuid+".active")){
 						oldVip = key.toString();
-						long total = getLong(0,"activeVips."+key.toString()+"."+uuid+".duration")-plugin.getUtil().getNowMillis();
-						plugin.getConfig().set("activeVips."+key+"."+uuid+".duration", total);
+						long total = getVipLong(0,"activeVips."+key.toString()+"."+uuid+".duration")-plugin.getUtil().getNowMillis();
+						vipsFile.set("activeVips."+key+"."+uuid+".duration", total);
 					}
-					plugin.getConfig().set("activeVips."+key+"."+uuid+".active", false);
+					vipsFile.set("activeVips."+key+"."+uuid+".active", false);
 				}
 			}
 		}			
-		runChangeVipCmds(uuid, newVip, oldVip);				
+		runChangeVipCmds(p, newVip, oldVip);
+		//change kits
+		changeVipKit(p, oldVip, newVip);
 		saveConfigAll();
 	}
-	
-	public void runChangeVipCmds(String puuid, String newVip, String oldVip){
-		for (String cmd:plugin.getPVConfig().getListString("configs.commandsToRunOnChangeVip")){
-			String cmdf = cmd.replace("{p}", plugin.getUtil().getUser(UUID.fromString(puuid)).getName());
+		
+	public void runChangeVipCmds(OfflinePlayer p, String newVip, String oldVip){
+		for (String cmd:getListString("configs.commandsToRunOnChangeVip")){
+			if (p.getName() == null){break;}
+			
+			String cmdf = cmd.replace("{p}", p.getName());
 			if (!oldVip.equals("") && cmdf.contains("{oldvip}")){
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
@@ -372,19 +494,44 @@ public class PVConfig {
 			}
 		}
 		if (plugin.getConfig().getBoolean("configs.useVault-toChangePlayerGroup")){
-			plugin.getPerms().removeGroup(Bukkit.getOfflinePlayer(UUID.fromString(puuid)), oldVip);
-			plugin.getPerms().setGroup(Bukkit.getOfflinePlayer(UUID.fromString(puuid)), newVip);
+			if (oldVip != null && !oldVip.isEmpty()){
+				plugin.getPerms().removeGroup(p, oldVip);
+			}			
+			plugin.getPerms().addGroup(p, newVip);
 		} else {
 			reloadPerms();
 		}
 	}
 	
+	private void changeVipKit(OfflinePlayer p, String oldVip, String newVip){
+		if (plugin.ess != null && p.isOnline()){
+			
+			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");			
+			if (!oldKit.isEmpty()){
+				long oldTime = plugin.ess.getUser(p.getPlayer()).getKitTimestamp(oldKit.toLowerCase());
+				vipsFile.set("activeVips."+oldVip+"."+p.getUniqueId().toString()+".kit-cooldown", oldTime);
+			}
+			
+			String newKit = this.getString("", "groups."+newVip+".essentials-kit");			
+			if (!newKit.isEmpty()){
+				long newTime = vipsFile.getLong("activeVips."+newVip+"."+p.getUniqueId().toString()+".kit-cooldown", 0);
+				if (newTime > 0){
+					plugin.ess.getUser(p.getPlayer()).setKitTimestamp(newKit.toLowerCase(), newTime);
+				}
+			}
+		}
+	}
+	
 	void removeVip(OfflinePlayer p, String group){
-		plugin.getConfig().set("activeVips."+group+"."+p.getUniqueId().toString(), null);
+		plugin.addLog("RemoveVip | "+p.getName()+" | "+group);
+		
+		vipsFile.set("activeVips."+group+"."+p.getUniqueId().toString(), null);
 		plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 			@Override
 			public void run() {
-				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdOnRemoveVip").replace("{p}", p.getName()).replace("{vip}", group));			
+				if (p.getName() != null){
+					plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(p.getName()).get()).replace("{vip}", group));
+				}							
 		    }
 		},delay*5);
 		delay++;
@@ -396,7 +543,7 @@ public class PVConfig {
 	
 	public void removeVip(OfflinePlayer p, Optional<String> optg){				
 		String uuid = p.getUniqueId().toString();
-		List<String[]> vipInfo = plugin.getPVConfig().getVipInfo(uuid);
+		List<String[]> vipInfo = getVipInfo(uuid);
 		boolean id = false;
 		String oldGroup = "";
 		if (vipInfo.size() > 0){			
@@ -406,22 +553,22 @@ public class PVConfig {
 				if (vipInfo.size() > 1 ){
 					if (optg.isPresent()){
 						if (optg.get().equals(group)){
-							plugin.getPVConfig().removeVip(p, group);			    							
+							removeVip(p, group);			    							
 						} else if (!id){
-							plugin.getPVConfig().setActive(p, group, "");
+							setActive(p, group, "");
 							id = true;
 						}			    						
 	    			} else {	    				
-    					plugin.getPVConfig().removeVip(p, group);
+    					removeVip(p, group);
 	    			}
 				} else {
-					plugin.getPVConfig().removeVip(p, group);
+					removeVip(p, group);
 				}		
 			}			    			
 		}
-		if (plugin.getPVConfig().getVipInfo(uuid).size() == 0){			
+		if (getVipInfo(uuid).size() == 0){			
 			for (String cmd:getListString("configs.commandsToRunOnVipFinish")){
-				if (cmd.contains("{vip}")){continue;}
+				if (cmd.contains("{vip}") || p.getName() == null){continue;}
 				String cmdf = cmd.replace("{p}", p.getName()).replace("{playergroup}", oldGroup);
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
@@ -450,6 +597,22 @@ public class PVConfig {
 			
 		}, (1+delay)*10);	
 		delay=0;
+	}
+	
+	public long getVipLong(int def, String node){
+		return vipsFile.getLong(node, def);
+	}
+	
+	public int getVipInt(int def, String node){
+		return vipsFile.getInt(node, def);
+	}
+	
+	public String getVipString(String def, String node){
+		return vipsFile.getString(node, def);
+	}
+	
+	public boolean getVipBoolean(boolean def, String node){
+		return vipsFile.getBoolean(node, def);
 	}
 	
 	public long getLong(int def, String node){
@@ -504,6 +667,13 @@ public class PVConfig {
 		return new HashSet<String>();
 	}
 	
+	public Set<String> getItemListKeys() {
+		if (plugin.getConfig().getConfigurationSection("itemKeys") != null){
+			return plugin.getConfig().getConfigurationSection("itemKeys").getKeys(false);
+		}
+		return new HashSet<String>();
+	}
+	
 	public Set<String> getGroupList(){
 		if (plugin.getConfig().getConfigurationSection("groups") != null){
 			return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
@@ -513,8 +683,8 @@ public class PVConfig {
 	
 	public HashMap<String,List<String[]>> getVipList(){
 		HashMap<String,List<String[]>> vips = new HashMap<String,List<String[]>>();		
-		getGroupList().stream().filter(k->plugin.getConfig().contains("activeVips."+k)).forEach(groupobj -> {
-			plugin.getConfig().getConfigurationSection("activeVips."+groupobj).getKeys(false).forEach(uuidobj -> {
+		getGroupList().stream().filter(k->vipsFile.contains("activeVips."+k)).forEach(groupobj -> {
+			vipsFile.getConfigurationSection("activeVips."+groupobj).getKeys(false).forEach(uuidobj -> {
 				String uuid = uuidobj.toString();				
 				List<String[]> vipInfo = getVipInfo(uuid);
 				List<String[]> activeVips = new ArrayList<String[]>();
@@ -530,16 +700,43 @@ public class PVConfig {
 	}
 	
 	/**Return player's vip info.<p>
-	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active
+	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active, [4] = Player Nick
 	 * @param puuid Player UUID as string.
-	 * @return {@code List<String[4]>}
+	 * @return {@code List<String[5]>}
 	 */
 	public List<String[]> getVipInfo(String puuid){
 		List<String[]> vips = new ArrayList<String[]>();
-		getGroupList().stream().filter(k->plugin.getConfig().contains("activeVips."+k.toString()+"."+puuid)).forEach(key ->{
-			vips.add(new String[]{getString("","activeVips."+key.toString()+"."+puuid+".duration"), key.toString(), getString("","activeVips."+key.toString()+"."+puuid+".playerGroup"), getString("","activeVips."+key.toString()+"."+puuid+".active")});
+		getGroupList().stream().filter(k->vipsFile.contains("activeVips."+k.toString()+"."+puuid)).forEach(key ->{
+			vips.add(new String[]{
+					getVipString("","activeVips."+key.toString()+"."+puuid+".duration"),
+					key.toString(),
+					getVipString("","activeVips."+key.toString()+"."+puuid+".playerGroup"),
+					getVipString("","activeVips."+key.toString()+"."+puuid+".active"),
+					getVipString("","activeVips."+key.toString()+"."+puuid+".nick")});
 		});				
 		return vips;
 	}
 	
+	
+	/**Return player's vip info.<p>
+	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active, [4] = Player Nick
+	 * @param puuid Player UUID as string or nickname.
+	 * @return {@code String[5]}
+	 */
+	@SuppressWarnings("deprecation")
+	public String[] getActiveVipInfo(String playName){
+		OfflinePlayer offp = null;	
+		try{
+			UUID puuid = UUID.fromString(playName);
+			offp = Bukkit.getOfflinePlayer(puuid);	
+		} catch (IllegalArgumentException ex){
+			offp = Bukkit.getOfflinePlayer(playName);				
+		}
+		for (String[] vips:getVipInfo(offp.getUniqueId().toString())){
+			if (vips[3].equals("true")){
+				return vips;
+			}
+		}
+		return new String[5];
+	}
 }

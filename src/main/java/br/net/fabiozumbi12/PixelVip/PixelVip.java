@@ -1,6 +1,12 @@
 package br.net.fabiozumbi12.PixelVip;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +26,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.earth2me.essentials.Essentials;
+
 import br.net.fabiozumbi12.Bungee.PixelVipBungee;
 import br.net.fabiozumbi12.PixelVip.cmds.PVCommands;
 
@@ -29,7 +37,8 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public Server serv;
 	public PluginDescriptionFile pdf;
 	public String mainPath;
-	private PVLogger logger;
+	public PVLogger logger;
+	public Essentials ess;
 	private int task;
 	
 	private PVUtil util;
@@ -47,9 +56,10 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public void reloadCmd(CommandSender src){
 		logger.info("Reloading config module...");			
 		reloadConfig();
+		config.reloadVips();
 		saveConfig();
 		reloadVipTask();
-		
+				
 		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips"));
 		logger.sucess(util.toColor("PixelVip reloaded"));
 	}
@@ -85,10 +95,17 @@ public class PixelVip extends JavaPlugin implements Listener {
         logger.info("Init utils module...");
 		this.util = new PVUtil(this);
 		
+		logger.info("Init essentials module...");
+		Plugin essPl = Bukkit.getServer().getPluginManager().getPlugin("Essentials");
+		if (essPl != null && essPl.isEnabled()){
+			logger.info(util.toColor("Essentials found. Hooked!"));
+			ess = (Essentials) essPl;
+		}
+		
 		logger.info("Init economy module...");
 		if (checkVault()){
         	RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-            if (rsp == null) {
+            if (rsp == null) { 
             	super.setEnabled(false);
             	logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");  
             	return;
@@ -132,25 +149,22 @@ public class PixelVip extends JavaPlugin implements Listener {
 			@Override
 			public void run() {						
 				getPVConfig().getVipList().forEach((uuid,value)->{
-					OfflinePlayer p = util.getUser(UUID.fromString(uuid));				
+					OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));				
 					getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
 						long dur = new Long(vipInfo[0]);
-						if (p != null){
-							if (!permApi.getGroup(p).equals(vipInfo[1])){
-								config.runChangeVipCmds(uuid, vipInfo[1], permApi.getGroup(p));
+						if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])){
+							config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
+						}
+						if (dur <= util.getNowMillis()){
+							getPVConfig().removeVip(p, Optional.of(vipInfo[1]));
+							if (p.isOnline()){
+								p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
 							}
-							if (dur <= util.getNowMillis()){
-								getPVConfig().removeVip(p, Optional.of(vipInfo[1]));
-								if (p.isOnline()){
-									p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
-								}
-								getLogger().info(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.getName() + " &bhas ended!"));
-							}
+							Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.getName() + " &bhas ended!"));
 						}					
 					});
 				});
-			}
-			
+			}			
 		}, 0, 20*60);
 		logger.info("-> Task started");
 	}
@@ -162,8 +176,9 @@ public class PixelVip extends JavaPlugin implements Listener {
 		if (getPVConfig().queueCmds()){
 			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 				@Override
-				public void run() {					
-					getPVConfig().getQueueCmds(p.getUniqueId().toString()).forEach((cmd)->{
+				public void run() {	
+					List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());
+					qcmds.forEach((cmd)->{
 						plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 							@Override
 							public void run() {
@@ -183,6 +198,24 @@ public class PixelVip extends JavaPlugin implements Listener {
     		return true;
     	}
     	return false;
+    }
+    
+    public void addLog(String log){
+    	String timeStamp = new SimpleDateFormat("dd.MM.yyyy - HH:mm:ss").format(Calendar.getInstance().getTime());
+    	try {
+    		File folder = new File(this.getDataFolder()+File.separator+"logs");
+    		if (!folder.exists()){
+    			folder.mkdir();
+    		}
+    		File logs = new File(folder+File.separator+"logs.log");    		
+    		
+			FileWriter fw = new FileWriter(logs,true);
+			fw.append(timeStamp+" - PixelVip Log: "+log);
+			fw.append("\n");
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
     }
 }
 

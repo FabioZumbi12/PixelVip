@@ -1,13 +1,13 @@
 package br.net.fabiozumbi12.PixelVip;
 
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 public class PVUtil {
@@ -16,11 +16,7 @@ public class PVUtil {
 	public PVUtil(PixelVip plugin){
 		this.plugin = plugin;
 	}
-	/*
-	public Text toColor(String str){
-    	return TextSerializers.FORMATTING_CODE.deserialize(str);
-    }
-	*/
+	
 	public String toColor(String str){
     	return str.replaceAll("(&([a-fk-or0-9]))", "\u00A7$2"); 
     }
@@ -47,20 +43,10 @@ public class PVUtil {
 		Random random = new SecureRandom();
 	    char[] result = new char[length];
 	    for (int i = 0; i < result.length; i++) {
-	        // picks a random index out of character set > random character
 	        int randomCharIndex = random.nextInt(chartset.length);
 	        result[i] = chartset[randomCharIndex];
 	    }
 	    return new String(result);
-	}
-	
-	@SuppressWarnings("deprecation")
-	public OfflinePlayer getUser(String name){			
-		return plugin.serv.getOfflinePlayer(name);		
-	}
-	
-	public OfflinePlayer getUser(UUID uuid){
-		return plugin.serv.getOfflinePlayer(uuid);		
 	}
 	
 	public boolean sendVipTime(CommandSender src, String UUID, String name) {	
@@ -68,9 +54,9 @@ public class PVUtil {
 		if (vips.size() > 0){
 			src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipInfoFor")+name+":"));
 			src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
-			vips.stream().filter(v->v.length == 4).forEach((vipInfo)->{
+			vips.stream().filter(v->v.length == 5).forEach((vipInfo)->{
 				String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
-				if (plugin.getPVConfig().getBoolean(true, "activeVips."+vipInfo[1]+"."+UUID.toString()+".active")){
+				if (plugin.getPVConfig().getVipBoolean(true, "activeVips."+vipInfo[1]+"."+UUID.toString()+".active")){
 					time = plugin.getUtil().millisToMessage(new Long(vipInfo[0])-plugin.getUtil().getNowMillis());
 				}
 		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft")+time));
@@ -105,5 +91,11 @@ public class PVUtil {
 			return plugin.getPVConfig().getLang("lessThan");
 		}		
 		return msg.toString();
+	}
+	
+	public String expiresOn(Long millis){
+		Date date = new Date(millis);
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");		
+		return sdf.format(date);
 	}
 }

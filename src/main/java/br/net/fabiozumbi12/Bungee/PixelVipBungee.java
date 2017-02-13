@@ -49,17 +49,31 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 							String a = in.readUTF();
 							String b = in.readUTF();
 							
-							try {
-								plugin.getConfig().set(a,Long.parseLong(b));
-							} catch (NumberFormatException ex){
-								if (b.equals("true") || b.equals("false")){
-									plugin.getConfig().set(a,Boolean.valueOf(b));
-								} else {
-									plugin.getConfig().set(a,b);
-								}								
+							if (a.startsWith("activeVips.")){
+								try {
+									plugin.getPVConfig().getVips().set(a,Long.parseLong(b));
+								} catch (NumberFormatException ex){
+									if (b.equals("true") || b.equals("false")){
+										plugin.getPVConfig().getVips().set(a,Boolean.valueOf(b));
+									} else {
+										plugin.getPVConfig().getVips().set(a,b);
+									}								
+								}
+								plugin.getPVConfig().saveVips();
+							} 
+							if (a.startsWith("keys.")){
+								try {
+									plugin.getConfig().set(a,Long.parseLong(b));
+								} catch (NumberFormatException ex){
+									if (b.equals("true") || b.equals("false")){
+										plugin.getConfig().set(a,Boolean.valueOf(b));
+									} else {
+										plugin.getConfig().set(a,b);
+									}								
+								}
+								plugin.saveConfig();
 							}							
 						}						
-						plugin.saveConfig();						
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -81,9 +95,15 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 		out.writeUTF("send");
 		
 		for (String key:plugin.getConfig().getKeys(true)){
-			if ((key.startsWith("keys.") || key.startsWith("activeVips.")) && !plugin.getConfig().isConfigurationSection(key)){
+			if (key.startsWith("keys.") && !plugin.getConfig().isConfigurationSection(key)){
 				out.writeUTF(key);
 				out.writeUTF(plugin.getConfig().getString(key));
+			}			
+		}
+		for (String key:plugin.getPVConfig().getVips().getKeys(true)){
+			if (key.startsWith("activeVips.") && !plugin.getPVConfig().getVips().isConfigurationSection(key)){
+				out.writeUTF(key);
+				out.writeUTF(plugin.getPVConfig().getVips().getString(key));
 			}			
 		}
 		sendPendentBungee(out.toByteArray());	

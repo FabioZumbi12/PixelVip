@@ -19,6 +19,10 @@ public class PermsAPI {
 	public String[] getGroups(OfflinePlayer player){		
 		return perms.getPlayerGroups(null, player);	
 	}	
+
+	public void addGroup(OfflinePlayer p, String group){
+		perms.playerAddGroup(null, p, group);
+	}
 	
 	public void setGroup(OfflinePlayer p, String group){
 		perms.playerAddGroup(null, p, group);

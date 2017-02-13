@@ -4,7 +4,7 @@
 
   <groupId>br.net.fabiozumbi12</groupId>
   <artifactId>PixelVip</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.5</version>
   <packaging>jar</packaging>
 
   <name>PixelVip</name>
@@ -28,9 +28,24 @@
            <version>LATEST</version>
            <scope>provided</scope>
         </dependency>
-         
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.0.8</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>EssentialsX</artifactId>
+            <version>2.0.1</version>
+            <scope>provided</scope>
+        </dependency> 
   </dependencies>
   <repositories>
+     <repository>
+            <id>ess-repo</id>
+            <url>http://ci.drtshock.net/plugin/repository/everything</url>
+     </repository> 
      <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
@@ -39,6 +54,10 @@
             <id>vault-repo</id>
             <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
         </repository>
+     <repository>
+            <id>placeholderapi</id>
+            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+     </repository>
   </repositories>
   
 
