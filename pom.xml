@@ -5,62 +5,17 @@
   <groupId>br.net.fabiozumbi12</groupId>
   <artifactId>PixelVip</artifactId>
   <version>1.0.5</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>PixelVip</name>
   <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <mineVersion>1.11.2-R0.1-SNAPSHOT</mineVersion>
   </properties>
   
-    <dependencies>
-    
-        <dependency>
-          <groupId>org.spigotmc</groupId>
-          <artifactId>spigot-api</artifactId>
-          <version>1.10-R0.1-SNAPSHOT</version>
-        </dependency>       
-        
-        <dependency>
-           <groupId>net.milkbowl.vault</groupId>
-           <artifactId>VaultAPI</artifactId>            
-           <version>LATEST</version>
-           <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.0.8</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.ess3</groupId>
-            <artifactId>EssentialsX</artifactId>
-            <version>2.0.1</version>
-            <scope>provided</scope>
-        </dependency> 
-  </dependencies>
-  <repositories>
-     <repository>
-            <id>ess-repo</id>
-            <url>http://ci.drtshock.net/plugin/repository/everything</url>
-     </repository> 
-     <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-     </repository>
-     <repository>
-            <id>vault-repo</id>
-            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
-        </repository>
-     <repository>
-            <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-     </repository>
-  </repositories>
-  
-
   <scm>
      <connection>scm:git:git@github.com:FabioZumbi12/PixelVip-Spigot.git</connection>
      <developerConnection>scm:git:git@github.com:FabioZumbi12/PixelVip-Spigot.git</developerConnection>
@@ -129,4 +84,9 @@
     </plugins>
   </build>
   <description>A plugin to manage vips on your server!</description>
+  
+  <modules>
+  	<module>PixelVip-Bukkit-Spigot</module>
+  	<module>PixelVip-Bungee</module>
+  </modules>
 </project>

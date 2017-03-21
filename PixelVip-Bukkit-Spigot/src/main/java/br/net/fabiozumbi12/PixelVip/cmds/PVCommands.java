@@ -363,7 +363,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	 */
 	@SuppressWarnings("deprecation")
 	public boolean vipTime(CommandSender sender, String[] args) {		
-		if (args.length == 0){
+		if (sender instanceof Player && args.length == 0){
 			plugin.getUtil().sendVipTime(sender, ((Player)sender).getUniqueId().toString(), ((Player)sender).getName());
 			return true;			
 		}		

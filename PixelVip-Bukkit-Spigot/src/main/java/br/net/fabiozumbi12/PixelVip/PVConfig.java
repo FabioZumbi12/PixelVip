@@ -101,7 +101,7 @@ public class PVConfig {
         plugin.getConfig().set("strings.keyGenerated", getObj("&aGenerated a key with the following:","strings.keyGenerated"));
         plugin.getConfig().set("strings.invalidKey", getObj("&cThis key is invalid or not exists!","strings.invalidKey"));
         plugin.getConfig().set("strings.vipActivated", getObj("&aVip activated with success:","strings.vipActivated"));
-        plugin.getConfig().set("strings.usesLeftActivation", getObj("&b This key can be used for more: &6{uses} &btimes.","strings.usesLeftActivation"));
+        plugin.getConfig().set("strings.usesLeftActivation", getObj("&bThis key can be used for more: &6{uses} &btimes.","strings.usesLeftActivation"));
         plugin.getConfig().set("strings.activeVip", getObj("&b- Vip: &6{vip}","strings.activeVip"));
         plugin.getConfig().set("strings.activeDays", getObj("&b- Days: &6{days} &bdays","strings.activeDays"));	
         plugin.getConfig().set("strings.timeLeft", getObj("&b- Time left: &6","strings.timeLeft"));	        
@@ -154,7 +154,7 @@ public class PVConfig {
 	
 	public void reloadVips() {
 		File fileVips = new File(plugin.getDataFolder()+File.separator+"vips.yml");
-		if (fileVips.exists()){
+		if (!fileVips.exists()){
 			try {
 				fileVips.createNewFile();
 			} catch (IOException e) {
