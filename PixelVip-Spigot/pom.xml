@@ -5,7 +5,7 @@
     <artifactId>PixelVip</artifactId>
     <version>1.0.5</version>
   </parent>
-  <artifactId>PixelVip-Bukkit-Spigot</artifactId>
+  <artifactId>PixelVip-Spigot</artifactId>
   
   <dependencies>    
         <dependency>
