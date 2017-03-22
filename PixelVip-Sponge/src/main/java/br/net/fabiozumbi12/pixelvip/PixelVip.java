@@ -40,7 +40,7 @@ import com.google.inject.Inject;
 
 @Plugin(id = "pixelvip", 
 name = "PixelVip", 
-version = "1.0.5",
+version = "${buildNumber}",
 authors="FabioZumbi12", 
 description="Plugin to give VIP to your players.")
 public class PixelVip {

@@ -8,3 +8,9 @@ Sponge: https://ore.spongepowered.org/FabioZumbi12/PixelVip
 
 ## Dev Builds:
 Dev builds on Jenkins: [![Build Status](http://158.69.121.149:8080/buildStatus/icon?job=PixelVip)](http://158.69.121.149:8080/job/PixelVip/)
+
+## Jenkins Builds:
+
+The jar buils are diferent of jenkins builds.  
+Jar builds represents internal test builds and test builds, and jenkins builds numbers represents public dev builds.
+This mean jenkins can have new builds, but not new versions.
