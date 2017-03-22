@@ -120,7 +120,7 @@
   <description>A plugin to manage vips on your server!</description>
   
   <modules>
-  	<module>PixelVip-Bukkit-Spigot</module>
+  	<module>PixelVip-Spigot</module>
   	<module>PixelVip-Bungee</module>
   	<module>PixelVip-Sponge</module>
   </modules>
