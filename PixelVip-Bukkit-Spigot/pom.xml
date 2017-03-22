@@ -41,18 +41,8 @@
 			<systemPath>${project.basedir}/../libs/EssentialsX-2.0.1.jar</systemPath>
         </dependency> 
   </dependencies>
-  <repositories>
-     <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-     </repository>
-     <repository>
-            <id>vault-repo</id>
-            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
-        </repository>
-     <repository>
-            <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-     </repository>
-  </repositories>
+  
+  <properties>
+  	<mineVersion>1.11.2-R0.1-SNAPSHOT</mineVersion>
+  </properties>
 </project>
