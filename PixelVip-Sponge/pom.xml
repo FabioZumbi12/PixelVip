@@ -21,6 +21,21 @@
         <version>${spongeVersion}</version>
         <classifier>javadoc</classifier>
     </dependency> 
+    
+    <dependency>
+            <groupId>de.icongmbh.oss.maven.plugins</groupId>
+            <artifactId>javassist-maven-plugin</artifactId>
+            <version>${javassist-plugin.version}</version>
+            <optional>true</optional>
+            <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+    </dependency>
   </dependencies>
   
   <properties>

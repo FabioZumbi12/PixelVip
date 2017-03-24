@@ -22,6 +22,10 @@
             <enabled>true</enabled>
         </snapshots>
     </repository>  
+    <repository>
+            <id>kitteh-repo</id>
+            <url>http://repo.kitteh.org/content/groups/public</url>
+    </repository>
      
     <!-- Spigot repos -->
     <repository>
@@ -41,14 +45,21 @@
      <repository>
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-     </repository>
-         
+     </repository>         
   </repositories>
+  
+  <pluginRepositories>
+        <pluginRepository>
+            <id>kitteh-repo</id>
+            <url>http://repo.kitteh.org/content/groups/public</url>
+        </pluginRepository>
+  </pluginRepositories>
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <pluginVersion>1.0.5</pluginVersion>
+    <javassist-plugin.version>1.1.0-KITTEH</javassist-plugin.version>
   </properties>
   
   <scm>
@@ -67,14 +78,44 @@
             <filtering>true</filtering>
             <directory>src/main/resources/</directory>
         </resource>
-        <resource>
-            <directory>src/main/java/br/net/fabiozumbi12/pixelvip/</directory>
-            <filtering>true</filtering>
-        </resource>
     </resources>
     
     <plugins>
-      
+           <!-- Parse Version to sponge plugin -->
+           <plugin>
+                <groupId>de.icongmbh.oss.maven.plugins</groupId>
+                <artifactId>javassist-maven-plugin</artifactId>
+                <version>${javassist-plugin.version}</version>
+                <configuration>
+                    <includeTestClasses>false</includeTestClasses>
+                    <transformerClasses>
+                        <transformerClass>
+                            <className>br.net.fabiozumbi12.pixelvip.Transform</className>
+                            <properties>
+                                <property>
+                                    <name>version</name>
+                                    <value>${project.version}</value>
+                                </property>
+                            </properties>
+                        </transformerClass>
+                    </transformerClasses>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>javassist</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>br.net.fabiozumbi12</groupId>
+                        <artifactId>PixelVip-Sponge</artifactId>
+                        <version>${pluginVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
       <!-- Parse Version to plugin.yml -->
       <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -121,6 +162,41 @@
       </plugin>
             
     </plugins>
+    <pluginManagement>
+    	<plugins>
+    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+    		<plugin>
+    			<groupId>org.eclipse.m2e</groupId>
+    			<artifactId>lifecycle-mapping</artifactId>
+    			<version>1.0.0</version>
+    			<configuration>
+    				<lifecycleMappingMetadata>
+    					<pluginExecutions>
+    						<pluginExecution>
+    							<pluginExecutionFilter>
+    								<groupId>
+    									de.icongmbh.oss.maven.plugins
+    								</groupId>
+    								<artifactId>
+    									javassist-maven-plugin
+    								</artifactId>
+    								<versionRange>
+    									[1.1.0-KITTEH,)
+    								</versionRange>
+    								<goals>
+    									<goal>javassist</goal>
+    								</goals>
+    							</pluginExecutionFilter>
+    							<action>
+    								<ignore></ignore>
+    							</action>
+    						</pluginExecution>
+    					</pluginExecutions>
+    				</lifecycleMappingMetadata>
+    			</configuration>
+    		</plugin>
+    	</plugins>
+    </pluginManagement>
   </build>
   <description>A plugin to manage vips on your server!</description>
   
