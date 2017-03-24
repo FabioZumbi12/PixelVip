@@ -80,42 +80,7 @@
         </resource>
     </resources>
     
-    <plugins>
-           <!-- Parse Version to sponge plugin -->
-           <plugin>
-                <groupId>de.icongmbh.oss.maven.plugins</groupId>
-                <artifactId>javassist-maven-plugin</artifactId>
-                <version>${javassist-plugin.version}</version>
-                <configuration>
-                    <includeTestClasses>false</includeTestClasses>
-                    <transformerClasses>
-                        <transformerClass>
-                            <className>br.net.fabiozumbi12.pixelvip.Transform</className>
-                            <properties>
-                                <property>
-                                    <name>version</name>
-                                    <value>${project.version}</value>
-                                </property>
-                            </properties>
-                        </transformerClass>
-                    </transformerClasses>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>javassist</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>br.net.fabiozumbi12</groupId>
-                        <artifactId>PixelVip-Sponge</artifactId>
-                        <version>${pluginVersion}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+    <plugins>           
       <!-- Parse Version to plugin.yml -->
       <plugin>
           <groupId>org.codehaus.mojo</groupId>
