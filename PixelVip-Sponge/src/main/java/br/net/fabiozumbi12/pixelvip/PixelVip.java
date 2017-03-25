@@ -40,13 +40,10 @@ import com.google.inject.Inject;
 
 @Plugin(id = "pixelvip", 
 name = "PixelVip", 
-version = PixelVip.MAGIC_VERSION,
+version = VersionData.VERSION,
 authors="FabioZumbi12", 
 description="Plugin to give VIP to your players.")
 public class PixelVip {
-	// Field set by javassist-maven-plugin
-	static final String MAGIC_VERSION = "SET_BY_MAGIC";
-	
 	@Inject private Logger logger;
 	public Logger getLogger(){	
 		return logger;

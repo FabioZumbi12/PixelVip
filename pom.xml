@@ -21,10 +21,6 @@
         <snapshots>
             <enabled>true</enabled>
         </snapshots>
-    </repository>  
-    <repository>
-            <id>kitteh-repo</id>
-            <url>http://repo.kitteh.org/content/groups/public</url>
     </repository>
      
     <!-- Spigot repos -->
@@ -47,13 +43,6 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
      </repository>         
   </repositories>
-  
-  <pluginRepositories>
-        <pluginRepository>
-            <id>kitteh-repo</id>
-            <url>http://repo.kitteh.org/content/groups/public</url>
-        </pluginRepository>
-  </pluginRepositories>
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -80,21 +69,20 @@
         </resource>
     </resources>
     
-    <plugins>           
-      <!-- Parse Version to plugin.yml -->
+    <plugins>       
       <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.10</version>
-          <executions>
-              <execution>
-                  <id>parse-version</id>
-                  <goals>
-                      <goal>parse-version</goal>
-                  </goals>
-              </execution>
-          </executions>
-      </plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>templating-maven-plugin</artifactId>
+        <version>1.0.0</version>
+            <executions>
+               <execution>
+                  <id>filter-src</id>
+                    <goals>
+                      <goal>filter-sources</goal>
+                    </goals>
+               </execution>
+            </executions>
+      </plugin>   
       
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -126,42 +114,7 @@
         </configuration>
       </plugin>
             
-    </plugins>
-    <pluginManagement>
-    	<plugins>
-    		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-    		<plugin>
-    			<groupId>org.eclipse.m2e</groupId>
-    			<artifactId>lifecycle-mapping</artifactId>
-    			<version>1.0.0</version>
-    			<configuration>
-    				<lifecycleMappingMetadata>
-    					<pluginExecutions>
-    						<pluginExecution>
-    							<pluginExecutionFilter>
-    								<groupId>
-    									de.icongmbh.oss.maven.plugins
-    								</groupId>
-    								<artifactId>
-    									javassist-maven-plugin
-    								</artifactId>
-    								<versionRange>
-    									[1.1.0-KITTEH,)
-    								</versionRange>
-    								<goals>
-    									<goal>javassist</goal>
-    								</goals>
-    							</pluginExecutionFilter>
-    							<action>
-    								<ignore></ignore>
-    							</action>
-    						</pluginExecution>
-    					</pluginExecutions>
-    				</lifecycleMappingMetadata>
-    			</configuration>
-    		</plugin>
-    	</plugins>
-    </pluginManagement>
+    </plugins>   
   </build>
   <description>A plugin to manage vips on your server!</description>
   
