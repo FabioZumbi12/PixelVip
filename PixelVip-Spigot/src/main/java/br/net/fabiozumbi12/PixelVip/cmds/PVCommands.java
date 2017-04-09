@@ -136,7 +136,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	private boolean mainCommand(CommandSender sender, String[] args) {
 		if (args.length == 1){
 			if (args[0].equalsIgnoreCase("reload")){
-				plugin.reloadCmd(sender);
+				plugin.reloadCmd();
 				return true;
 			}
 		}
@@ -323,7 +323,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
     		sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
     		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","listItemKeys")));
     		for (Object key:itemKeys){		
-    			List<String> cmds = plugin.getConfig().getStringList("itemKeys."+key.toString()+".cmds");
+    			List<String> cmds = plugin.getPVConfig().getItemKeyCmds(key.toString());
     			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key.toString()));
     			for (String cmd:cmds){
     				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("item"))+cmd);

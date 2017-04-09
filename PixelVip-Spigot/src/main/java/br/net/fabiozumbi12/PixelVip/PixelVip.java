@@ -13,10 +13,8 @@ import java.util.UUID;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,10 +24,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.earth2me.essentials.Essentials;
-
 import br.net.fabiozumbi12.Bungee.PixelVipBungee;
 import br.net.fabiozumbi12.PixelVip.cmds.PVCommands;
+
+import com.earth2me.essentials.Essentials;
 
 public class PixelVip extends JavaPlugin implements Listener {
 	
@@ -37,13 +35,17 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public Server serv;
 	public PluginDescriptionFile pdf;
 	public String mainPath;
-	public PVLogger logger;
+	private PVLogger logger;
 	public Essentials ess;
 	private int task;
 	
 	private PVUtil util;
 	public PVUtil getUtil(){
 		return this.util;
+	}
+	
+	public PVLogger getPVLogger(){
+		return this.logger;
 	}
 	
 	private Permission perms;
@@ -53,7 +55,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		return this.config;
 	}
 	
-	public void reloadCmd(CommandSender src){
+	public void reloadCmd(){
 		logger.info("Reloading config module...");			
 		reloadConfig();
 		config.reloadVips();
@@ -216,27 +218,5 @@ public class PixelVip extends JavaPlugin implements Listener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-    }
-}
-
-class PVLogger {
-	public void sucess(String s) {
-    	Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "PixelVip: [&a&l"+s+"&r]"));
-    }
-	
-    public void info(String s) {
-    	Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "PixelVip: ["+s+"]"));
-    }
-    
-    public void warning(String s) {
-    	Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "PixelVip: [&6"+s+"&r]"));
-    }
-    
-    public void severe(String s) {
-    	Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "PixelVip: [&c&l"+s+"&r]"));
-    }
-    
-    public void log(String s) {
-    	Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "PixelVip: ["+s+"]"));
     }
 }

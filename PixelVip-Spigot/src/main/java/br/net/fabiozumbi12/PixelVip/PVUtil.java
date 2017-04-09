@@ -56,7 +56,7 @@ public class PVUtil {
 			src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			vips.stream().filter(v->v.length == 5).forEach((vipInfo)->{
 				String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
-				if (plugin.getPVConfig().getVipBoolean(true, "activeVips."+vipInfo[1]+"."+UUID.toString()+".active")){
+				if (plugin.getPVConfig().isVipActive(vipInfo[1], UUID.toString())){
 					time = plugin.getUtil().millisToMessage(new Long(vipInfo[0])-plugin.getUtil().getNowMillis());
 				}
 		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft")+time));

@@ -1,5 +1,5 @@
-name: ${project.name}
-main: ${project.groupId}.${project.artifactId}.${project.name}
+name: PixelVip
+main: br.net.fabiozumbi12.PixelVip.PixelVip
 version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}
@@ -13,7 +13,7 @@ commands:
     description: "Generate new item key for commands."
     permission: "pixelvip.cmd.newitemkey"
     usage: "/newitemkey <cmd1, cmd2, ...>"
-    aliases: [genitemkey, geraritemkey, newikey]
+    aliases: [genitemkey, geraritemkey, newikey, gerarikey]
   additemkey:
     description: "Add commands to a key."
     permission: "pixelvip.cmd.additemkey"
