@@ -72,23 +72,25 @@ public class PVConfig {
         plugin.getConfig().set("configs.database.mysql.username", getObj("user","configs.database.mysql.username"));
         plugin.getConfig().set("configs.database.mysql.password", getObj("pass","configs.database.mysql.password"));
 
-        plugin.getConfig().set("configs.database.mysql.keys.table-name", getObj("keys","configs.database.mysql.keys.table-name"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.key", getObj("key","configs.database.mysql.keys.columns.key"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.group", getObj("group","configs.database.mysql.keys.columns.group"));        
-        plugin.getConfig().set("configs.database.mysql.keys.columns.duration", getObj("duration","configs.database.mysql.keys.columns.duration"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.uses", getObj("uses","configs.database.mysql.keys.columns.uses"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.cmds", getObj("cmds","configs.database.mysql.keys.columns.cmds"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.kits", getObj("kits","configs.database.mysql.keys.columns.kits"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.comments", getObj("comments","configs.database.mysql.keys.columns.comments"));
+        plugin.getConfig().set("configs.database.mysql.keys.table-name", getObj("pixelvip_keys","configs.database.mysql.keys.table-name"));
+        plugin.getConfig().set("configs.database.mysql.keys.columns.key", getObj("col_key","configs.database.mysql.keys.columns.key"));
+        plugin.getConfig().set("configs.database.mysql.keys.columns.group", getObj("col_group","configs.database.mysql.keys.columns.group"));        
+        plugin.getConfig().set("configs.database.mysql.keys.columns.duration", getObj("col_duration","configs.database.mysql.keys.columns.duration"));
+        plugin.getConfig().set("configs.database.mysql.keys.columns.uses", getObj("col_uses","configs.database.mysql.keys.columns.uses"));
+        plugin.getConfig().set("configs.database.mysql.keys.columns.cmds", getObj("col_cmds","configs.database.mysql.keys.columns.cmds"));        
+        plugin.getConfig().set("configs.database.mysql.keys.columns.info", getObj("col_info","configs.database.mysql.keys.columns.info"));
+        plugin.getConfig().set("configs.database.mysql.keys.columns.comments", getObj("col_comments","configs.database.mysql.keys.columns.comments"));
         
-        plugin.getConfig().set("configs.database.mysql.vips.table-name", getObj("vips","configs.database.mysql.vips.table-name"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.vip", getObj("vip","configs.database.mysql.vips.columns.vip"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.playerGroup", getObj("playerGroup","configs.database.mysql.vips.columns.playerGroup"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.duration", getObj("duration","configs.database.mysql.vips.columns.duration"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.nick", getObj("nick","configs.database.mysql.vips.columns.nick"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.expires-on-exact", getObj("expires-on-exact","configs.database.mysql.vips.columns.expires-on-exact"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.active", getObj("active","configs.database.mysql.vips.columns.active"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.comments", getObj("comments","configs.database.mysql.vips.columns.comments"));
+        plugin.getConfig().set("configs.database.mysql.vips.table-name", getObj("pixelvip_vips","configs.database.mysql.vips.table-name"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.uuid", getObj("col_uuid","configs.database.mysql.vips.columns.uuid"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.vip", getObj("col_vip","configs.database.mysql.vips.columns.vip"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.playerGroup", getObj("col_playerGroup","configs.database.mysql.vips.columns.playerGroup"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.duration", getObj("col_duration","configs.database.mysql.vips.columns.duration"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.nick", getObj("col_nick","configs.database.mysql.vips.columns.nick"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.expires-on-exact", getObj("col_expires","configs.database.mysql.vips.columns.expires-on-exact"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.active", getObj("col_active","configs.database.mysql.vips.columns.active"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.kits", getObj("col_kits","configs.database.mysql.vips.columns.kits"));
+        plugin.getConfig().set("configs.database.mysql.vips.columns.comments", getObj("col_comments","configs.database.mysql.vips.columns.comments"));
         //end database
         
         
@@ -101,13 +103,6 @@ public class PVConfig {
         plugin.getConfig().set("configs.queueCmdsForOfflinePlayers", getObj(false,"configs.queueCmdsForOfflinePlayers"));
         plugin.getConfig().set("bungee.enableSync", getObj(false,"bungee.enableSync"));
         plugin.getConfig().set("bungee.serverID", getObj("server1","bungee.serverID"));
-                
-        if (!plugin.getConfig().contains("keys")){
-        	plugin.getConfig().set("keys", new ArrayList<String>());
-        }        
-        if (!plugin.getConfig().contains("itemKeys")){
-        	plugin.getConfig().set("itemKeys", new ArrayList<String>());
-        }        	
         
         if (plugin.getConfig().getStringList("configs.commandsToRunOnVipFinish").size() == 0){	        	
         	plugin.getConfig().set("configs.commandsToRunOnVipFinish", 
@@ -232,6 +227,12 @@ public class PVConfig {
 	
 	public void saveVips(){
 		dataManager.saveVips();
+	}
+	
+	public void closeCon(){
+		if (dataManager != null){
+			dataManager.closeCon();
+		}
 	}
 	
 	public boolean isVipActive(String vip, String id){

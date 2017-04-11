@@ -9,7 +9,7 @@ public interface PVDataManager {
 	
 	void saveKeys();
 	
-	void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires);
+	void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires);
 	
 	void addRawKey(String key, String group, long duration, int uses);
 	
@@ -19,7 +19,7 @@ public interface PVDataManager {
 	
 	HashMap<String,List<String[]>> getAllVipList();
 	
-	List<String[]> getVipInfo(String puuid);
+	List<String[]> getVipInfo(String uuid);
 	
 	List<String> getItemKeyCmds(String key);
 	
@@ -35,21 +35,21 @@ public interface PVDataManager {
 	
 	void setKeyUse(String key, int uses);
 	
-	void setVipActive(String id, String vip, boolean active);
+	void setVipActive(String uuid, String vip, boolean active);
 	
-	void setVipDuration(String id, String vip, long duration);
+	void setVipDuration(String uuid, String vip, long duration);
 	
-	boolean containsVip(String id, String vip);
+	boolean containsVip(String uuid, String vip);
 	
-	void setVipKitCooldown(String id, String vip, long cooldown);
+	void setVipKitCooldown(String uuid, String vip, long cooldown);
 	
-	void removeVip(String id, String vip);
+	void removeVip(String uuid, String vip);
 
-	long getVipCooldown(String id, String vip);
+	long getVipCooldown(String uuid, String vip);
 	
-	long getVipDuration(String id, String vip);
+	long getVipDuration(String uuid, String vip);
 	
-	boolean isVipActive(String id, String vip);
+	boolean isVipActive(String uuid, String vip);
 
 	void closeCon();
 }

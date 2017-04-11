@@ -173,7 +173,6 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public void setVipActive(String id, String vip, boolean active){
-		plugin.getLogger().severe("Passou set active!");
 		vipsFile.set("activeVips."+vip+"."+id+".active", active);
 	}
 	

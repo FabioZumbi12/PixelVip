@@ -37,7 +37,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public String mainPath;
 	private PVLogger logger;
 	public Essentials ess;
-	private int task;
+	private int task = 0;
 	
 	private PVUtil util;
 	public PVUtil getUtil(){
@@ -56,11 +56,12 @@ public class PixelVip extends JavaPlugin implements Listener {
 	}
 	
 	public void reloadCmd(){
-		logger.info("Reloading config module...");			
+		logger.info("Reloading config module...");		
 		reloadConfig();
-		config.reloadVips();
-		saveConfig();
+		config.closeCon();
+		this.config = new PVConfig(this, mainPath, new File(mainPath+"config.yml"));
 		reloadVipTask();
+		saveConfig();
 				
 		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips"));
 		logger.sucess(util.toColor("PixelVip reloaded"));
@@ -149,7 +150,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
 			
 			@Override
-			public void run() {						
+			public void run() {
 				getPVConfig().getVipList().forEach((uuid,value)->{
 					OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));				
 					getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
@@ -162,7 +163,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 							if (p.isOnline()){
 								p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
 							}
-							Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.getName() + " &bhas ended!"));
+							Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
 						}					
 					});
 				});
