@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -214,5 +217,21 @@ public class PVDataFile implements PVDataManager {
 	@Override
 	public void closeCon() {
 		//for mysql
+	}
+
+	@Override
+	public String getVipUUID(String player) {
+		Iterator<String> it = vipsFile.getKeys(true).stream().filter(key->key.contains(".nick")).iterator();
+		while(it.hasNext()){
+			String key = it.next();
+			if (vipsFile.getString(key).equals(player)){
+				Pattern pairRegex = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}");
+			    Matcher matcher = pairRegex.matcher(key);
+			    while (matcher.find()) {
+			        return matcher.group(0);
+			    }
+			}
+		}
+		return null;
 	}
 }

@@ -34,7 +34,6 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public PixelVip plugin;
 	public Server serv;
 	public PluginDescriptionFile pdf;
-	public String mainPath;
 	private PVLogger logger;
 	public Essentials ess;
 	private int task = 0;
@@ -58,8 +57,8 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public void reloadCmd(){
 		logger.info("Reloading config module...");		
 		reloadConfig();
-		config.closeCon();
-		this.config = new PVConfig(this, mainPath, new File(mainPath+"config.yml"));
+		config.closeCon();		
+		this.config = new PVConfig(this);
 		reloadVipTask();
 		saveConfig();
 				
@@ -90,10 +89,12 @@ public class PixelVip extends JavaPlugin implements Listener {
 		
 		logger = new PVLogger();
         pdf = getDescription();
-        mainPath = "plugins" + File.separator + pdf.getName() + File.separator;
 
         logger.info("Init config module...");			
-		this.config = new PVConfig(this, mainPath, new File(mainPath+"config.yml"));
+        if (!getDataFolder().exists()){
+			getDataFolder().mkdir();
+		}
+		this.config = new PVConfig(this);
         
         logger.info("Init utils module...");
 		this.util = new PVUtil(this);
@@ -159,7 +160,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 							config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
 						}
 						if (dur <= util.getNowMillis()){
-							getPVConfig().removeVip(p, Optional.of(vipInfo[1]));
+							getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
 							if (p.isOnline()){
 								p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
 							}

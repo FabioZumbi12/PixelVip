@@ -50,6 +50,8 @@ public interface PVDataManager {
 	long getVipDuration(String uuid, String vip);
 	
 	boolean isVipActive(String uuid, String vip);
+	
+	String getVipUUID(String player);
 
 	void closeCon();
 }

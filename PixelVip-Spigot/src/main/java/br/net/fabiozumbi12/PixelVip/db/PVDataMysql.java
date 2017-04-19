@@ -642,4 +642,22 @@ public class PVDataMysql implements PVDataManager {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public String getVipUUID(String player) {
+		String uuid = null;
+		try {			
+			PreparedStatement st = this.con.prepareStatement("SELECT "+colVUUID+" FROM `"+vipTable+"` WHERE "+colVNick+"=?");				
+			st.setString(1, player);
+			ResultSet rs = st.executeQuery();
+			if (rs.next()){
+				uuid = rs.getString(colVUUID);
+			}
+			rs.close();
+			st.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return uuid;
+	}
 }

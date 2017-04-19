@@ -58,6 +58,10 @@ public class PVCommands implements CommandExecutor, TabCompleter {
     
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (sender instanceof Player && !plugin.getPVConfig().worldAllowed(((Player)sender).getWorld())){
+			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","strings.cmdNotAllowedWorld")));
+			return true;
+		}
 		
 		if (cmd.getName().equalsIgnoreCase("delkey")){
 			return delKey(sender, args);
@@ -109,8 +113,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		
 		if (cmd.getName().equalsIgnoreCase("listvips")){
 			return listVips(sender, args);
-		}
-		
+		}		
 		return true;
 	}
 		
@@ -360,17 +363,16 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	/**Command to check the vip time.
 	 * 
 	 * @return CommandSpec
-	 */
-	@SuppressWarnings("deprecation")
+	 */	
 	public boolean vipTime(CommandSender sender, String[] args) {		
 		if (sender instanceof Player && args.length == 0){
 			plugin.getUtil().sendVipTime(sender, ((Player)sender).getUniqueId().toString(), ((Player)sender).getName());
 			return true;			
 		}		
 		if (args.length == 1 && sender.hasPermission("pixelvip.cmd.player.others")){
-			OfflinePlayer optp = Bukkit.getOfflinePlayer(args[0]);
-			if (optp != null){
-    			plugin.getUtil().sendVipTime(sender, optp.getUniqueId().toString(), optp.getName());			    			
+			String uuid = plugin.getPVConfig().getVipUUID(args[0]);
+			if (uuid != null){
+    			plugin.getUtil().sendVipTime(sender, uuid, args[0]);			    			
     		} else {
     			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));	
     		}
@@ -383,12 +385,11 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	 * 
 	 * @return CommandSpec
 	 */
-	@SuppressWarnings("deprecation")
 	public boolean removeVip(CommandSender sender, String[] args) {
 		if (args.length == 1){
-			OfflinePlayer optp = Bukkit.getOfflinePlayer(args[0]);
-	    	if (optp != null){
-	    		plugin.getPVConfig().removeVip(optp, Optional.empty());
+			String uuid = plugin.getPVConfig().getVipUUID(args[0]);
+			if (uuid == null){
+				plugin.getPVConfig().removeVip(uuid, Optional.empty());
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipsRemoved")));	    		
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));	 
@@ -396,15 +397,15 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	return true;
 		}
 		if (args.length == 2){
-			OfflinePlayer optp = Bukkit.getOfflinePlayer(args[0]);
 			Optional<String> group = Optional.of(args[1]);
 			if (!plugin.getPVConfig().groupExists(group.get())){
 				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noGroups")+args[1]));
 				return true;
 			} 
 			
-	    	if (optp != null){
-	    		plugin.getPVConfig().removeVip(optp, group);
+			String uuid = plugin.getPVConfig().getVipUUID(args[0]);
+			if (uuid != null){
+	    		plugin.getPVConfig().removeVip(uuid, group);
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipsRemoved")));	    		
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));	 
@@ -421,7 +422,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	 */
 	public boolean setActive(CommandSender sender, String[] args) {
 		if (args.length == 1){
-			if (sender instanceof Player){
+			if (sender instanceof Player){				
 	    		Player p = (Player) sender;
 	    		String group = args[0];
 		    	if (!plugin.getPVConfig().groupExists(group)){
@@ -434,7 +435,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		    	if (vipInfo.size() > 0){				    		
 		    		for (String[] vip:vipInfo){
 		    			if (vip[1].equalsIgnoreCase(group)){				    				
-		    				plugin.getPVConfig().setActive(p, vip[1], vip[2]);
+		    				plugin.getPVConfig().setActive(p.getUniqueId().toString(), vip[1], vip[2]);
 		    				p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","activeVipSetTo")+vip[1]));
 		    				return true;
 		    			}
@@ -446,6 +447,32 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","onlyPlayers")));
 	    		return true;
 	    	}
+		}
+		if (args.length == 2 && sender.hasPermission("pixelvip.setactive")){	
+			String uuid = plugin.getPVConfig().getVipUUID(args[1]);
+			if (uuid == null){
+				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noPlayersByName")));
+	    		return true;
+			}
+    		String group = args[0];
+	    	if (!plugin.getPVConfig().groupExists(group)){
+	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noGroups")+group));
+	    		return true;
+	    	}
+    		
+    		List<String[]> vipInfo = plugin.getPVConfig().getVipInfo(uuid);
+    		
+	    	if (vipInfo.size() > 0){				    		
+	    		for (String[] vip:vipInfo){
+	    			if (vip[1].equalsIgnoreCase(group)){				    				
+	    				plugin.getPVConfig().setActive(uuid, vip[1], vip[2]);
+	    				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","activeVipSetTo")+vip[1]));
+	    				return true;
+	    			}
+	    		}
+	    	}
+	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noGroups")+group));
+	    	return true;
 		}
     	return false;
 	}
@@ -490,10 +517,10 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	public boolean setVip(CommandSender sender, String[] args) {
 		if (args.length == 3){			
 			String pname = args[0];
-			OfflinePlayer p = Bukkit.getOfflinePlayer(pname);
-	    	if (p.getName() != null){
-	    		pname = p.getName();
-	    	}
+			String uuid = plugin.getPVConfig().getVipUUID(pname);
+			if (uuid == null){
+				uuid = Bukkit.getOfflinePlayer(pname).getUniqueId().toString();
+			}
 	    	String group = args[1];
 	    	if (!plugin.getPVConfig().groupExists(group)){
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","noGroups")+group));
@@ -505,7 +532,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	} catch (NumberFormatException ex){
 	    		return false;
 	    	}
-	    	plugin.getPVConfig().setVip(p, group, plugin.getUtil().dayToMillis(days), pname);		
+	    	plugin.getPVConfig().setVip(uuid, group, plugin.getUtil().dayToMillis(days), pname);		
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipSet")));
 	    	return true;
 		}
