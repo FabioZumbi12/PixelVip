@@ -9,7 +9,17 @@ public interface PVDataManager {
 	
 	void saveKeys();
 	
+	void removeTrans(String trans);
+	
+	void addTras(String trans, String player);
+	
+	boolean transactionExist(String trans);
+	
+	HashMap<String, String> getAllTrans();
+	
 	void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires);
+	
+	void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active);
 	
 	void addRawKey(String key, String group, long duration, int uses);
 	

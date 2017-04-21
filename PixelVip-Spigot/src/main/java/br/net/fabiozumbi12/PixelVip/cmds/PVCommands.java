@@ -13,10 +13,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import br.net.fabiozumbi12.PixelVip.PixelVip;
+import br.net.fabiozumbi12.PixelVip.db.PVDataFile;
+import br.net.fabiozumbi12.PixelVip.db.PVDataManager;
+import br.net.fabiozumbi12.PixelVip.db.PVDataMysql;
 
 public class PVCommands implements CommandExecutor, TabCompleter {
 
@@ -50,7 +54,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		}
     	
     	if (cmd.getName().equalsIgnoreCase("pixelvip") && args.length == 1){
-			return Arrays.asList("reload");
+			return Arrays.asList("reload","mysqlToFile","fileToMysql");
 		}
     	
 		return null;
@@ -116,7 +120,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		}		
 		return true;
 	}
-		
+	
 	private boolean listVips(CommandSender sender, String[] args) {  	
     	HashMap<String, List<String[]>> vips = plugin.getPVConfig().getVipList();    	
     	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","list-of-vips")));  
@@ -143,10 +147,58 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 				return true;
 			}
 		}
-		
+		if (sender instanceof ConsoleCommandSender){
+			if (args.length == 1){
+				if (args[0].equalsIgnoreCase("fileToMysql")){
+					if (plugin.getConfig().getString("configs.database.type").equalsIgnoreCase("mysql")){
+						sender.sendMessage(plugin.getUtil().toColor("&cYour database type is already Mysql. Use &4/pixelvip mysqlToFile &cif you want to convert to file."));
+						return true;
+					}
+					plugin.getConfig().set("configs.database.type", "mysql");
+					convertDB(new PVDataMysql(plugin));
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("mysqlToFile")){
+					if (plugin.getConfig().getString("configs.database.type").equalsIgnoreCase("file")){
+						sender.sendMessage(plugin.getUtil().toColor("&cYour database type is already File. Use &4/pixelvip fileToMysql &cif you want to convert to mysql."));
+						return true;
+					}
+					plugin.getConfig().set("configs.database.type", "file");
+					convertDB(new PVDataFile(plugin));
+					return true;
+				}
+			}
+		}		
 		return false;
 	}
     
+	private void convertDB(PVDataManager dm){
+		plugin.getPVConfig().getAllVips().forEach((uuid,vipInfo)->{
+			vipInfo.forEach(vips->{
+				dm.addRawVip(vips[1], uuid, vips[2], Long.valueOf(vips[0]), vips[4], plugin.getUtil().expiresOn(Long.valueOf(vips[0])), Boolean.parseBoolean(vips[3]));
+			});
+		});
+		dm.saveVips();
+		
+		plugin.getPVConfig().getListKeys().forEach(key->{
+			String[] keyInfo = plugin.getPVConfig().getKeyInfo(key);
+			dm.addRawKey(key, keyInfo[0], Long.parseLong(keyInfo[1]), Integer.parseInt(keyInfo[2]));
+		});
+		
+		plugin.getPVConfig().getItemListKeys().forEach(key->{
+			dm.addRawItemKey(key, plugin.getPVConfig().getItemKeyCmds(key));
+		});		
+		dm.saveKeys();
+		
+		plugin.getPVConfig().getAllTrans().forEach((code,nick)->{
+			dm.addTras(code, nick);
+		});
+		
+		dm.closeCon();
+		plugin.saveConfig();
+		plugin.reloadCmd();
+	}
+	
 	private List<String> fixArgs(String[] args){
 		StringBuilder cmds = new StringBuilder();			
 		for (String arg:args){
@@ -351,7 +403,18 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 			if (sender instanceof Player){
 	    		Player p = (Player) sender;
 	    		String key = args[0].toUpperCase();
-		    	plugin.getPVConfig().activateVip(p, key, "", 0, p.getName());
+	    		if (plugin.getPagSeguro() != null){
+	    			if (plugin.getPVConfig().transExist(key)){
+						sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","pagseguro.codeused")));
+						return true;
+					}
+	    			plugin.processTrans.add(key);
+					if (plugin.getPagSeguro().checkTransaction(sender, key)){
+						return true;
+					}
+					plugin.processTrans.remove(key);
+	    		}	    		
+	    		plugin.getPVConfig().activateVip(p, key, "", 0, p.getName());
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","onlyPlayers")));
 	    	}

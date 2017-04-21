@@ -45,6 +45,12 @@ public class PVDataMysql implements PVDataManager {
 	private String colVKits;
 	private String colVComment;
 
+	private String transTable;
+
+	private String colTID;
+
+	private String colTNick;
+
 	
 		
 	public PVDataMysql(PixelVip plugin){
@@ -74,6 +80,10 @@ public class PVDataMysql implements PVDataManager {
         this.colVActive = plugin.getConfig().getString("configs.database.mysql.vips.columns.active");
         this.colVKits = plugin.getConfig().getString("configs.database.mysql.vips.columns.kits");
         this.colVComment = plugin.getConfig().getString("configs.database.mysql.vips.columns.comments");
+		
+        this.transTable = plugin.getConfig().getString("configs.database.mysql.transactions.table-name");
+		this.colTID = plugin.getConfig().getString("configs.database.mysql.transactions.columns.idt");
+		this.colTNick = plugin.getConfig().getString("configs.database.mysql.transactions.columns.nick");
 		
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -133,6 +143,18 @@ public class PVDataMysql implements PVDataManager {
 				e.printStackTrace();
 			}        	
         }
+        //transactions connection
+        if (!checkTransTable()){
+			try {
+				PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+transTable+"` ("
+	        			+colTID+" varchar(128) PRIMARY KEY, "
+	        			+colTNick+" varchar(128))");
+	            st.executeUpdate();
+	            st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}        	
+        }
 	}
 	
 	private void tryConnect() throws SQLException{
@@ -180,13 +202,29 @@ public class PVDataMysql implements PVDataManager {
         return false;
     }
 	
+	private boolean checkTransTable() {     
+        try {
+            DatabaseMetaData meta = this.con.getMetaData();
+            ResultSet rs = meta.getTables(null, null, transTable, null);
+            if (rs.next()) {
+            	rs.close();
+            	return true;               
+            }
+        	rs.close();
+        } catch (SQLException e){
+        	e.printStackTrace();
+        }        
+        return false;
+    }
+	
 	@Override
 	public void saveVips() {}
 	
 	@Override
 	public void saveKeys() {}
 	
-	private boolean vipExist(String uuid, String group){
+	@Override
+	public boolean containsVip(String uuid, String group){
 		int total = 0;
 		try {
             PreparedStatement st = this.con.prepareStatement("SELECT COUNT(*) FROM `"+vipTable+"` WHERE "+colVUUID+" = ? AND "+colVVip+" = ?");
@@ -205,8 +243,34 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
+	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active) {
+		if (!containsVip(uuid, group)){
+			try {
+				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` (uuid_bin,"
+						+colVVip+","
+			            +colVPGroup+","
+						+colVDuration+", "
+			            +colVNick+", "
+						+colVExpires+","
+						+colVActive+") VALUES (unhex(replace(?,'-','')),?,?,?,?,?,?)");
+				st.setString(1, uuid);
+				st.setString(2, group);
+				st.setString(3, pgroup);
+				st.setLong(4, duration);
+				st.setString(5, nick);
+				st.setString(6, expires);
+				st.setBoolean(7, active);
+				st.executeUpdate();
+				st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
 	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires) {
-		if (!vipExist(uuid, group)){
+		if (!containsVip(uuid, group)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` (uuid_bin,"
 						+colVVip+","
@@ -503,7 +567,7 @@ public class PVDataMysql implements PVDataManager {
 	
 	@Override
 	public void setVipActive(String uuid, String vip, boolean active) {
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVActive+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
 				st.setBoolean(1, active);
@@ -519,7 +583,7 @@ public class PVDataMysql implements PVDataManager {
 	
 	@Override
 	public void setVipDuration(String uuid, String vip, long duration) {
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVDuration+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
 				st.setLong(1, duration);
@@ -534,13 +598,8 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
-	public boolean containsVip(String uuid, String vip) {
-		return vipExist(uuid, vip);
-	}
-	
-	@Override
 	public void setVipKitCooldown(String uuid, String vip, long cooldown) {
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVKits+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
 				st.setLong(1, cooldown);
@@ -556,7 +615,7 @@ public class PVDataMysql implements PVDataManager {
 	
 	@Override
 	public void removeVip(String uuid, String vip) {
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("DELETE FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=?");				
 				st.setString(1, uuid);
@@ -572,7 +631,7 @@ public class PVDataMysql implements PVDataManager {
 	@Override
 	public long getVipCooldown(String uuid, String vip) {
 		long count = 0;
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("SELECT "+colVKits+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=?");				
 				st.setString(1, uuid);
@@ -593,7 +652,7 @@ public class PVDataMysql implements PVDataManager {
 	@Override
 	public long getVipDuration(String uuid, String vip) {
 		long count = 0;
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("SELECT "+colVDuration+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=?");				
 				st.setString(1, uuid);
@@ -614,7 +673,7 @@ public class PVDataMysql implements PVDataManager {
 	@Override
 	public boolean isVipActive(String uuid, String vip) {
 		boolean active = true;
-		if (vipExist(uuid, vip)){
+		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("SELECT "+colVActive+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=? AND "+colVActive+" IS NOT NULL");				
 				st.setString(1, uuid);
@@ -660,4 +719,68 @@ public class PVDataMysql implements PVDataManager {
 		}
 		return uuid;
 	}
+
+	@Override
+	public void removeTrans(String trans) {
+		if (transactionExist(trans)){
+			try {
+				PreparedStatement st = this.con.prepareStatement("DELETE FROM `"+transTable+"` WHERE "+colTID+"=?");				
+				st.setString(1, trans);
+				st.executeUpdate();
+				st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+
+	@Override
+	public void addTras(String trans, String player) {
+		try {
+			PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+transTable+"` ("+colTID+","+colTNick+") VALUES (?,?) ON DUPLICATE KEY UPDATE "+colTNick+"=?");
+			st.setString(1, trans);
+			st.setString(2, player);			
+			st.setString(3, player);
+			st.executeUpdate();
+			st.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public boolean transactionExist(String trans) {
+		int total = 0;
+		try {
+            PreparedStatement st = this.con.prepareStatement("SELECT COUNT(*) FROM `"+transTable+"` WHERE "+colTID+" = ?");
+            st.setString(1, trans);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt("COUNT(*)");
+            }
+            st.close();
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+		return total > 0;
+	}
+	
+	@Override
+	public HashMap<String, String> getAllTrans(){
+		HashMap<String, String> trans = new HashMap<String, String>();
+		try {
+			PreparedStatement st = this.con.prepareStatement("SELECT * FROM `"+transTable+"`");
+			ResultSet rs = st.executeQuery();
+			while(rs.next()){
+				trans.put(rs.getString(colTID), rs.getString(colTNick));
+			}
+			st.close();
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return trans;
+	}
+	
 }

@@ -1,7 +1,9 @@
 package br.net.fabiozumbi12.PixelVip;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -90,6 +92,10 @@ public class PVConfig {
         plugin.getConfig().set("configs.database.mysql.vips.columns.active", getObj("col_active","configs.database.mysql.vips.columns.active"));
         plugin.getConfig().set("configs.database.mysql.vips.columns.kits", getObj("col_kits","configs.database.mysql.vips.columns.kits"));
         plugin.getConfig().set("configs.database.mysql.vips.columns.comments", getObj("col_comments","configs.database.mysql.vips.columns.comments"));
+        
+        plugin.getConfig().set("configs.database.mysql.transactions.table-name", getObj("pixelvip_transactions","configs.database.mysql.transactions.table-name"));
+        plugin.getConfig().set("configs.database.mysql.transactions.columns.idt", getObj("col_idt","configs.database.mysql.transactions.columns.idt"));
+        plugin.getConfig().set("configs.database.mysql.transactions.columns.nick", getObj("col_nick","configs.database.mysql.transactions.columns.nick"));
         //end database
         
         
@@ -108,6 +114,21 @@ public class PVConfig {
         plugin.getConfig().set("bungee.enableSync", getObj(false,"bungee.enableSync"));
         plugin.getConfig().set("bungee.serverID", getObj("server1","bungee.serverID"));
         
+        
+        plugin.getConfig().set("apis.pagseguro.use", getObj(false,"apis.pagseguro.use"));
+        plugin.getConfig().set("apis.pagseguro.email", getObj("your@email.com","apis.pagseguro.email"));
+        plugin.getConfig().set("apis.pagseguro.token", getObj("yourtoken","apis.pagseguro.token"));
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
+        sdf.format(Calendar.getInstance().getTime());
+        plugin.getConfig().set("apis.pagseguro.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()),"apis.pagseguro.ignoreOldest"));
+                
+        plugin.getConfig().set("apis.paypal.use", getObj(false,"apis.paypal.use"));
+        
+        if (!plugin.getConfig().contains("apis.commandsIds")){
+        	plugin.getConfig().set("apis.commandIds.1", getObj("darvip {p} Vip1 15","apis.commandIds.1"));
+            plugin.getConfig().set("apis.commandIds.2", getObj("silk give {p} iron_golem 2","apis.commandIds.2"));
+            plugin.getConfig().set("apis.commandIds.3", getObj("eco give {p} 10000","apis.commandIds.3"));
+        }
         
         //strings
         plugin.getConfig().set("strings._pluginTag", getObj("&7[&6PixelVip&7] ","strings._pluginTag"));	
@@ -151,6 +172,12 @@ public class PVConfig {
         plugin.getConfig().set("strings.noKeyRemoved", getObj("&cTheres no keys to remove!","strings.noKeyRemoved"));
         plugin.getConfig().set("strings.cmdNotAllowedWorld", getObj("&cThis command is not allowed in this world!","strings.cmdNotAllowedWorld"));
         
+        plugin.getConfig().set("strings.pagseguro.waiting", getObj("&cPagSeguro: Your purchase has not yet been approved!","strings.pagseguro.waiting"));
+        plugin.getConfig().set("strings.pagseguro.codeused", getObj("&cPagSeguro: This code has already been used!","strings.pagseguro.codeused"));
+        plugin.getConfig().set("strings.pagseguro.expired", getObj("&cPagSeguro: This code has expired!","strings.pagseguro.expired"));
+        plugin.getConfig().set("strings.pagseguro.noitems", getObj("&cPagSeguro: No items delivered. Contact an administrator to help you!","strings.pagseguro.noitems"));
+        
+        //init database
         reloadVips();
         
         /*---------------------------------------------------------*/
@@ -216,6 +243,22 @@ public class PVConfig {
         	dataManager = new PVDataFile(plugin);
         }
 	}	
+	
+	public boolean transExist(String trans){
+		return dataManager.transactionExist(trans);
+	}
+	
+	public void addTrans(String trans, String player){
+		dataManager.addTras(trans, player);
+	}
+	
+	public void removeTrans(String trans){
+		dataManager.removeTrans(trans);
+	}
+	
+	public HashMap<String, String> getAllTrans(){
+		return dataManager.getAllTrans();
+	}
 	
 	public boolean worldAllowed(World w){
 		return plugin.getConfig().getStringList("configs.worldCmdsAllowed").contains(w.getName());
@@ -563,7 +606,7 @@ public class PVConfig {
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
 					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(),  cmdf.replace("{oldvip}", oldVip));
+						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf.replace("{oldvip}", oldVip));
 					}
 				}, delay*5);
 				delay++;
@@ -572,7 +615,7 @@ public class PVConfig {
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
 					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(),  cmdf.replace("{newvip}", newVip));
+						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf.replace("{newvip}", newVip));
 					}
 				}, delay*5);
 				delay++;
@@ -580,7 +623,7 @@ public class PVConfig {
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
 					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(),  cmdf);
+						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
 					}
 				}, delay*5);
 				delay++;

@@ -18,12 +18,13 @@ import br.net.fabiozumbi12.PixelVip.PixelVip;
 public class PVDataFile implements PVDataManager {
 	private YamlConfiguration vipsFile;
 	private YamlConfiguration keysFile;
+	private YamlConfiguration transFile;
 	private PixelVip plugin;
 	
 	public PVDataFile(PixelVip plugin){
 		this.plugin = plugin;
 		
-		File fileVips = new File(plugin.getDataFolder()+File.separator+"vips.yml");
+		File fileVips = new File(plugin.getDataFolder(),"vips.yml");
 		if (!fileVips.exists()){
 			try {
 				fileVips.createNewFile();
@@ -31,7 +32,7 @@ public class PVDataFile implements PVDataManager {
 				e.printStackTrace();
 			}
 		}
-		File fileKeys = new File(plugin.getDataFolder()+File.separator+"keys.yml");
+		File fileKeys = new File(plugin.getDataFolder(),"keys.yml");
 		if (!fileKeys.exists()){
 			try {
 				fileKeys.createNewFile();
@@ -39,14 +40,57 @@ public class PVDataFile implements PVDataManager {
 				e.printStackTrace();
 			}
 		}
+		File fileTrans = new File(plugin.getDataFolder(),"transactions.yml");
+		if (!fileTrans.exists()){
+			try {
+				fileTrans.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		keysFile = YamlConfiguration.loadConfiguration(fileKeys);
 		vipsFile = YamlConfiguration.loadConfiguration(fileVips);
+		transFile = YamlConfiguration.loadConfiguration(fileTrans);
+	}
+	
+	@Override
+	public boolean transactionExist(String trans){
+		return this.transFile.contains(trans);
+	}
+	
+	@Override
+	public void addTras(String trans, String player) {
+		this.transFile.set(trans, player);	
+		saveTrans();
+	}
+	
+	@Override
+	public void removeTrans(String trans){
+		this.transFile.set(trans, null);
+		saveTrans();
+	}
+	
+	@Override
+	public HashMap<String, String> getAllTrans(){
+		HashMap<String, String> trans = new HashMap<String, String>();
+		for (String code:this.transFile.getKeys(false)){
+			trans.put(code, this.transFile.getString(code));
+		}
+		return trans;
+	}
+	
+	private void saveTrans(){
+		try {
+			this.transFile.save(new File(plugin.getDataFolder(),"transactions.yml"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
 	public void saveKeys() {
-		File fileKeys = new File(plugin.getDataFolder()+File.separator+"keys.yml");
+		File fileKeys = new File(plugin.getDataFolder(),"keys.yml");
 		try {
 			keysFile.save(fileKeys);
 		} catch (IOException e) {
@@ -56,7 +100,7 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public void saveVips() {
-		File fileVips = new File(plugin.getDataFolder()+File.separator+"vips.yml");
+		File fileVips = new File(plugin.getDataFolder(),"vips.yml");
 		try {
 			vipsFile.save(fileVips);
 		} catch (IOException e) {
@@ -139,6 +183,12 @@ public class PVDataFile implements PVDataManager {
 		return new HashSet<String>();
 	}
 
+	@Override
+	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires, boolean active) {
+		vipsFile.set("activeVips."+group+"."+id+".active", active);
+		addRawVip(group, id, pgroup, duration, nick, expires);
+	}
+	
 	@Override
 	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires) {
 		vipsFile.set("activeVips."+group+"."+id+".playerGroup", pgroup);

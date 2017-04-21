@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -37,6 +38,12 @@ public class PixelVip extends JavaPlugin implements Listener {
 	private PVLogger logger;
 	public Essentials ess;
 	private int task = 0;
+	public List<String> processTrans;
+	
+	private PVPagSeguro pag;
+	public PVPagSeguro getPagSeguro(){
+		return this.pag;
+	}
 	
 	private PVUtil util;
 	public PVUtil getUtil(){
@@ -62,7 +69,12 @@ public class PixelVip extends JavaPlugin implements Listener {
 		reloadVipTask();
 		saveConfig();
 				
-		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips"));
+		if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null){
+			this.pag = new PVPagSeguro(this);
+			logger.info("-> PagSeguroAPI found and hooked.");
+		}
+		
+		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
 		logger.sucess(util.toColor("PixelVip reloaded"));
 	}
 	
@@ -80,6 +92,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		plugin = this;
 		serv = getServer();
 		serv.getPluginManager().registerEvents(this, this);
+		processTrans = new ArrayList<String>();
 		
 		//register bungee
 		pvBungee = new PixelVipBungee(this);
@@ -123,6 +136,10 @@ public class PixelVip extends JavaPlugin implements Listener {
         	logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");  
         	return;
         }
+		if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null){
+			this.pag = new PVPagSeguro(this);
+			logger.info("-> PagSeguroAPI found and hooked.");
+		}
 		
 		logger.info("Init commands module...");
 		new PVCommands(this);
@@ -130,7 +147,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		logger.info("Init scheduler module...");	
 		reloadVipTask();		
 		
-		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips"));
+		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
 		logger.sucess(util.toColor("PixelVip enabled!"));
 		
 	}

@@ -3,12 +3,12 @@ main: br.net.fabiozumbi12.PixelVip.PixelVip
 version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}
-softdepend: [Vault, Essentials]
+softdepend: [Vault, Essentials, PagSeguroAPI]
 commands:
   pixelvip:
     description: "Main command for PixelVip."
     permission: "pixelvip.cmd.pixelvip"
-    usage: "/pixelvip reload"
+    usage: "/pixelvip reload|fileToMysql|mysqlToFile"
   newitemkey:
     description: "Generate new item key for commands."
     permission: "pixelvip.cmd.newitemkey"
