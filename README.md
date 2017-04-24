@@ -10,7 +10,7 @@ Sponge: https://ore.spongepowered.org/FabioZumbi12/PixelVip
 The source is available on GitHub: https://github.com/FabioZumbi12/PixelVip
 
 ## Dev Builds:
-Dev builds on Jenkins: [![Build Status](http://158.69.121.149:8080/buildStatus/icon?job=PixelVip)](http://158.69.121.149:8080/job/PixelVip/)
+Dev builds on Jenkins: [![Build Status](http://areaz12server.net.br:8080/buildStatus/icon?job=PixelVip)](http://areaz12server.net.br:8080/job/PixelVip/)
 
 ## Jenkins Builds:
 
