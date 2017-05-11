@@ -47,7 +47,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <pluginVersion>1.0.5</pluginVersion>
+    <pluginVersion>2.0.0</pluginVersion>
     <javassist-plugin.version>1.1.0-KITTEH</javassist-plugin.version>
   </properties>
   
