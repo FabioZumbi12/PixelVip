@@ -61,7 +61,7 @@ public class PVUtil {
 				}
 		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft")+time));
 		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+vipInfo[1]));		
-		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeActive")+vipInfo[3]));	
+		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeActive")+plugin.getPVConfig().getLang(vipInfo[3])));	
 		    	src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			});			
 			return true;

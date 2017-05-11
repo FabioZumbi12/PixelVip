@@ -86,8 +86,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
-				}	
-				
+				}					
 			}
 		}, 20);
 	}
@@ -122,18 +121,17 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 			sendPendentBungee(out.toByteArray());
 		}		
 		for (String uuid:plugin.getPVConfig().getAllVips().keySet()){
-			ByteArrayDataOutput out = ByteStreams.newDataOutput();
-			//operation
-			out.writeUTF("send");
-			out.writeUTF("vips");
-			
-			for (String[] vip:plugin.getPVConfig().getAllVips().get(uuid)){		
+			ByteArrayDataOutput out = ByteStreams.newDataOutput();			
+			for (String[] vip:plugin.getPVConfig().getAllVips().get(uuid)){	
+				//operation
+				out.writeUTF("send");
+				out.writeUTF("vips");
 				out.writeUTF(uuid);
 				for (String vipinfo:vip){
 					out.writeUTF(vipinfo);
-				}				
-			}
-			sendPendentBungee(out.toByteArray());
+				}	
+				sendPendentBungee(out.toByteArray());
+			}			
 		}		
 	}
 	

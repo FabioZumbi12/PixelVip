@@ -64,7 +64,9 @@ public class PixelVip extends JavaPlugin implements Listener {
 	public void reloadCmd(){
 		logger.info("Reloading config module...");		
 		reloadConfig();
-		config.closeCon();		
+		if (config != null){
+			config.closeCon();		
+		}
 		this.config = new PVConfig(this);
 		reloadVipTask();
 		saveConfig();

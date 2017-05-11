@@ -15,6 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
+import com.earth2me.essentials.User;
+
 import br.net.fabiozumbi12.PixelVip.db.PVDataFile;
 import br.net.fabiozumbi12.PixelVip.db.PVDataManager;
 import br.net.fabiozumbi12.PixelVip.db.PVDataMysql;
@@ -171,6 +173,8 @@ public class PVConfig {
         plugin.getConfig().set("strings.keyRemoved", getObj("&aKey removed with success: &b","strings.keyRemoved"));
         plugin.getConfig().set("strings.noKeyRemoved", getObj("&cTheres no keys to remove!","strings.noKeyRemoved"));
         plugin.getConfig().set("strings.cmdNotAllowedWorld", getObj("&cThis command is not allowed in this world!","strings.cmdNotAllowedWorld"));
+        plugin.getConfig().set("strings.true", getObj("&atrue","strings.true"));
+        plugin.getConfig().set("strings.false", getObj("&cfalse","strings.false"));
         
         plugin.getConfig().set("strings.pagseguro.waiting", getObj("&cPagSeguro: Your purchase has not yet been approved!","strings.pagseguro.waiting"));
         plugin.getConfig().set("strings.pagseguro.codeused", getObj("&cPagSeguro: This code has already been used!","strings.pagseguro.codeused"));
@@ -398,10 +402,10 @@ public class PVConfig {
 			if (uses-1 > 0){				
 				p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","usesLeftActivation").replace("{uses}", ""+(uses-1))));
 			}			
-			enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname);				
+			enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname, key);				
 			return true;
 		} else if (!group.equals("")){			
-			enableVip(p, group, plugin.getUtil().dayToMillis(days), pname);
+			enableVip(p, group, plugin.getUtil().dayToMillis(days), pname, key);
 			return true;
 		} else {
 			if (!hasItemkey){
@@ -428,8 +432,7 @@ public class PVConfig {
 		return dataManager.getKeyInfo(key);
 	}
 	
-	//public for bungee
-	private void enableVip(OfflinePlayer p, String group, long durMillis, String pname){		
+	private void enableVip(OfflinePlayer p, String group, long durMillis, String pname, String key){		
 		int count = 0;
 		long durf = durMillis;	
 		for (String[] k:getVipInfo(p.getUniqueId().toString())){
@@ -528,7 +531,7 @@ public class PVConfig {
 			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("activeDays").replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)))));
 			p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 		}		
-		plugin.addLog("EnableVip | "+p.getName()+" | "+group+" | Expires on: "+plugin.getUtil().expiresOn(durMillis));
+		plugin.addLog("EnableVip | key: "+key+" | "+p.getName()+" | "+group+" | Expires on: "+plugin.getUtil().expiresOn(durMillis));
 	}
 	
 	public void setVip(String uuid, String group, long durMillis, String pname){
@@ -568,7 +571,7 @@ public class PVConfig {
 	public void setActive(String uuid, String group, String pgroup){
 		String newVip = group;
 		String oldVip = pgroup;		
-		for (String glist:getGroupList()){
+		for (String glist:getGroupList()){			
 			if (dataManager.containsVip(uuid, glist)){
 				if (glist.equals(group)){
 					if (!dataManager.isVipActive(uuid, glist)){
@@ -641,17 +644,18 @@ public class PVConfig {
 	
 	private void changeVipKit(String uuid, String oldVip, String newVip){
 		if (plugin.ess != null){			
-			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");			
-			if (!oldKit.isEmpty()){
-				long oldTime = plugin.ess.getUser(UUID.fromString(uuid)).getKitTimestamp(oldKit.toLowerCase());
+			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");	
+			User user = plugin.ess.getUser(UUID.fromString(uuid));
+			if (!oldKit.isEmpty() && user != null){				
+				long oldTime = user.getKitTimestamp(oldKit.toLowerCase());
 				dataManager.setVipKitCooldown(uuid, oldVip, oldTime);
 			}
 			
 			String newKit = this.getString("", "groups."+newVip+".essentials-kit");			
-			if (!newKit.isEmpty()){
+			if (!newKit.isEmpty() && user != null){
 				long newTime = dataManager.getVipCooldown(uuid, newVip);
 				if (newTime > 0){
-					plugin.ess.getUser(UUID.fromString(uuid)).setKitTimestamp(newKit.toLowerCase(), newTime);
+					user.setKitTimestamp(newKit.toLowerCase(), newTime);
 				}
 			}
 		}

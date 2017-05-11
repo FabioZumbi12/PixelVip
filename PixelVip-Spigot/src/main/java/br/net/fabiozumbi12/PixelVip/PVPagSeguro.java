@@ -63,8 +63,9 @@ public class PVPagSeguro {
             System.out.println("item: " + item.getDescription());
             String[] ids = item.getDescription().split(" ");
             for (String id:ids){
+            	// description "id:<id from config>"
             	if (id.startsWith("id:")){
-            		String cmdId = id.split(":")[1];
+            		String cmdId = id.replace("id:", "");
             		String command = plugin.getConfig().getString("apis.comandIds."+cmdId);
             		if (command != null){
             			plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);

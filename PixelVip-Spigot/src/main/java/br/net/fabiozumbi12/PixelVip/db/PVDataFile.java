@@ -260,8 +260,8 @@ public class PVDataFile implements PVDataManager {
 	}
 	
 	@Override
-	public boolean isVipActive(String id, String vip){
-		return vipsFile.getBoolean("activeVips."+vip+"."+id+".active", true);
+	public boolean isVipActive(String uuid, String vip){
+		return vipsFile.getBoolean("activeVips."+vip+"."+uuid+".active", true);
 	}
 
 	@Override

@@ -243,7 +243,7 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
-	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active) {
+	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active) {		
 		if (!containsVip(uuid, group)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` (uuid_bin,"
@@ -260,6 +260,20 @@ public class PVDataMysql implements PVDataManager {
 				st.setString(5, nick);
 				st.setString(6, expires);
 				st.setBoolean(7, active);
+				st.executeUpdate();
+				st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVDuration+"=?, "+colVActive+"=?, "+colVExpires+"=? "
+						+ "WHERE "+colVVip+"=? AND "+colVUUID+"=?");
+				st.setLong(1, duration);
+				st.setBoolean(2, active);
+				st.setString(3, expires);
+				st.setString(4, group);
+				st.setString(5, uuid);
 				st.executeUpdate();
 				st.close();
 			} catch (SQLException e) {
@@ -289,7 +303,20 @@ public class PVDataMysql implements PVDataManager {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}		
+		} else {
+			try {
+				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVDuration+"=?, "+colVExpires+"=? "
+						+ "WHERE "+colVVip+"=? AND "+colVUUID+"=?");
+				st.setLong(1, duration);
+				st.setString(2, expires);
+				st.setString(3, group);
+				st.setString(4, uuid);
+				st.executeUpdate();
+				st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private boolean keyExist(String key){
@@ -582,7 +609,7 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
-	public void setVipDuration(String uuid, String vip, long duration) {
+	public void setVipDuration(String uuid, String vip, long duration) {		
 		if (containsVip(uuid, vip)){
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVDuration+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
@@ -675,7 +702,7 @@ public class PVDataMysql implements PVDataManager {
 		boolean active = true;
 		if (containsVip(uuid, vip)){
 			try {
-				PreparedStatement st = this.con.prepareStatement("SELECT "+colVActive+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=? AND "+colVActive+" IS NOT NULL");				
+				PreparedStatement st = this.con.prepareStatement("SELECT "+colVActive+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=?");				
 				st.setString(1, uuid);
 				st.setString(2, vip);
 				ResultSet rs = st.executeQuery();

@@ -6,6 +6,9 @@ Spigot: https://www.spigotmc.org/resources/pixelvip.30438/
 Bukkit: https://dev.bukkit.org/projects/pixelvip  
 Sponge: https://ore.spongepowered.org/FabioZumbi12/PixelVip  
 
+##WIKI:
+See commands, API and bungee usage: https://github.com/FabioZumbi12/PixelVip/wiki
+
 ## Source:
 The source is available on GitHub: https://github.com/FabioZumbi12/PixelVip
 
