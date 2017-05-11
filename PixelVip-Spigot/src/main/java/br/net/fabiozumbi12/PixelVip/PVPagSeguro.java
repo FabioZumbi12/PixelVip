@@ -62,13 +62,16 @@ public class PVPagSeguro {
 		for (Item item:trans.getItems()){
             System.out.println("item: " + item.getDescription());
             String[] ids = item.getDescription().split(" ");
+            int amount = item.getQuantity();
             for (String id:ids){
             	// description "id:<id from config>"
             	if (id.startsWith("id:")){
             		String cmdId = id.replace("id:", "");
             		String command = plugin.getConfig().getString("apis.comandIds."+cmdId);
             		if (command != null){
-            			plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
+            			for (int i = 0; i < amount; i++){
+            				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
+            			}            			
             			plugin.addLog("API:Pagseguro | "+player.getName()+" | Item Cmd:"+command+" | Transaction Code: "+trans);
             			log++;
             		}            		
