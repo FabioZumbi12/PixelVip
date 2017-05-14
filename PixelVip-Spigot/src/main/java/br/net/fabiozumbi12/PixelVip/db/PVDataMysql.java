@@ -702,7 +702,7 @@ public class PVDataMysql implements PVDataManager {
 		boolean active = true;
 		if (containsVip(uuid, vip)){
 			try {
-				PreparedStatement st = this.con.prepareStatement("SELECT "+colVActive+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=?");				
+				PreparedStatement st = this.con.prepareStatement("SELECT "+colVActive+" FROM `"+vipTable+"` WHERE "+colVUUID+"=? AND "+colVVip+"=? AND "+colVActive+" IS NOT NULL");				
 				st.setString(1, uuid);
 				st.setString(2, vip);
 				ResultSet rs = st.executeQuery();

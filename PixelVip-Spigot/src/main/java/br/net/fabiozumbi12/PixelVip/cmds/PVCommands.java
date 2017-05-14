@@ -451,7 +451,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	public boolean removeVip(CommandSender sender, String[] args) {
 		if (args.length == 1){
 			String uuid = plugin.getPVConfig().getVipUUID(args[0]);
-			if (uuid == null){
+			if (uuid != null){
 				plugin.getPVConfig().removeVip(uuid, Optional.empty());
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","vipsRemoved")));	    		
 	    	} else {

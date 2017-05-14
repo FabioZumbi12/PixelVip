@@ -537,7 +537,7 @@ public class PVConfig {
 	public void setVip(String uuid, String group, long durMillis, String pname){
 		int count = 0;
 		for (String[] k:getVipInfo(uuid)){
-			if (k[1].equals(group)){	
+			if (k[1].equals(group)){					
 				durMillis += new Long(k[0]);
 				count++;
 				break;
