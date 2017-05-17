@@ -708,7 +708,7 @@ public class PVConfig {
 		
 		if (getVipInfo(uuid).size() == 0){			
 			for (String cmd:plugin.getConfig().getStringList("configs.commandsToRunOnVipFinish")){
-				if (cmd.contains("{vip}")){continue;}
+				if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")){continue;}
 				String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", oldGroup);
 				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
 					@Override
