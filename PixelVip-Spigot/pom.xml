@@ -45,11 +45,11 @@
             <artifactId>PagSeguro-API</artifactId>
             <version>2.2.0</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/PagSeguro-2.2.0.jar</systemPath>
+			<systemPath>${project.basedir}/libs/PagSeguro-2.2.1.jar</systemPath>
         </dependency>
   </dependencies>
   
   <properties>
-  	<mineVersion>1.11.2-R0.1-SNAPSHOT</mineVersion>
+  	<mineVersion>1.12-pre5-SNAPSHOT</mineVersion>
   </properties>
 </project>
