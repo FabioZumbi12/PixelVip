@@ -8,26 +8,31 @@ public class PixelPHAPI extends EZPlaceholderHook{
 	
 	private PixelVip plugin;
 
-	public PixelPHAPI(PixelVip plugin, String placeholderName) {
+	public PixelPHAPI(PixelVip plugin) {
 		super(plugin, "pixelvip");
 		this.plugin = plugin;
 	}
 	
 	@Override
-	public String onPlaceholderRequest(Player arg0, String arg) {
-		if (arg.startsWith("expiration_millis_")){
-			String playName = arg.replace("expiration_millis_", "");			
-			return plugin.getPVConfig().getActiveVipInfo(playName)[0];
-		}
-		if (arg.startsWith("expiration_desc_")){
-			String playName = arg.replace("expiration_desc_", "");			
-			return plugin.getUtil().expiresOn(Long.getLong(plugin.getPVConfig().getActiveVipInfo(playName)[0]));
-		}
-		if (arg.startsWith("active_vip_")){
-			String playName = arg.replace("active_vip_", "");			
-			return plugin.getPVConfig().getActiveVipInfo(playName)[1];
-		}
-		return null;
+	public String onPlaceholderRequest(Player p, String arg) {
+		String text = "--";
+		String[] vipInfo = plugin.getPVConfig().getActiveVipInfo(p.getName());
+		if (vipInfo[0] != null){
+			String exp = vipInfo[0];
+			if (arg.equals("expiration_millis")){		
+				text = exp;
+			}
+			if (arg.equals("expiration_date")){		
+				text = plugin.getUtil().expiresOn(new Long(exp));
+			}
+			if (arg.equals("expiration_desc")){		
+				text = plugin.getUtil().millisToMessage(new Long(exp)-plugin.getUtil().getNowMillis());
+			}
+			if (arg.equals("active_vip")){		
+				text = vipInfo[1];
+			}
+		}		
+		return text;
 	}
 
 }

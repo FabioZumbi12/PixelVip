@@ -119,8 +119,8 @@ public class PixelVip extends JavaPlugin implements Listener {
 		if (essPl != null && essPl.isEnabled()){
 			logger.info(util.toColor("Essentials found. Hooked!"));
 			ess = (Essentials) essPl;
-		}
-		
+		}		
+				
 		logger.info("Init economy module...");
 		if (checkVault()){
         	RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
@@ -148,6 +148,11 @@ public class PixelVip extends JavaPlugin implements Listener {
 		
 		logger.info("Init scheduler module...");	
 		reloadVipTask();		
+		
+		if (checkPHAPI()){
+			new PixelPHAPI(this).hook();
+			logger.info("-> PlaceHolderAPI found. Hooked.");
+		}
 		
 		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
 		logger.sucess(util.toColor("PixelVip enabled!"));
@@ -222,6 +227,14 @@ public class PixelVip extends JavaPlugin implements Listener {
     	}
     	return false;
     }
+    
+    private boolean checkPHAPI() {
+		Plugin p = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+    	if (p != null && p.isEnabled()){
+    		return true;
+    	}
+		return false;
+	}
     
     public void addLog(String log){
     	String timeStamp = new SimpleDateFormat("dd.MM.yyyy - HH:mm:ss").format(Calendar.getInstance().getTime());

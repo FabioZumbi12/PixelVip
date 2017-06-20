@@ -100,6 +100,13 @@ public class PVConfig {
         plugin.getConfig().set("configs.database.mysql.transactions.columns.nick", getObj("col_nick","configs.database.mysql.transactions.columns.nick"));
         //end database
         
+        try {
+			plugin.serv.spigot();
+			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(true ,"configs.spigot.clickKeySuggest"));
+		} catch (Exception e) {
+			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(false ,"configs.spigot.clickKeySuggest"));
+		}
+        plugin.getConfig().set("configs.spigot.clickSuggest", getObj("/usekey {key}", "configs.spigot.clickSuggest"));
         
         plugin.getConfig().set("configs.key-size", getObj(10,"configs.key-size"));
         plugin.getConfig().set("configs.useVault-toChangePlayerGroup", getObj(true ,"configs.useVault-toChangePlayerGroup"));
@@ -143,6 +150,7 @@ public class PVConfig {
         plugin.getConfig().set("strings.playerNotVip", getObj("&cThis player(or you) is not VIP!","strings.playerNotVip"));
         plugin.getConfig().set("strings.moreThanZero", getObj("&cThis number need to be more than 0","strings.moreThanZero"));
         plugin.getConfig().set("strings.keyGenerated", getObj("&aGenerated a key with the following:","strings.keyGenerated"));
+        plugin.getConfig().set("strings.keySendTo", getObj("&aYou received a key with the following:","strings.keySendTo"));        
         plugin.getConfig().set("strings.invalidKey", getObj("&cThis key is invalid or not exists!","strings.invalidKey"));
         plugin.getConfig().set("strings.vipActivated", getObj("&aVip activated with success:","strings.vipActivated"));
         plugin.getConfig().set("strings.usesLeftActivation", getObj("&bThis key can be used for more: &6{uses} &btimes.","strings.usesLeftActivation"));
@@ -150,7 +158,8 @@ public class PVConfig {
         plugin.getConfig().set("strings.activeDays", getObj("&b- Days: &6{days} &bdays","strings.activeDays"));	
         plugin.getConfig().set("strings.timeLeft", getObj("&b- Time left: &6","strings.timeLeft"));	        
         plugin.getConfig().set("strings.totalTime", getObj("&b- Days: &6","strings.totalTime"));
-        plugin.getConfig().set("strings.timeKey", getObj("&b- Key: &6","strings.timeKey"));	        	        
+        plugin.getConfig().set("strings.timeKey", getObj("&b- Key: &6","strings.timeKey"));	  
+        plugin.getConfig().set("strings.hoverKey", getObj("&7&o(Click to get the Key)&r","strings.hoverKey"));	
         plugin.getConfig().set("strings.timeGroup", getObj("&b- Vip: &6","strings.timeGroup"));
         plugin.getConfig().set("strings.timeActive", getObj("&b- In Use: &6","strings.timeActive"));
         plugin.getConfig().set("strings.infoUses", getObj("&b- Uses left: &6","strings.infoUses"));

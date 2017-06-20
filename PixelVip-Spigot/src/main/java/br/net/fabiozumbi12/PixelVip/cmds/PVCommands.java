@@ -31,6 +31,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		
 		plugin.getCommand("delkey").setExecutor(this);
 		plugin.getCommand("newkey").setExecutor(this);
+		plugin.getCommand("sendkey").setExecutor(this);
 		plugin.getCommand("newitemkey").setExecutor(this);
 		plugin.getCommand("additemkey").setExecutor(this);
 		plugin.getCommand("listkeys").setExecutor(this);
@@ -72,7 +73,11 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("newkey")){
-			return newKey(sender, args);
+			return newKey(sender, args, false);
+		}
+		
+		if (cmd.getName().equalsIgnoreCase("sendkey")){
+			return sendKey(sender, args);
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("newitemkey")){
@@ -234,8 +239,8 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 			plugin.getPVConfig().addItemKey(key, cmds);
 			
 			sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
-			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","itemsAdded")));
-			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","itemsAdded")));			
+			plugin.getUtil().sendHoverKey(sender, key);	 
 			for (String cmd:cmds){
 				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("item"))+cmd);
 			}
@@ -258,7 +263,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 			
 			sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
-			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+			plugin.getUtil().sendHoverKey(sender, key);	 
 			for (String cmd:cmds){
 				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("item"))+cmd);
 			}
@@ -286,7 +291,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	 * 
 	 * @return boolean
 	 */
-	private boolean newKey(CommandSender sender, String[] args) {
+	private boolean newKey(CommandSender sender, String[] args, boolean isSend) {
 		if (args.length == 2){
 			String group = args[0];
 			long days = 0;
@@ -308,8 +313,12 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	}
 	    	String key = plugin.getUtil().genKey(plugin.getPVConfig().getInt(10,"configs.key-size"));
 	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), 1);	
-	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
-	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+	    	if (isSend){
+	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keySendTo")));
+	    	} else {
+	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
+	    	}
+	    	plugin.getUtil().sendHoverKey(sender, key);	    		    	
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+group));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime")+days)); 
 	    	return true;
@@ -344,8 +353,12 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	}
 	    	String key = plugin.getUtil().genKey(plugin.getPVConfig().getInt(10,"configs.key-size"));
 	    	plugin.getPVConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), uses);	
-	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
-	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+	    	if (isSend){
+	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keySendTo")));
+	    	} else {
+	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keyGenerated")));
+	    	}	    	
+	    	plugin.getUtil().sendHoverKey(sender, key);	 
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+group));
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime")+days)); 
 	    	sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("infoUses")+uses)); 
@@ -354,6 +367,46 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		return false;
 	}
 	
+	/**Command to send a new key to a player.
+	 * 
+	 * @return boolean
+	 */
+	private boolean sendKey(CommandSender sender, String[] args) {
+		if (args.length == 2){
+			if (plugin.serv.getPlayer(args[0]) == null){
+				return false;
+			}
+			if (!plugin.getPVConfig().getListKeys().contains(args[1])){
+				return false;
+			}
+			Player play = plugin.serv.getPlayer(args[0]);
+			String[] keyInfo = plugin.getPVConfig().getKeyInfo(args[1]);
+			
+			play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","keySendTo")));	    	
+	    	plugin.getUtil().sendHoverKey(play, args[1]);	 
+	    	play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup")+keyInfo[0]));
+	    	play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime")+plugin.getUtil().millisToDay(keyInfo[1]))); 
+	    	play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("infoUses")+keyInfo[2])); 
+	    	return true;
+		}
+		
+		if (args.length == 3 || args.length == 4){
+			String[] nargs = new String[args.length-1];
+			String splay = args[0];
+			if (plugin.serv.getPlayer(splay) == null){
+				return false;
+			}
+			Player play = plugin.serv.getPlayer(splay);
+			for (int i = 0; i < args.length; i++){
+				if (i+1 == args.length){
+					break;
+				}
+				nargs[i] = args[i+1];
+			}
+			return newKey(play, nargs, true);
+		}
+		return false;
+	}
 	
 	/**Command to list all available keys, and key's info.
 	 * 
@@ -379,7 +432,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
     		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","listItemKeys")));
     		for (Object key:itemKeys){		
     			List<String> cmds = plugin.getPVConfig().getItemKeyCmds(key.toString());
-    			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key.toString()));
+    			plugin.getUtil().sendHoverKey(sender, key.toString());	 
     			for (String cmd:cmds){
     				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("item"))+cmd);
     			}    			

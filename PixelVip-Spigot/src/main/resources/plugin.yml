@@ -3,7 +3,7 @@ main: br.net.fabiozumbi12.PixelVip.PixelVip
 version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}
-softdepend: [Vault, Essentials, PagSeguroAPI]
+softdepend: [Vault, Essentials, PagSeguroAPI, PlaceholderAPI]
 commands:
   pixelvip:
     description: "Main command for PixelVip."
@@ -25,10 +25,15 @@ commands:
     usage: "/delkey <key>"
     aliases: [removekey, dkey, rkey]
   newkey:
-    description: "Generate new vip key for groups."
+    description: "Generate a new vip key for groups."
     permission: "pixelvip.cmd.newkey"
     usage: "/newkey <vip group> <days> [uses]"
     aliases: [genkey, gerarkey]
+  sendkey:
+    description: "Generate a new vip key and send to player."
+    permission: "pixelvip.cmd.sendkey"
+    usage: "/sendkey <player> <key>|<vip group> <days> [uses]"
+    aliases: [enviarkey]
   listkeys:
     description: "List all available keys."
     permission: "pixelvip.cmd.listkeys"
@@ -82,6 +87,7 @@ permissions:
       pixelvip.cmd.player: true
       pixelvip.cmd.player.others: true
       pixelvip.cmd.newkey: true
+      pixelvip.cmd.sendkey: true
       pixelvip.cmd.delkey: true
       pixelvip.cmd.newitemkey: true
       pixelvip.cmd.additemkey: true
