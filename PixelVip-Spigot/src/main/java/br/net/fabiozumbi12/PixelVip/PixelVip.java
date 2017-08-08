@@ -172,8 +172,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 			logger.info("-> Task stoped");
 		}
 				
-		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
-			
+		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){			
 			@Override
 			public void run() {
 				getPVConfig().getVipList().forEach((uuid,value)->{
@@ -191,15 +190,24 @@ public class PixelVip extends JavaPlugin implements Listener {
 							Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
 						}					
 					});
-				});
+				});				
 			}			
-		}, 0, 20*60);
+		}, 0, 20*60);		
 		logger.info("-> Task started");
 	}
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e){
 		Player p = e.getPlayer();
+		
+		//check player groups if is on vip group without vip info
+		if (permApi.getGroups(p) != null){				
+			for (String g:permApi.getGroups(p)){
+				if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
+					permApi.removeGroup(p.getUniqueId().toString(), g);
+				}
+			}
+		}
 		
 		if (getPVConfig().queueCmds()){
 			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){

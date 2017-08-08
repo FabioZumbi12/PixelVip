@@ -809,7 +809,7 @@ public class PVConfig {
 	/**Return player's vip info.<p>
 	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active, [4] = Player Nick
 	 * @param puuid Player UUID as string.
-	 * @return {@code List<String[5]>}
+	 * @return {@code List<String[5]>} or a empty list if theres no vip for player.
 	 */
 	public List<String[]> getVipInfo(String puuid){			
 		return dataManager.getVipInfo(puuid);
