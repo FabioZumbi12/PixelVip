@@ -174,7 +174,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 				
 		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){			
 			@Override
-			public void run() {
+			public void run() {				
 				getPVConfig().getVipList().forEach((uuid,value)->{
 					OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));				
 					getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
@@ -201,13 +201,18 @@ public class PixelVip extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		
 		//check player groups if is on vip group without vip info
-		if (permApi.getGroups(p) != null){				
-			for (String g:permApi.getGroups(p)){
-				if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
-					permApi.removeGroup(p.getUniqueId().toString(), g);
+		serv.getScheduler().runTaskLater(plugin, new Runnable(){
+			@Override
+			public void run() {
+				if (permApi.getGroups(p) != null){				
+					for (String g:permApi.getGroups(p)){
+						if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
+							permApi.removeGroup(p.getUniqueId().toString(), g);
+						}
+					}
 				}
-			}
-		}
+			}			
+		}, 40);		
 		
 		if (getPVConfig().queueCmds()){
 			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){

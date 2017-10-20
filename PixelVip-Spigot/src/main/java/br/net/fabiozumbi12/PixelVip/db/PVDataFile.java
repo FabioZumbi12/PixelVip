@@ -141,7 +141,7 @@ public class PVDataFile implements PVDataManager {
 	@Override
 	public List<String[]> getVipInfo(String puuid){
 		List<String[]> vips = new ArrayList<String[]>();
-		plugin.getPVConfig().getGroupList().stream().filter(k->vipsFile.contains("activeVips."+k.toString()+"."+puuid)).forEach(key ->{
+		plugin.getPVConfig().getGroupList().stream().filter(k->vipsFile.get("activeVips."+k+"."+puuid+".active") != null).forEach(key ->{
 			vips.add(new String[]{
 					vipsFile.getString("activeVips."+key+"."+puuid+".duration"),
 					key,
