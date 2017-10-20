@@ -92,22 +92,16 @@ public class PVDataMysql implements PVDataManager {
             setError();
             return;
         }
-                
-		try {
+        
+		try {			
+			
 			//create connection
 			tryConnect();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			setError();
-			return;
-		}
-        
-		//vips connection
-		if (!checkVipTable()){
-			try {				
+			
+			//vips connection
+			if (!checkVipTable()){
 				PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+vipTable+"` ("
-						+"uuid_bin binary(16), "
-						+colVUUID+" varchar(36) generated always as (insert(insert(insert(insert(hex(uuid_bin),9,0,?),14,0,?),19,0,?),24,0,?)) virtual, "
+						+colVUUID+" varchar(36),"
 	        			+colVVip+" varchar(128), "
 	        			+colVPGroup+" varchar(128), "
 	        			+colVDuration+" bigint(13), "
@@ -116,20 +110,17 @@ public class PVDataMysql implements PVDataManager {
 	        			+colVActive+" tinyint(1), "
 	        			+colVKits+" bigint(13), "
 	        			+colVComment+" varchar(255))");
-				st.setString(1, "-");
-				st.setString(2, "-");
-				st.setString(3, "-");
-				st.setString(4, "-");
 	            st.executeUpdate();
 	            st.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}        	
-        }
-        //keys connection
-        if (!checkKeyTable()){
-			try {
-				PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+keyTable+"` ("
+	            
+	            st = this.con.prepareStatement("ALTER TABLE `"+vipTable+"` ADD INDEX `"+colVUUID+"` (`"+colVUUID+"`)");
+	            st.executeUpdate();	            
+	            st.close();       	
+	        }
+			
+			//keys connection
+	        if (!checkKeyTable()){
+	        	PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+keyTable+"` ("
 	        			+colKey+" varchar(128) PRIMARY KEY, "
 	        			+colKGroup+" varchar(128), "
 	        			+colKDuration+" bigint(13), "
@@ -139,22 +130,29 @@ public class PVDataMysql implements PVDataManager {
 	        			+colKComment+" varchar(255))");
 	            st.executeUpdate();
 	            st.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}        	
-        }
-        //transactions connection
-        if (!checkTransTable()){
-			try {
-				PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+transTable+"` ("
+	            
+	            st = this.con.prepareStatement("ALTER TABLE `"+keyTable+"` ADD INDEX `"+colKey+"` (`"+colKey+"`)");
+	            st.executeUpdate();	            
+	            st.close();       	
+	        }
+	        
+	        //transactions connection
+	        if (!checkTransTable()){
+	        	PreparedStatement st = this.con.prepareStatement("CREATE TABLE `"+transTable+"` ("
 	        			+colTID+" varchar(128) PRIMARY KEY, "
 	        			+colTNick+" varchar(128))");
 	            st.executeUpdate();
 	            st.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}        	
-        }
+	            
+	            st = this.con.prepareStatement("ALTER TABLE `"+transTable+"` ADD INDEX `"+colTID+"` (`"+colTID+"`)");
+	            st.executeUpdate();	            
+	            st.close();       	
+	        }
+	        
+		} catch (SQLException e) {
+			e.printStackTrace();
+			setError();
+		}  		
 	}
 	
 	private void tryConnect() throws SQLException{
@@ -171,49 +169,36 @@ public class PVDataMysql implements PVDataManager {
         plugin.reloadCmd();
 	}
 	
-	private boolean checkKeyTable() {     
-        try {
-        	this.con = DriverManager.getConnection(this.host + this.dbname, this.username, this.password);
-            DatabaseMetaData meta = this.con.getMetaData();
-            ResultSet rs = meta.getTables(null, null, keyTable, null);
-            if (rs.next()) {
-            	rs.close();
-            	return true;               
-            }
+	private boolean checkKeyTable() throws SQLException {     
+        DatabaseMetaData meta = this.con.getMetaData();
+        ResultSet rs = meta.getTables(null, null, keyTable, null);
+        if (rs.next()) {
         	rs.close();
-        } catch (SQLException e){
-        	e.printStackTrace();
-        }        
+        	return true;               
+        }
+    	rs.close();      
         return false;
     }
 	
-	private boolean checkVipTable() {     
-        try {
-            DatabaseMetaData meta = this.con.getMetaData();
-            ResultSet rs = meta.getTables(null, null, vipTable, null);
-            if (rs.next()) {
-            	rs.close();
-            	return true;               
-            }
+	private boolean checkVipTable() throws SQLException {     
+        DatabaseMetaData meta = this.con.getMetaData();
+        ResultSet rs = meta.getTables(null, null, vipTable, null);
+        if (rs.next()) {
         	rs.close();
-        } catch (SQLException e){
-        	e.printStackTrace();
-        }        
+        	return true;               
+        }
+    	rs.close();      
         return false;
     }
 	
-	private boolean checkTransTable() {     
-        try {
-            DatabaseMetaData meta = this.con.getMetaData();
-            ResultSet rs = meta.getTables(null, null, transTable, null);
-            if (rs.next()) {
-            	rs.close();
-            	return true;               
-            }
+	private boolean checkTransTable() throws SQLException {     
+        DatabaseMetaData meta = this.con.getMetaData();
+        ResultSet rs = meta.getTables(null, null, transTable, null);
+        if (rs.next()) {
         	rs.close();
-        } catch (SQLException e){
-        	e.printStackTrace();
-        }        
+        	return true;               
+        }
+    	rs.close();      
         return false;
     }
 	
@@ -228,7 +213,7 @@ public class PVDataMysql implements PVDataManager {
 		int total = 0;
 		try {
             PreparedStatement st = this.con.prepareStatement("SELECT COUNT(*) FROM `"+vipTable+"` WHERE "+colVUUID+" = ? AND "+colVVip+" = ?");
-            st.setString(1, uuid);
+            st.setString(1, uuid.toLowerCase());
             st.setString(2, group);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
@@ -246,14 +231,15 @@ public class PVDataMysql implements PVDataManager {
 	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active) {		
 		if (!containsVip(uuid, group)){
 			try {
-				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` (uuid_bin,"
+				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
+						+colVUUID+","
 						+colVVip+","
 			            +colVPGroup+","
 						+colVDuration+", "
 			            +colVNick+", "
 						+colVExpires+","
-						+colVActive+") VALUES (unhex(replace(?,'-','')),?,?,?,?,?,?)");
-				st.setString(1, uuid);
+						+colVActive+") VALUES (?,?,?,?,?,?,?)");
+				st.setString(1, uuid.toLowerCase());
 				st.setString(2, group);
 				st.setString(3, pgroup);
 				st.setLong(4, duration);
@@ -273,7 +259,7 @@ public class PVDataMysql implements PVDataManager {
 				st.setBoolean(2, active);
 				st.setString(3, expires);
 				st.setString(4, group);
-				st.setString(5, uuid);
+				st.setString(5, uuid.toLowerCase());
 				st.executeUpdate();
 				st.close();
 			} catch (SQLException e) {
@@ -286,13 +272,14 @@ public class PVDataMysql implements PVDataManager {
 	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires) {
 		if (!containsVip(uuid, group)){
 			try {
-				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` (uuid_bin,"
+				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
+						+colVUUID+","
 						+colVVip+","
 			            +colVPGroup+","
 						+colVDuration+", "
 			            +colVNick+", "
-						+colVExpires+") VALUES (unhex(replace(?,'-','')),?,?,?,?,?)");
-				st.setString(1, uuid);
+						+colVExpires+") VALUES (?,?,?,?,?,?)");
+				st.setString(1, uuid.toLowerCase());
 				st.setString(2, group);
 				st.setString(3, pgroup);
 				st.setLong(4, duration);
@@ -310,7 +297,7 @@ public class PVDataMysql implements PVDataManager {
 				st.setLong(1, duration);
 				st.setString(2, expires);
 				st.setString(3, group);
-				st.setString(4, uuid);
+				st.setString(4, uuid.toLowerCase());
 				st.executeUpdate();
 				st.close();
 			} catch (SQLException e) {
@@ -398,7 +385,7 @@ public class PVDataMysql implements PVDataManager {
 				getVipInfo(uuid).stream().filter(vip->vip[3].equals("true")).forEach(vipInfos->{
 					actives.add(vipInfos);
 				});		
-				activeVips.put(uuid, actives);
+				activeVips.put(uuid.toLowerCase(), actives);
 			}			
 			st.close();
 			rs.close();
@@ -421,7 +408,7 @@ public class PVDataMysql implements PVDataManager {
 			ResultSet rs = st.executeQuery();
 			while (rs.next()){
 				String uuid = rs.getString(colVUUID);
-				activeVips.put(uuid, getVipInfo(uuid));
+				activeVips.put(uuid.toLowerCase(), getVipInfo(uuid));
 			}			
 			st.close();
 			rs.close();
@@ -442,7 +429,7 @@ public class PVDataMysql implements PVDataManager {
         			+colVNick+", "
         			+colVActive+
         			" FROM `"+vipTable+"` WHERE "+colVUUID+"=?");
-			st.setString(1, puuid);
+			st.setString(1, puuid.toLowerCase());
 			ResultSet rs = st.executeQuery();
 			while(rs.next()){
 				String[] info = new String[]{
@@ -598,7 +585,7 @@ public class PVDataMysql implements PVDataManager {
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVActive+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
 				st.setBoolean(1, active);
-				st.setString(2, uuid);
+				st.setString(2, uuid.toLowerCase());
 				st.setString(3, vip);
 				st.executeUpdate();
 				st.close();
@@ -614,7 +601,7 @@ public class PVDataMysql implements PVDataManager {
 			try {
 				PreparedStatement st = this.con.prepareStatement("UPDATE `"+vipTable+"` SET "+colVDuration+"=? WHERE "+colVUUID+"=? AND "+colVVip+"=?");
 				st.setLong(1, duration);
-				st.setString(2, uuid);
+				st.setString(2, uuid.toLowerCase());
 				st.setString(3, vip);
 				st.executeUpdate();
 				st.close();
@@ -744,7 +731,7 @@ public class PVDataMysql implements PVDataManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return uuid;
+		return uuid.toLowerCase();
 	}
 
 	@Override

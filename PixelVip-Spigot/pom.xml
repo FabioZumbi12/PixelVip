@@ -46,10 +46,10 @@
             <version>2.2.0</version>
 			<scope>system</scope>
 			<systemPath>${project.basedir}/libs/PagSeguro-2.2.1.jar</systemPath>
-        </dependency>
+        </dependency>  
   </dependencies>
   
   <properties>
-  	<mineVersion>1.12-R0.1-SNAPSHOT</mineVersion>
+  	<mineVersion>1.12.1-R0.1-SNAPSHOT</mineVersion>
   </properties>
 </project>
