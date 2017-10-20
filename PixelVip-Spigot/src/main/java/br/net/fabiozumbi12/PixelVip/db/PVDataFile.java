@@ -115,9 +115,9 @@ public class PVDataFile implements PVDataManager {
 			vipsFile.getConfigurationSection("activeVips."+group).getKeys(false).forEach(uuid -> {	
 				List<String[]> vipInfo = getVipInfo(uuid);
 				List<String[]> activeVips = new ArrayList<String[]>();
-				vipInfo.stream().filter(v->v[3].equals("true")).forEach(active -> {
+				vipInfo.stream().filter(v->v[3] != null && v[3].equals("true")).forEach(active -> {
 					activeVips.add(active);					
-				});				
+				});						
 				if (activeVips.size() > 0){
 					vips.put(uuid, activeVips);
 				}
@@ -143,11 +143,11 @@ public class PVDataFile implements PVDataManager {
 		List<String[]> vips = new ArrayList<String[]>();
 		plugin.getPVConfig().getGroupList().stream().filter(k->vipsFile.contains("activeVips."+k.toString()+"."+puuid)).forEach(key ->{
 			vips.add(new String[]{
-					vipsFile.getString("activeVips."+key.toString()+"."+puuid+".duration"),
-					key.toString(),
-					vipsFile.getString("activeVips."+key.toString()+"."+puuid+".playerGroup"),
-					vipsFile.getString("activeVips."+key.toString()+"."+puuid+".active"),
-					vipsFile.getString("activeVips."+key.toString()+"."+puuid+".nick")});
+					vipsFile.getString("activeVips."+key+"."+puuid+".duration"),
+					key,
+					vipsFile.getString("activeVips."+key+"."+puuid+".playerGroup"),
+					vipsFile.getString("activeVips."+key+"."+puuid+".active"),
+					vipsFile.getString("activeVips."+key+"."+puuid+".nick")});
 		});				
 		return vips;
 	}
@@ -185,12 +185,14 @@ public class PVDataFile implements PVDataManager {
 
 	@Override
 	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires, boolean active) {
+		id = id.toLowerCase();
 		vipsFile.set("activeVips."+group+"."+id+".active", active);
 		addRawVip(group, id, pgroup, duration, nick, expires);
 	}
 	
 	@Override
 	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires) {
+		id = id.toLowerCase();
 		vipsFile.set("activeVips."+group+"."+id+".playerGroup", pgroup);
 		vipsFile.set("activeVips."+group+"."+id+".duration", duration);
 		vipsFile.set("activeVips."+group+"."+id+".nick", nick);
@@ -226,12 +228,12 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public void setVipActive(String id, String vip, boolean active){
-		vipsFile.set("activeVips."+vip+"."+id+".active", active);
+		vipsFile.set("activeVips."+vip+"."+id.toLowerCase()+".active", active);
 	}
 	
 	@Override
 	public void setVipDuration(String id, String vip, long duration){
-		vipsFile.set("activeVips."+vip+"."+id+".duration", duration);
+		vipsFile.set("activeVips."+vip+"."+id.toLowerCase()+".duration", duration);
 	}
 	
 	@Override
@@ -278,7 +280,7 @@ public class PVDataFile implements PVDataManager {
 				Pattern pairRegex = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}");
 			    Matcher matcher = pairRegex.matcher(key);
 			    while (matcher.find()) {
-			        return matcher.group(0);
+			        return matcher.group(0).toLowerCase();
 			    }
 			}
 		}
