@@ -44,17 +44,22 @@ public class PVUtil {
 	}
 	
 	public void sendHoverKey(CommandSender sender, String key){
-		if (plugin.getPVConfig().getBoolean(true, "configs.clickKeySuggest") && sender instanceof Player){
-			TextComponent text = new TextComponent();			
-			text.setText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key+" "+plugin.getPVConfig().getLang("hoverKey")));
-			text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("hoverKey")))));
-			text.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, 
-					plugin.getPVConfig().getString("/usekey ", "configs.spigot.clickSuggest").replace("{key}", key)));			
-			sender.spigot().sendMessage(text);
-    	} else {
-    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
-    	}
+		try {
+			if (plugin.getPVConfig().getBoolean(true, "configs.clickKeySuggest") && sender instanceof Player){
+				TextComponent text = new TextComponent();
+				text.setText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key+" "+plugin.getPVConfig().getLang("hoverKey")));
+				text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("hoverKey")))));
+				text.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+						plugin.getPVConfig().getString("/usekey ", "configs.spigot.clickSuggest").replace("{key}", key)));
+				sender.spigot().sendMessage(text);
+			} else {
+				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+			}
+		} catch (Exception e){
+			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
+		}
 	}
+	
 	public String genKey(int length) {
 	    char[] chartset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 		Random random = new SecureRandom();
