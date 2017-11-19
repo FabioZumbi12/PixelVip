@@ -59,7 +59,9 @@ public class PVConfig {
 				+ "- {vip} = Name of Vip\n"
 				+ "- {playergroup} = Player Group before Vip activation\n"
 				+ "\n"
-				+ "");
+                + "On Vault options, you can use \"set\" to set the VIP group or \"add\" to add VIP group to player.\n"
+                + "*Using Vault you don't need to set any permission plugin command to set groups, Vault will do all this jobs.\n"
+                + "\n");
 				
         if (!plugin.getConfig().contains("groups")){
         	plugin.getConfig().set("groups.vip1.essentials-kit", "vip1");
@@ -109,7 +111,11 @@ public class PVConfig {
         plugin.getConfig().set("configs.spigot.clickSuggest", getObj("/usekey {key}", "configs.spigot.clickSuggest"));
         
         plugin.getConfig().set("configs.key-size", getObj(10,"configs.key-size"));
-        plugin.getConfig().set("configs.useVault-toChangePlayerGroup", getObj(true ,"configs.useVault-toChangePlayerGroup"));
+
+        //plugin.getConfig().set("configs.useVault-toChangePlayerGroup", getObj(true ,"configs.useVault-toChangePlayerGroup"));
+		plugin.getConfig().set("configs.Vault.use", getObj(true ,"configs.Vault.use"));
+		plugin.getConfig().set("configs.Vault.mode", getObj("set" ,"configs.Vault.mode"));
+
         plugin.getConfig().set("configs.cmdToReloadPermPlugin", getObj("pex reload","configs.cmdToReloadPermPlugin"));
         plugin.getConfig().set("configs.cmdOnRemoveVip", getObj("","configs.cmdOnRemoveVip"));
         plugin.getConfig().set("configs.commandsToRunOnVipFinish", getObj(Arrays.asList("nick {p} off"),"configs.commandsToRunOnVipFinish"));
@@ -641,11 +647,16 @@ public class PVConfig {
 				delay++;
 			}
 		}
-		if (plugin.getConfig().getBoolean("configs.useVault-toChangePlayerGroup")){
+		if (plugin.getConfig().getBoolean("configs.Vault.use")){
 			if (oldVip != null && !oldVip.isEmpty()){
 				plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
-			}			
-			plugin.getPerms().addGroup(p, newVip);
+			}
+            if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("set")){
+                plugin.getPerms().setGroup(p.getUniqueId().toString(), newVip);
+            }
+            if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("add")){
+                plugin.getPerms().addGroup(p, newVip);
+            }
 		} else {
 			reloadPerms();
 		}
@@ -682,7 +693,7 @@ public class PVConfig {
 		},delay*5);
 		delay++;
 		
-		if (plugin.getConfig().getBoolean("configs.useVault-toChangePlayerGroup")){
+		if (plugin.getConfig().getBoolean("configs.Vault.use")){
 			plugin.getPerms().removeGroup(uuid, group);
 		} 
 	}
@@ -729,7 +740,7 @@ public class PVConfig {
 			}
 		}
 		
-		if (plugin.getConfig().getBoolean("configs.useVault-toChangePlayerGroup")){
+		if (plugin.getConfig().getBoolean("configs.Vault.use")){
 			plugin.getPerms().setGroup(uuid, oldGroup);
 		} else {
 			reloadPerms();
