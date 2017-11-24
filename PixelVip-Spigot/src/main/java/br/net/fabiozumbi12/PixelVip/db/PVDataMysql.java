@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.net.fabiozumbi12.PixelVip.PixelVip;
+import org.bukkit.Bukkit;
 
 public class PVDataMysql implements PVDataManager {
 	
@@ -166,7 +167,7 @@ public class PVDataMysql implements PVDataManager {
 		plugin.getConfig().set("configs.database.type", "file");
 		plugin.getPVLogger().severe("Database set back to file!");
         plugin.saveConfig();
-        plugin.reloadCmd();
+        plugin.reloadCmd(Bukkit.getConsoleSender());
 	}
 	
 	private boolean checkKeyTable() throws SQLException {     

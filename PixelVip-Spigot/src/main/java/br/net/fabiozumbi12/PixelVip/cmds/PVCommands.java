@@ -148,7 +148,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	private boolean mainCommand(CommandSender sender, String[] args) {
 		if (args.length == 1){
 			if (args[0].equalsIgnoreCase("reload")){
-				plugin.reloadCmd();
+				plugin.reloadCmd(sender);
 				return true;
 			}
 		}
@@ -201,7 +201,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		
 		dm.closeCon();
 		plugin.saveConfig();
-		plugin.reloadCmd();
+		plugin.reloadCmd(Bukkit.getConsoleSender());
 	}
 	
 	private List<String> fixArgs(String[] args){

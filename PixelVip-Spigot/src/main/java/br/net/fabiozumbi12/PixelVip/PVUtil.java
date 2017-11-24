@@ -45,7 +45,7 @@ public class PVUtil {
 	
 	public void sendHoverKey(CommandSender sender, String key){
 		try {
-			if (plugin.getPVConfig().getBoolean(true, "configs.clickKeySuggest") && sender instanceof Player){
+			if (plugin.getPVConfig().getBoolean(true, "configs.spigot.clickKeySuggest") && sender instanceof Player){
 				TextComponent text = new TextComponent();
 				text.setText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key+" "+plugin.getPVConfig().getLang("hoverKey")));
 				text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(plugin.getUtil().toColor(plugin.getPVConfig().getLang("hoverKey")))));
@@ -55,7 +55,7 @@ public class PVUtil {
 			} else {
 				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
 			}
-		} catch (Exception e){
+		} catch (NoSuchMethodError e){
 			sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeKey")+key));
 		}
 	}
@@ -78,7 +78,7 @@ public class PVUtil {
 			src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
 			vips.stream().filter(v->v.length == 5).forEach((vipInfo)->{
 				String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
-				if (plugin.getPVConfig().isVipActive(vipInfo[1], UUID.toString())){
+				if (plugin.getPVConfig().isVipActive(vipInfo[1], UUID)){
 					time = plugin.getUtil().millisToMessage(new Long(vipInfo[0])-plugin.getUtil().getNowMillis());
 				}
 		    	src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft")+time));

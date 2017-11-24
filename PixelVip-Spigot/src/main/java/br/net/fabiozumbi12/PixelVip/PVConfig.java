@@ -105,7 +105,7 @@ public class PVConfig {
         try {
 			plugin.serv.spigot();
 			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(true ,"configs.spigot.clickKeySuggest"));
-		} catch (Exception e) {
+		} catch (NoSuchMethodError e) {
 			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(false ,"configs.spigot.clickKeySuggest"));
 		}
         plugin.getConfig().set("configs.spigot.clickSuggest", getObj("/usekey {key}", "configs.spigot.clickSuggest"));
@@ -190,6 +190,7 @@ public class PVConfig {
         plugin.getConfig().set("strings.cmdNotAllowedWorld", getObj("&cThis command is not allowed in this world!","strings.cmdNotAllowedWorld"));
         plugin.getConfig().set("strings.true", getObj("&atrue","strings.true"));
         plugin.getConfig().set("strings.false", getObj("&cfalse","strings.false"));
+        plugin.getConfig().set("strings.reload", getObj("&aPixelvip reloaded with success!","strings.reload"));
         
         plugin.getConfig().set("strings.pagseguro.waiting", getObj("&cPagSeguro: Your purchase has not yet been approved!","strings.pagseguro.waiting"));
         plugin.getConfig().set("strings.pagseguro.codeused", getObj("&cPagSeguro: This code has already been used!","strings.pagseguro.codeused"));
@@ -829,7 +830,7 @@ public class PVConfig {
 	
 	/**Return player's vip info.<p>
 	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active, [4] = Player Nick
-	 * @param puuid Player UUID as string or nickname.
+	 * @param playName Player UUID as string or nickname.
 	 * @return {@code String[5]}
 	 */
 	public String[] getActiveVipInfo(String playName){

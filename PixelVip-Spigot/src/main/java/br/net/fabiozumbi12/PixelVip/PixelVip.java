@@ -16,6 +16,7 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -61,7 +62,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		return this.config;
 	}
 	
-	public void reloadCmd(){
+	public void reloadCmd(CommandSender sender){
 		logger.info("Reloading config module...");		
 		reloadConfig();
 		if (config != null){
@@ -75,9 +76,8 @@ public class PixelVip extends JavaPlugin implements Listener {
 			this.pag = new PVPagSeguro(this);
 			logger.info("-> PagSeguroAPI found and hooked.");
 		}
-		
+        sender.sendMessage(plugin.getUtil().toColor(getConfig().getString("strings.reload")));
 		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
-		logger.sucess(util.toColor("PixelVip reloaded"));
 	}
 	
 	private PermsAPI permApi;	
@@ -156,7 +156,6 @@ public class PixelVip extends JavaPlugin implements Listener {
 		
 		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
 		logger.sucess(util.toColor("PixelVip enabled!"));
-		
 	}
 	
 	public void onDisable() {
