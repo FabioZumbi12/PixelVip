@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.Bukkit;
@@ -94,7 +95,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 		plugin = this;
 		serv = getServer();
 		serv.getPluginManager().registerEvents(this, this);
-		processTrans = new ArrayList<String>();
+		processTrans = new ArrayList<>();
 		
 		//register bungee
 		pvBungee = new PixelVipBungee(this);
@@ -126,7 +127,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         	RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
             if (rsp == null) { 
             	super.setEnabled(false);
-            	logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");  
+            	logger.severe("-> Vault not found. This plugin needs Vault to work! Disabling...");
             	return;
             } else {
             	perms = rsp.getProvider();

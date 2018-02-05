@@ -1,15 +1,7 @@
 package br.net.fabiozumbi12.PixelVip;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -649,14 +641,14 @@ public class PVConfig {
 			}
 		}
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){
-			if (oldVip != null && !oldVip.isEmpty()){
+			if (oldVip != null && !oldVip.isEmpty() && !oldVip.equals(newVip)){
 				plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
 			}
             if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("set")){
                 plugin.getPerms().setGroup(p.getUniqueId().toString(), newVip);
             }
             if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("add")){
-                plugin.getPerms().addGroup(p, newVip);
+                plugin.getPerms().addGroup(p.getUniqueId().toString(), newVip);
             }
 		} else {
 			reloadPerms();
@@ -664,19 +656,20 @@ public class PVConfig {
 	}
 	
 	private void changeVipKit(String uuid, String oldVip, String newVip){
-		if (plugin.ess != null){			
+		if (plugin.ess != null){
+		    long now = System.currentTimeMillis();
 			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");	
 			User user = plugin.ess.getUser(UUID.fromString(uuid));
 			if (!oldKit.isEmpty() && user != null){				
-				long oldTime = user.getKitTimestamp(oldKit.toLowerCase());
-				dataManager.setVipKitCooldown(uuid, oldVip, oldTime);
+				long oldTime = user.getKitTimestamp(oldKit.toLowerCase(Locale.ENGLISH));
+				dataManager.setVipKitCooldown(uuid, oldVip, now - oldTime);
 			}
 			
 			String newKit = this.getString("", "groups."+newVip+".essentials-kit");			
 			if (!newKit.isEmpty() && user != null){
 				long newTime = dataManager.getVipCooldown(uuid, newVip);
 				if (newTime > 0){
-					user.setKitTimestamp(newKit.toLowerCase(), newTime);
+					user.setKitTimestamp(newKit.toLowerCase(Locale.ENGLISH), now - newTime);
 				}
 			}
 		}
@@ -686,12 +679,7 @@ public class PVConfig {
 		plugin.addLog("RemoveVip | "+pname+" | "+group);
 		
 		dataManager.removeVip(uuid, group);
-		plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-			@Override
-			public void run() {
-				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(pname).get()).replace("{vip}", group));							
-		    }
-		},delay*5);
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(pname).get()).replace("{vip}", group)),delay*5);
 		delay++;
 		
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){
@@ -725,8 +713,7 @@ public class PVConfig {
 				}		
 			}			    			
 		}
-		
-		
+
 		if (getVipInfo(uuid).size() == 0){			
 			for (String cmd:plugin.getConfig().getStringList("configs.commandsToRunOnVipFinish")){
 				if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")){continue;}
@@ -750,13 +737,7 @@ public class PVConfig {
 	}
 	
 	public void reloadPerms(){
-		plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-			@Override
-			public void run() {
-				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdToReloadPermPlugin"));	
-			}
-			
-		}, (1+delay)*10);	
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdToReloadPermPlugin")), (1+delay)*10);
 		delay=0;
 	}
 	
