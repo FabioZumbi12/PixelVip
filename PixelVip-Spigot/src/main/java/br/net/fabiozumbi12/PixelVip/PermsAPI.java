@@ -1,5 +1,6 @@
 package br.net.fabiozumbi12.PixelVip;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +30,7 @@ public class PermsAPI {
 	public void addGroup(String uuid, String group){
         if (Bukkit.getPlayer(uuid) != null && Bukkit.getPlayer(uuid).isOnline()){
             Player p = Bukkit.getPlayer(uuid);
-            List<String> groups = Arrays.asList(getGroups(p));
+            List<String> groups = new ArrayList<>(Arrays.asList(getGroups(p)));
             groups.add(group);
             for (String pGroup:groups){
                 if (!perms.playerInGroup(p, pGroup)) perms.playerAddGroup(p, group);
@@ -37,7 +38,7 @@ public class PermsAPI {
         } else {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             if (p.getName() != null){
-                List<String> groups = Arrays.asList(getGroups(p));
+                List<String> groups = new ArrayList<>(Arrays.asList(getGroups(p)));
                 groups.add(group);
                 for (String pGroup:groups){
                     if (!perms.playerInGroup(null, p, pGroup)) perms.playerAddGroup(null, p, group);
@@ -49,7 +50,7 @@ public class PermsAPI {
 	public void setGroup(String uuid, String group){
 		if (Bukkit.getPlayer(uuid) != null && Bukkit.getPlayer(uuid).isOnline()){
             Player p = Bukkit.getPlayer(uuid);
-            List<String> groups = Arrays.asList(getGroups(p));
+            List<String> groups = new ArrayList<>(Arrays.asList(getGroups(p)));
             for (String pGroup:groups){
                 if (perms.playerInGroup(p, pGroup)) perms.playerRemoveGroup(p, pGroup);
             }
@@ -57,7 +58,7 @@ public class PermsAPI {
         } else {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             if (p.getName() != null){
-                List<String> groups = Arrays.asList(getGroups(p));
+                List<String> groups = new ArrayList<>(Arrays.asList(getGroups(p)));
                 for (String pGroup:groups){
                     if (perms.playerInGroup(null, p, pGroup)) perms.playerRemoveGroup(null, p, pGroup);
                 }
