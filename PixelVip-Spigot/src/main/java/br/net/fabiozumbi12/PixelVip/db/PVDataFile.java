@@ -139,7 +139,11 @@ public class PVDataFile implements PVDataManager {
 			for (String str:vipsFile.getStringList("activeVips."+key+"."+puuid+".playerGroup")){
 			    builder.append(str).append(",");
 			}
-			String pgroup = builder.toString().substring(0, builder.toString().length()-1);
+
+			String pgroup = vipsFile.getString("activeVips."+key+"."+puuid+".playerGroup");
+            if (builder.toString().length() > 0){
+                pgroup = builder.toString().substring(0, builder.toString().length()-1);
+            }
 			vips.add(new String[]{
 					vipsFile.getString("activeVips."+key+"."+puuid+".duration"),
 					key,
