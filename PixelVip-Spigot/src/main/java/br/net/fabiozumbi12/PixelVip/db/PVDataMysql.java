@@ -229,9 +229,14 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
-	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active) {		
+	public void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active) {
 		if (!containsVip(uuid, group)){
 			try {
+                StringBuilder builder = new StringBuilder();
+                for (String str:pgroup){
+                    builder.append(str).append(",");
+                }
+                String pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
 						+colVUUID+","
 						+colVVip+","
@@ -242,7 +247,7 @@ public class PVDataMysql implements PVDataManager {
 						+colVActive+") VALUES (?,?,?,?,?,?,?)");
 				st.setString(1, uuid.toLowerCase());
 				st.setString(2, group);
-				st.setString(3, pgroup);
+				st.setString(3, pgroupStr);
 				st.setLong(4, duration);
 				st.setString(5, nick);
 				st.setString(6, expires);
@@ -270,9 +275,14 @@ public class PVDataMysql implements PVDataManager {
 	}
 	
 	@Override
-	public void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires) {
+	public void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires) {
 		if (!containsVip(uuid, group)){
 			try {
+				StringBuilder builder = new StringBuilder();
+				for (String str:pgroup){
+					builder.append(str).append(",");
+				}
+				String pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
 						+colVUUID+","
 						+colVVip+","
@@ -282,7 +292,7 @@ public class PVDataMysql implements PVDataManager {
 						+colVExpires+") VALUES (?,?,?,?,?,?)");
 				st.setString(1, uuid.toLowerCase());
 				st.setString(2, group);
-				st.setString(3, pgroup);
+				st.setString(3, pgroupStr);
 				st.setLong(4, duration);
 				st.setString(5, nick);
 				st.setString(6, expires);
@@ -376,16 +386,14 @@ public class PVDataMysql implements PVDataManager {
 	
 	@Override
 	public HashMap<String, List<String[]>> getActiveVipList() {
-		HashMap<String, List<String[]>> activeVips = new HashMap<String, List<String[]>>();
+		HashMap<String, List<String[]>> activeVips = new HashMap<>();
 		try {
 			PreparedStatement st = this.con.prepareStatement("SELECT "+colVUUID+" FROM `"+vipTable+"`");
 			ResultSet rs = st.executeQuery();
 			while (rs.next()){
 				String uuid = rs.getString(colVUUID);
 				List<String[]> actives = new ArrayList<String[]>();
-				getVipInfo(uuid).stream().filter(vip->vip[3].equals("true")).forEach(vipInfos->{
-					actives.add(vipInfos);
-				});		
+				getVipInfo(uuid).stream().filter(vip->vip[3].equals("true")).forEach(actives::add);
 				activeVips.put(uuid.toLowerCase(), actives);
 			}			
 			st.close();
@@ -403,7 +411,7 @@ public class PVDataMysql implements PVDataManager {
 		
 	@Override
 	public HashMap<String, List<String[]>> getAllVipList() {
-		HashMap<String, List<String[]>> activeVips = new HashMap<String, List<String[]>>();
+		HashMap<String, List<String[]>> activeVips = new HashMap<>();
 		try {
 			PreparedStatement st = this.con.prepareStatement("SELECT "+colVUUID+" FROM `"+vipTable+"`");
 			ResultSet rs = st.executeQuery();
@@ -421,7 +429,7 @@ public class PVDataMysql implements PVDataManager {
 	
 	@Override
 	public List<String[]> getVipInfo(String puuid) {
-		List<String[]> vips = new ArrayList<String[]>();
+		List<String[]> vips = new ArrayList<>();
 		try {
 			PreparedStatement st = this.con.prepareStatement("SELECT "
 					+colVVip+", "

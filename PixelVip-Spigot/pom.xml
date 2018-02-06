@@ -19,14 +19,21 @@
           <artifactId>spigot-api</artifactId>
           <version>${mineVersion}</version>
           <classifier>javadoc</classifier>
-        </dependency>    
-        
+        </dependency>
+
         <dependency>
            <groupId>net.milkbowl.vault</groupId>
            <artifactId>VaultAPI</artifactId>            
            <version>LATEST</version>
            <scope>provided</scope>
         </dependency>
+      <dependency>
+          <groupId>net.milkbowl.vault</groupId>
+          <artifactId>VaultAPI</artifactId>
+          <version>LATEST</version>
+          <classifier>javadoc</classifier>
+      </dependency>
+
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>

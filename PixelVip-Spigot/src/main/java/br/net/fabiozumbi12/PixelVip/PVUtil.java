@@ -120,4 +120,10 @@ public class PVUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");		
 		return sdf.format(date);
 	}
+
+	public void ExecuteCmd(String cmd){
+	    if (cmd == null || cmd.isEmpty()) return;
+		plugin.addLog("Running Command - \""+cmd+"\"");
+		plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd);
+	}
 }

@@ -180,7 +180,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	private void convertDB(PVDataManager dm){
 		plugin.getPVConfig().getAllVips().forEach((uuid,vipInfo)->{
 			vipInfo.forEach(vips->{
-				dm.addRawVip(vips[1], uuid, vips[2], Long.valueOf(vips[0]), vips[4], plugin.getUtil().expiresOn(Long.valueOf(vips[0])), Boolean.parseBoolean(vips[3]));
+				dm.addRawVip(vips[1], uuid, Arrays.asList(vips[2].split("'")), Long.valueOf(vips[0]), vips[4], plugin.getUtil().expiresOn(Long.valueOf(vips[0])), Boolean.parseBoolean(vips[3]));
 			});
 		});
 		dm.saveVips();
@@ -551,7 +551,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 		    	if (vipInfo.size() > 0){				    		
 		    		for (String[] vip:vipInfo){
 		    			if (vip[1].equalsIgnoreCase(group)){				    				
-		    				plugin.getPVConfig().setActive(p.getUniqueId().toString(), vip[1], vip[2]);
+		    				plugin.getPVConfig().setActive(p.getUniqueId().toString(), vip[1], Arrays.asList(vip[2].split(",")));
 		    				p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","activeVipSetTo")+vip[1]));
 		    				return true;
 		    			}
@@ -581,7 +581,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	    	if (vipInfo.size() > 0){				    		
 	    		for (String[] vip:vipInfo){
 	    			if (vip[1].equalsIgnoreCase(group)){				    				
-	    				plugin.getPVConfig().setActive(uuid, vip[1], vip[2]);
+	    				plugin.getPVConfig().setActive(uuid, vip[1], Arrays.asList(vip[2].split(",")));
 	    				sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","activeVipSetTo")+vip[1]));
 	    				return true;
 	    			}

@@ -2,12 +2,7 @@ package br.net.fabiozumbi12.PixelVip.db;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,14 +105,12 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public HashMap<String,List<String[]>> getActiveVipList(){
-		HashMap<String,List<String[]>> vips = new HashMap<String,List<String[]>>();		
+		HashMap<String,List<String[]>> vips = new HashMap<>();
 		plugin.getPVConfig().getGroupList().stream().filter(group->vipsFile.getConfigurationSection("activeVips."+group) != null).forEach(group -> {
 			vipsFile.getConfigurationSection("activeVips."+group).getKeys(false).forEach(uuid -> {	
 				List<String[]> vipInfo = getVipInfo(uuid);
-				List<String[]> activeVips = new ArrayList<String[]>();
-				vipInfo.stream().filter(v->v[3] != null && v[3].equals("true")).forEach(active -> {
-					activeVips.add(active);					
-				});						
+				List<String[]> activeVips = new ArrayList<>();
+				vipInfo.stream().filter(v->v[3] != null && v[3].equals("true")).forEach(activeVips::add);
 				if (activeVips.size() > 0){
 					vips.put(uuid, activeVips);
 				}
@@ -128,7 +121,7 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public HashMap<String,List<String[]>> getAllVipList(){
-		HashMap<String,List<String[]>> vips = new HashMap<String,List<String[]>>();		
+		HashMap<String,List<String[]>> vips = new HashMap<>();
 		plugin.getPVConfig().getGroupList().stream().filter(group->vipsFile.getConfigurationSection("activeVips."+group) != null).forEach(group -> {
 			vipsFile.getConfigurationSection("activeVips."+group).getKeys(false).forEach(uuid -> {				
 				List<String[]> vipInfo = getVipInfo(uuid);
@@ -140,12 +133,17 @@ public class PVDataFile implements PVDataManager {
 	
 	@Override
 	public List<String[]> getVipInfo(String puuid){
-		List<String[]> vips = new ArrayList<String[]>();
+		List<String[]> vips = new ArrayList<>();
 		plugin.getPVConfig().getGroupList().stream().filter(k->vipsFile.get("activeVips."+k+"."+puuid+".active") != null).forEach(key ->{
+			StringBuilder builder = new StringBuilder();
+			for (String str:vipsFile.getStringList("activeVips."+key+"."+puuid+".playerGroup")){
+			    builder.append(str).append(",");
+			}
+			String pgroup = builder.toString().substring(0, builder.toString().length()-1);
 			vips.add(new String[]{
 					vipsFile.getString("activeVips."+key+"."+puuid+".duration"),
 					key,
-					vipsFile.getString("activeVips."+key+"."+puuid+".playerGroup"),
+                    pgroup,
 					vipsFile.getString("activeVips."+key+"."+puuid+".active"),
 					vipsFile.getString("activeVips."+key+"."+puuid+".nick")});
 		});				
@@ -172,7 +170,7 @@ public class PVDataFile implements PVDataManager {
 		if (keysFile.getConfigurationSection("keys.keys") != null){
 			return keysFile.getConfigurationSection("keys.keys").getKeys(false);
 		}
-		return new HashSet<String>();
+		return new HashSet<>();
 	}
 	
 	@Override
@@ -180,18 +178,18 @@ public class PVDataFile implements PVDataManager {
 		if (keysFile.getConfigurationSection("keys.itemKeys") != null){
 			return keysFile.getConfigurationSection("keys.itemKeys").getKeys(false);
 		}
-		return new HashSet<String>();
+		return new HashSet<>();
 	}
 
 	@Override
-	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires, boolean active) {
+	public void addRawVip(String group, String id, List<String> pgroup, long duration, String nick, String expires, boolean active) {
 		id = id.toLowerCase();
 		vipsFile.set("activeVips."+group+"."+id+".active", active);
 		addRawVip(group, id, pgroup, duration, nick, expires);
 	}
 	
 	@Override
-	public void addRawVip(String group, String id, String pgroup, long duration, String nick, String expires) {
+	public void addRawVip(String group, String id, List<String> pgroup, long duration, String nick, String expires) {
 		id = id.toLowerCase();
 		vipsFile.set("activeVips."+group+"."+id+".playerGroup", pgroup);
 		vipsFile.set("activeVips."+group+"."+id+".duration", duration);

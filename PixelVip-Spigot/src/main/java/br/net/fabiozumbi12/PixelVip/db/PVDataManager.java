@@ -17,9 +17,9 @@ public interface PVDataManager {
 	
 	HashMap<String, String> getAllTrans();
 	
-	void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires);
+	void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires);
 	
-	void addRawVip(String group, String uuid, String pgroup, long duration, String nick, String expires, boolean active);
+	void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active);
 	
 	void addRawKey(String key, String group, long duration, int uses);
 	

@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.permission.Permission;
 
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -69,6 +68,10 @@ public class PixelVip extends JavaPlugin implements Listener {
 		if (config != null){
 			config.closeCon();		
 		}
+		if (this.permApi != null){
+		    Bukkit.getScheduler().cancelTask(this.permApi.taskId);
+            this.permApi = new PermsAPI(perms, this);
+        }
 		this.config = new PVConfig(this);
 		reloadVipTask();
 		saveConfig();
@@ -133,7 +136,7 @@ public class PixelVip extends JavaPlugin implements Listener {
             	perms = rsp.getProvider();
             	logger.info("-> Vault found. Hooked.");                	
             }
-            this.permApi = new PermsAPI(perms);
+            this.permApi = new PermsAPI(perms, this);
         } else {
         	super.setEnabled(false);
         	logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");  
@@ -172,27 +175,22 @@ public class PixelVip extends JavaPlugin implements Listener {
 			logger.info("-> Task stoped");
 		}
 				
-		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){			
-			@Override
-			public void run() {				
-				getPVConfig().getVipList().forEach((uuid,value)->{
-					OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));				
-					getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
-						long dur = new Long(vipInfo[0]);
-						if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])){
-							config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
-						}
-						if (dur <= util.getNowMillis()){
-							getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
-							if (p.isOnline()){
-								p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
-							}
-							Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
-						}					
-					});
-				});				
-			}			
-		}, 0, 20*60);		
+		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, () -> getPVConfig().getVipList().forEach((uuid, value)->{
+            OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+            getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
+                long dur = new Long(vipInfo[0]);
+                if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])){
+                    config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
+                }
+                if (dur <= util.getNowMillis()){
+                    getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
+                    if (p.isOnline()){
+                        p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
+                    }
+                    Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
+                }
+            });
+        }), 0, 20*60);
 		logger.info("-> Task started");
 	}
 	
@@ -201,34 +199,23 @@ public class PixelVip extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		
 		//check player groups if is on vip group without vip info
-		serv.getScheduler().runTaskLater(plugin, new Runnable(){
-			@Override
-			public void run() {
-				if (permApi.getGroups(p) != null){				
-					for (String g:permApi.getGroups(p)){
-						if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
-							permApi.removeGroup(p.getUniqueId().toString(), g);
-						}
-					}
-				}
-			}			
-		}, 40);		
+		serv.getScheduler().runTaskLater(plugin, () -> {
+            if (permApi.getGroups(p) != null){
+                for (String g:permApi.getGroups(p)){
+                    if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
+                        permApi.removeGroup(p.getUniqueId().toString(), g);
+                    }
+                }
+            }
+        }, 40);
 		
 		if (getPVConfig().queueCmds()){
-			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-				@Override
-				public void run() {	
-					List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());
-					qcmds.forEach((cmd)->{
-						plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-							@Override
-							public void run() {
-								plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd);
-							}
-						}, 10);
-					});						
-				}
-			}, 60);			
+			plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());
+                qcmds.forEach((cmd)->{
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd), 10);
+                });
+            }, 60);
 		}
 	}
 	

@@ -46,7 +46,7 @@ public class PVConfig {
 				+ "- {newvip} = Name of Vip the player is changing to\n"
 				+ "- {oldvip} = Name of Vip the player is changing from\n"
 				+ "\n"
-				+ "In \"configs\" > \"commandsToRunOnVipFinish\"(List) you can use this placeholders:\n"
+				+ "In \"configs\" > \"commandsToRunOnVipFinish\" and \"run-on-vip-finish\" (Lists) you can use this placeholders:\n"
 				+ "- {p} = Player Name\n"
 				+ "- {vip} = Name of Vip\n"
 				+ "- {playergroup} = Player Group before Vip activation\n"
@@ -59,7 +59,8 @@ public class PVConfig {
         	plugin.getConfig().set("groups.vip1.essentials-kit", "vip1");
         	plugin.getConfig().set("groups.vip1.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays","give {p} minecraft:diamond 10", "eco give {p} 10000"));
         	plugin.getConfig().set("groups.vip1.cmdChances.50", Arrays.asList("give {p} minecraft:diamond_block 5"));
-        	plugin.getConfig().set("groups.vip1.cmdChances.30", Arrays.asList("give {p} minecraft:mob_spawner 1"));        	
+        	plugin.getConfig().set("groups.vip1.cmdChances.30", Arrays.asList("give {p} minecraft:mob_spawner 1"));
+            plugin.getConfig().set("groups.vip1.run-on-vip-finish", Arrays.asList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"));
         } 
                 
         //database
@@ -104,7 +105,6 @@ public class PVConfig {
         
         plugin.getConfig().set("configs.key-size", getObj(10,"configs.key-size"));
 
-        //plugin.getConfig().set("configs.useVault-toChangePlayerGroup", getObj(true ,"configs.useVault-toChangePlayerGroup"));
 		plugin.getConfig().set("configs.Vault.use", getObj(true ,"configs.Vault.use"));
 		plugin.getConfig().set("configs.Vault.mode", getObj("set" ,"configs.Vault.mode"));
 
@@ -113,7 +113,7 @@ public class PVConfig {
         plugin.getConfig().set("configs.commandsToRunOnVipFinish", getObj(Arrays.asList("nick {p} off"),"configs.commandsToRunOnVipFinish"));
         plugin.getConfig().set("configs.commandsToRunOnChangeVip", getObj(new ArrayList<String>(),"configs.commandsToRunOnChangeVip"));
         plugin.getConfig().set("configs.queueCmdsForOfflinePlayers", getObj(false,"configs.queueCmdsForOfflinePlayers"));
-        List<String> worlds = new ArrayList<String>();
+        List<String> worlds = new ArrayList<>();
         for (World w:Bukkit.getWorlds()){
         	worlds.add(w.getName());
         }
@@ -200,7 +200,7 @@ public class PVConfig {
         	plugin.getConfig().getConfigurationSection("activeVips").getKeys(false).forEach((group->{
         		plugin.getConfig().getConfigurationSection("activeVips."+group).getKeys(false).forEach((id)->{
         			dataManager.addRawVip(group, id, 
-        					plugin.getConfig().getString("activeVips."+group+"."+id+".playerGroup"), 
+        					Arrays.asList(plugin.getConfig().getString("activeVips."+group+"."+id+".playerGroup").split(",")),
         					plugin.getConfig().getLong("activeVips."+group+"."+id+".duration"), 
         					plugin.getConfig().getString("activeVips."+group+"."+id+".nick"), 
         					plugin.getConfig().getString("activeVips."+group+"."+id+".expires-on-exact"));
@@ -314,7 +314,7 @@ public class PVConfig {
 	}
 	
 	public List<String> getQueueCmds(String uuid){
-		List<String> cmds = new ArrayList<String>();
+		List<String> cmds = new ArrayList<>();
 		if (plugin.getConfig().contains("joinCmds."+uuid+".cmds")){
 			cmds.addAll(plugin.getConfig().getStringList("joinCmds."+uuid+".cmds"));
 		}
@@ -380,22 +380,19 @@ public class PVConfig {
 			StringBuilder cmdsBuilder = new StringBuilder();
 			List<String> cmds = dataManager.getItemKeyCmds(key);
 			for (String cmd:cmds){
-				cmdsBuilder.append(cmd+", ");
-				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-					@Override
-					public void run() {
-						String cmdf = cmd.replace("{p}", p.getName());
-						if (p.isOnline()){
-							plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);							
-						} 					
-					}
-				}, delay*2);
+				cmdsBuilder.append(cmd).append(", ");
+				plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                    String cmdf = cmd.replace("{p}", p.getName());
+                    if (p.isOnline()){
+plugin.getUtil().ExecuteCmd(cmdf);
+                    }
+                }, delay*2);
 				delay++;
 			}		
 			dataManager.removeItemKey(key);
 			saveConfigAll();
 			
-			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","itemsGiven").replace("{items}", new String(cmds.size()+""))));		
+			p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","itemsGiven").replace("{items}", cmds.size()+"")));
 			
 			String cmdBuilded = cmdsBuilder.toString();
 			plugin.addLog("ItemKey | "+p.getName()+" | "+key+" | Cmds: "+cmdBuilded.substring(0, cmdBuilded.length()-2));
@@ -428,7 +425,7 @@ public class PVConfig {
 	 * For bungeecord
 	 */
 	public void addVip(String group, String uuid, String pgroup, long duration, String nick, String expires){
-		dataManager.addRawVip(group, uuid, pgroup, duration, nick, expires);
+		dataManager.addRawVip(group, uuid, new ArrayList<>(Arrays.asList(pgroup.split(","))), duration, nick, expires);
 	}
 	
 	/** Return the key info: <p>
@@ -455,33 +452,30 @@ public class PVConfig {
 			durMillis += plugin.getUtil().getNowMillis();
 		}
 		
-		String pGroup = plugin.getPerms().getGroup(p);
-		String pdGroup = pGroup;
+		List<String> pGroups = plugin.getPerms().getGroupsList(p);
+        List<String> pdGroup = pGroups;
 		List<String[]> vips = getVipInfo(p.getUniqueId().toString());
 		if (!vips.isEmpty()){
-			pGroup = vips.get(0)[2];
+			pGroups = new ArrayList<>(Arrays.asList(vips.get(0)[2].split(",")));
 		}
 		
 		
-		List<String> normCmds = new ArrayList<String>();
-		List<String> chanceCmds = new ArrayList<String>();
-		
+		List<String> normCmds = new ArrayList<>();
+		List<String> chanceCmds = new ArrayList<>();
+
 		//run command from vip
 		plugin.getConfig().getStringList("groups."+group+".commands").forEach((cmd)->{
-			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-				@Override
-				public void run() {
-					String cmdf = cmd.replace("{p}", p.getName())
-							.replace("{vip}", group)
-							.replace("{playergroup}", pdGroup)
-							.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
-					if (p.isOnline()){
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
-					} else {
-						normCmds.add(cmdf);
-					}						
-				}
-			}, delay*2);			
+			plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                String cmdf = cmd.replace("{p}", p.getName())
+                        .replace("{vip}", group)
+                        .replace("{playergroup}", pdGroup.get(0))
+                        .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
+                if (p.isOnline()){
+                    plugin.getUtil().ExecuteCmd(cmdf);
+                } else {
+                    normCmds.add(cmdf);
+                }
+            }, delay*2);
 			delay++;
 		});		
 		
@@ -494,39 +488,33 @@ public class PVConfig {
 			//test chance
 			if (rand <= chance){
 				plugin.getConfig().getStringList("groups."+group+".cmdChances."+chanceString).forEach((cmd)->{
-					plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-						@Override
-						public void run() {
-							String cmdf = cmd.replace("{p}", p.getName())
-									.replace("{vip}", group)
-									.replace("{playergroup}", pdGroup)
-									.replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
-							if (p.isOnline()){
-								plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
-							} else {
-								chanceCmds.add(cmdf);
-							}
-						}
-					}, delay*2);			
+					plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                        String cmdf = cmd.replace("{p}", p.getName())
+                                .replace("{vip}", group)
+                                .replace("{playergroup}", pdGroup.get(0))
+                                .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
+                        if (p.isOnline()){
+                            plugin.getUtil().ExecuteCmd(cmdf);
+                        } else {
+                            chanceCmds.add(cmdf);
+                        }
+                    }, delay*2);
 					delay++;
 				});
 			}						
 		});
 		
 		if (queueCmds() && (normCmds.size() > 0 || chanceCmds.size() > 0)){	
-			plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-				@Override
-				public void run() {
-					plugin.getLogger().info("Queued cmds for player "+p.getName()+" to run on join.");
-					setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
-				}
-			}, delay*2);			
+			plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getLogger().info("Queued cmds for player "+p.getName()+" to run on join.");
+                setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
+            }, delay*2);
 		}		
 		
 		delay = 0;
 		
 		dataManager.addRawVip(group, p.getUniqueId().toString(), 
-				pGroup, 
+				pGroups,
 				durMillis, 
 				pname, 
 				plugin.getUtil().expiresOn(durMillis));
@@ -556,29 +544,29 @@ public class PVConfig {
 			durMillis += plugin.getUtil().getNowMillis();
 		}
 		
-		String pGroup = "";
+		List<String> pGroups = new ArrayList<>();
 		OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
 		if (p.getName() != null){
-			pGroup = plugin.getPerms().getGroup(p);
+			pGroups = plugin.getPerms().getGroupsList(p);
 		}
 		List<String[]> vips = getVipInfo(uuid);
 		if (!vips.isEmpty()){
-			pGroup = vips.get(0)[2];
+			pGroups = new ArrayList<>(Collections.singletonList(vips.get(0)[2]));
 		}				
 		
 		dataManager.addRawVip(group, uuid, 
-				pGroup, 
+				pGroups,
 				durMillis, 
 				pname, 
 				plugin.getUtil().expiresOn(durMillis));
-		setActive(uuid,group,pGroup);
+		setActive(uuid,group,pGroups);
 		
 		plugin.addLog("SetVip | "+p.getName()+" | "+group+" | Expires on: "+plugin.getUtil().expiresOn(durMillis));
 	}
 	
-	public void setActive(String uuid, String group, String pgroup){
+	public void setActive(String uuid, String group, List<String> pgroup){
 		String newVip = group;
-		String oldVip = pgroup;		
+		String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
 		for (String glist:getGroupList()){			
 			if (dataManager.containsVip(uuid, glist)){
 				if (glist.equals(group)){
@@ -614,42 +602,30 @@ public class PVConfig {
 			
 			String cmdf = cmd.replace("{p}", p.getName());
 			if (!oldVip.equals("") && cmdf.contains("{oldvip}")){
-				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-					@Override
-					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf.replace("{oldvip}", oldVip));
-					}
-				}, delay*5);
+				plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip)), delay*5);
 				delay++;
 			} else
 			if (!newVip.equals("") && cmdf.contains("{newvip}")){
-				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-					@Override
-					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf.replace("{newvip}", newVip));
-					}
-				}, delay*5);
+				plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip)), delay*5);
 				delay++;
 			} else {
-				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-					@Override
-					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
-					}
-				}, delay*5);
+				plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), delay*5);
 				delay++;
 			}
 		}
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){
-			if (oldVip != null && !oldVip.isEmpty() && !oldVip.equals(newVip)){
-				plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
-			}
-            if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("set")){
-                plugin.getPerms().setGroup(p.getUniqueId().toString(), newVip);
-            }
-            if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("add")){
-                plugin.getPerms().addGroup(p.getUniqueId().toString(), newVip);
-            }
+            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                if (oldVip != null && !oldVip.isEmpty() && !oldVip.equals(newVip)){
+                    plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
+                }
+                if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("set")){
+                    plugin.getPerms().setGroup(p.getUniqueId().toString(), newVip);
+                }
+                if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("add")){
+                    plugin.getPerms().addGroup(p.getUniqueId().toString(), newVip);
+                }
+            }, delay*2);
+            delay++;
 		} else {
 			reloadPerms();
 		}
@@ -679,57 +655,83 @@ public class PVConfig {
 		plugin.addLog("RemoveVip | "+pname+" | "+group);
 		
 		dataManager.removeVip(uuid, group);
-		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(pname).get()).replace("{vip}", group)),delay*5);
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(pname).get()).replace("{vip}", group)),delay*5);
 		delay++;
 		
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){
-			plugin.getPerms().removeGroup(uuid, group);
+            plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().removeGroup(uuid, group), delay*2);
+            delay++;
 		} 
 	}
 	
-	public void removeVip(String uuid, Optional<String> optg){	
+	public void removeVip(String uuid, Optional<String> optg){
 		List<String[]> vipInfo = getVipInfo(uuid);		
 		boolean id = false;
 		String nick = "";
-		String oldGroup = "";
-		if (vipInfo.size() > 0){			
+		List<String> oldGroup = new ArrayList<>();
+        String vipGroup = "";
+        if (vipInfo.size() > 0){
 			for (String[] key:vipInfo){
-				String group = key[1];
-				oldGroup = key[2];
+				vipGroup = key[1];
+				oldGroup = Arrays.asList(key[2].split(","));
 				nick = key[4];
 				if (vipInfo.size() > 1 ){
 					if (optg.isPresent()){
-						if (optg.get().equals(group)){
-							removeVip(uuid, nick, group);			    							
+						if (optg.get().equals(vipGroup)){
+							removeVip(uuid, nick, vipGroup);
 						} else if (!id){
-							setActive(uuid, group, "");
+							setActive(uuid, vipGroup, new ArrayList<>());
 							id = true;
 						}			    						
 	    			} else {	    				
-    					removeVip(uuid, nick, group);
+    					removeVip(uuid, nick, vipGroup);
 	    			}
 				} else {
-					removeVip(uuid, nick, group);
+					removeVip(uuid, nick, vipGroup);
 				}		
 			}			    			
 		}
 
+		//commands to run on vip finish
 		if (getVipInfo(uuid).size() == 0){			
 			for (String cmd:plugin.getConfig().getStringList("configs.commandsToRunOnVipFinish")){
 				if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")){continue;}
-				String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", oldGroup);
-				plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-					@Override
-					public void run() {
-						plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmdf);
-					}
-				},1+delay*5);		
-				delay++;
+				if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")){
+                    for (String group:oldGroup){
+                        String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf),1+delay*5);
+                        delay++;
+                    }
+                } else {
+                    String cmdf = cmd.replace("{p}", nick);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf),1+delay*5);
+                    delay++;
+                }
 			}
 		}
-		
+
+		//command to run from vip GROUP on finish
+        for (String cmd:getCmdsToRunOnFinish(vipGroup)) {
+            if (cmd == null || cmd.isEmpty()) continue;
+            if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")){
+                for (String group:oldGroup){
+                    String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf),1+delay*5);
+                    delay++;
+                }
+            } else {
+                String cmdf = cmd.replace("{p}", nick);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf),1+delay*5);
+                delay++;
+            }
+        }
+
+        //use vault to add back oldgroup
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){
-			plugin.getPerms().setGroup(uuid, oldGroup);
+            for (String group:oldGroup){
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().addGroup(uuid, group),1+delay*5);
+                delay++;
+            }
 		} else {
 			reloadPerms();
 		}
@@ -737,7 +739,7 @@ public class PVConfig {
 	}
 	
 	public void reloadPerms(){
-		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), getString("","configs.cmdToReloadPermPlugin")), (1+delay)*10);
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("","configs.cmdToReloadPermPlugin")), (1+delay)*10);
 		delay=0;
 	}
 	
@@ -777,8 +779,15 @@ public class PVConfig {
 		if (plugin.getConfig().getConfigurationSection("groups."+vip+".cmdChances") != null){
 			return plugin.getConfig().getConfigurationSection("groups."+vip+".cmdChances").getKeys(false);
 		}
-		return new HashSet<String>();
+		return new HashSet<>();
 	}
+
+    public Set<String> getCmdsToRunOnFinish(String vip) {
+        if (plugin.getConfig().getConfigurationSection("groups."+vip+".run-on-vip-end") != null){
+            return plugin.getConfig().getConfigurationSection("groups."+vip+".run-on-vip-end").getKeys(false);
+        }
+        return new HashSet<>();
+    }
 	
 	public Set<String> getListKeys() {
 		return dataManager.getListKeys();
@@ -792,7 +801,7 @@ public class PVConfig {
 		if (plugin.getConfig().getConfigurationSection("groups") != null){
 			return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
 		}
-		return new HashSet<String>();
+		return new HashSet<>();
 	}
 	
 	public HashMap<String,List<String[]>> getVipList(){		
@@ -815,7 +824,7 @@ public class PVConfig {
 	 * @return {@code String[5]}
 	 */
 	public String[] getActiveVipInfo(String playName){
-		String uuid = null;	
+		String uuid;
 		try{
 			UUID.fromString(playName);
 			uuid = playName;	
