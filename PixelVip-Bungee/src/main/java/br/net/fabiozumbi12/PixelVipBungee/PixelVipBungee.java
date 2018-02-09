@@ -30,8 +30,8 @@ public class PixelVipBungee extends Plugin implements Listener {
 		ByteArrayInputStream stream = new ByteArrayInputStream(e.getData());
 	    DataInputStream in = new DataInputStream(stream);
 	    
-	    String id = "";	  
-	    String op = "";	
+	    String id;
+	    String op;
 	    try {
 	    	id = in.readUTF();
 	    	op = in.readUTF();

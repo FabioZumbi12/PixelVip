@@ -26,7 +26,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 	
 	public PixelVipBungee(PixelVip plugin){
 		this.plugin = plugin;
-		this.pendentBytes = new ArrayList<byte[]>();
+		this.pendentBytes = new ArrayList<>();
 	}
 	
 	@Override
@@ -38,57 +38,54 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 			return;
 		}
 		
-		plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-			@Override
-			public void run() {	
-				
-				DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-				try {
-					String id = in.readUTF();
-					if (id.equals(plugin.getPVConfig().getString("", "bungee.serverID"))){
-						return;
-					}
-					
-					//operation
-					String op = in.readUTF();
-					if (op.equals("receive")){	
-						
-						while (in.available() > 0){
-							String a = in.readUTF();							
-							
-							if (a.equals("vips")){
-								String uuid = in.readUTF();
-								String duration = in.readUTF();
-								String group = in.readUTF();
-								String pgroup = in.readUTF();
-								String nick = in.readUTF();
-								boolean active = Boolean.getBoolean(in.readUTF());
-								String expires = in.readUTF();
-								plugin.getPVConfig().addVip(group, uuid, pgroup, Long.parseLong(duration), nick, expires);
-								plugin.getPVConfig().setVipActive(uuid, group, active);
-								plugin.getPVConfig().saveVips();
-							} 
-							if (a.startsWith("keys")){
-								String key = in.readUTF();
-								String group = in.readUTF();
-								long millis = Long.parseLong(in.readUTF());
-								int uses = Integer.parseInt(in.readUTF());
-								plugin.getPVConfig().addKey(key, group, millis, uses);
-								plugin.getPVConfig().saveKeys();
-							}	
-							if (a.startsWith("itemkeys")){
-								String key = in.readUTF();
-								List<String> cmds = Arrays.asList(in.readUTF().split(","));
-								plugin.getPVConfig().addItemKey(key, cmds);
-								plugin.getPVConfig().saveKeys();
-							}							
-						}						
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}					
-			}
-		}, 20);
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+
+            DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
+            try {
+                String id = in.readUTF();
+                if (id.equals(plugin.getPVConfig().getString("", "bungee.serverID"))){
+                    return;
+                }
+
+                //operation
+                String op = in.readUTF();
+                if (op.equals("receive")){
+
+                    while (in.available() > 0){
+                        String a = in.readUTF();
+
+                        if (a.equals("vips")){
+                            String uuid = in.readUTF();
+                            String duration = in.readUTF();
+                            String group = in.readUTF();
+                            String pgroup = in.readUTF();
+                            String nick = in.readUTF();
+                            boolean active = Boolean.getBoolean(in.readUTF());
+                            String expires = in.readUTF();
+                            plugin.getPVConfig().addVip(group, uuid, pgroup, Long.parseLong(duration), nick, expires);
+                            plugin.getPVConfig().setVipActive(uuid, group, active);
+                            plugin.getPVConfig().saveVips();
+                        }
+                        if (a.startsWith("keys")){
+                            String key = in.readUTF();
+                            String group = in.readUTF();
+                            long millis = Long.parseLong(in.readUTF());
+                            int uses = Integer.parseInt(in.readUTF());
+                            plugin.getPVConfig().addKey(key, group, millis, uses);
+                            plugin.getPVConfig().saveKeys();
+                        }
+                        if (a.startsWith("itemkeys")){
+                            String key = in.readUTF();
+                            List<String> cmds = Arrays.asList(in.readUTF().split(","));
+                            plugin.getPVConfig().addItemKey(key, cmds);
+                            plugin.getPVConfig().saveKeys();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 20);
 	}
 	
 	public void sendBungeeSync(){
