@@ -1,5 +1,5 @@
 name: PixelVip
-main: br.net.fabiozumbi12.PixelVip.PixelVip
+main: br.net.fabiozumbi12.pixelvip.bukkit.PixelVip
 version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}

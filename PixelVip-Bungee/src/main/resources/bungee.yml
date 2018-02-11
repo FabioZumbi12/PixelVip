@@ -1,0 +1,4 @@
+name: PixelVip
+main: br.net.fabiozumbi12.pixelvip.bungee.PixelVipProxy
+version: ${project.version}
+author: FabioZumbi12

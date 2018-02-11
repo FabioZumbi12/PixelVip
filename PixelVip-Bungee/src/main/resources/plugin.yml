@@ -1,4 +1,0 @@
-name: ${project.name}
-main: ${project.groupId}.${project.artifactId}
-version: ${project.version}
-author: FabioZumbi12
