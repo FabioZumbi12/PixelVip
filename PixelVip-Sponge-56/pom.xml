@@ -22,4 +22,8 @@
         <classifier>javadoc</classifier>
     </dependency>     
   </dependencies>
+
+    <build>
+        <finalName>DONT-DOWNLOAD-Sponge56-Reference</finalName>
+    </build>
 </project>

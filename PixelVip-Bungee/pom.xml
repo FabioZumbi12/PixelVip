@@ -23,4 +23,8 @@
              <scope>provided</scope>
          </dependency>
      </dependencies>
+
+    <build>
+        <finalName>DONT-DOWNLOAD-Bungee-Reference</finalName>
+    </build>
 </project>

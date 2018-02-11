@@ -59,4 +59,8 @@
   <properties>
   	<mineVersion>1.12.2-R0.1-SNAPSHOT</mineVersion>
   </properties>
+
+    <build>
+        <finalName>DONT-DOWNLOAD-Spigot-Reference</finalName>
+    </build>
 </project>
