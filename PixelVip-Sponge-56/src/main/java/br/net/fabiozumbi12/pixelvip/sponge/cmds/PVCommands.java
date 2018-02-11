@@ -1,13 +1,5 @@
 package br.net.fabiozumbi12.pixelvip.sponge.cmds;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -17,6 +9,8 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
+
+import java.util.*;
 
 public class PVCommands {
 
@@ -304,7 +298,7 @@ public class PVCommands {
 			    		throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag","onlyPlayers")), true);
 			    	}
 			    	if (src.hasPermission("pixelvip.cmd.player.others") && args.hasAny("player")){
-		    			Optional<User> optp = args.<User>getOne("player");
+		    			Optional<User> optp = args.getOne("player");
 		    			if (optp.isPresent()){
 		    				User p = optp.get();
 			    			return plugin.getUtil().sendVipTime(src, p.getUniqueId().toString(), p.getName());			    			
@@ -312,7 +306,7 @@ public class PVCommands {
 			    			throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag","noPlayersByName")));	
 			    		}
 		    		} else {
-		    			return plugin.getUtil().sendVipTime(src, ((Player)src).getUniqueId().toString(), ((Player)src).getName());
+		    			return plugin.getUtil().sendVipTime(src, ((Player)src).getUniqueId().toString(), src.getName());
 		    		}	    	
 			    }			    	
 			    })
@@ -331,7 +325,7 @@ public class PVCommands {
 			    .executor((src, args) -> { {	
 			    	if (args.hasAny("vip")){
 			    		User optp = args.<User>getOne("player").get();
-			    		Optional<String> group = args.<String>getOne("vip");
+			    		Optional<String> group = args.getOne("vip");
 						if (!plugin.getConfig().groupExists(group.get())){
 							throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag","noGroups")+group.get()));
 						} 

@@ -1,20 +1,10 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import org.bukkit.Bukkit;
+
+import java.sql.*;
+import java.util.*;
 
 public class PVDataMysql implements PVDataManager {
 	

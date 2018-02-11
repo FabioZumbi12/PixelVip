@@ -1,20 +1,10 @@
 package br.net.fabiozumbi12.pixelvip.sponge;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
+import br.net.fabiozumbi12.pixelvip.sponge.cmds.PVCommands;
+import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
@@ -35,9 +25,16 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
-import br.net.fabiozumbi12.pixelvip.sponge.cmds.PVCommands;
-
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "pixelvip", 
 name = "PixelVip", 
@@ -136,7 +133,7 @@ public class PixelVip {
         }
 	}
 
-	private void setCompatperms() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+	private void setCompatperms() {
 		//init perms
 		try {
 			String v = this.game.getPlatform().getContainer(Platform.Component.API).getVersion().get();

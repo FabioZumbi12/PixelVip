@@ -1,26 +1,15 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.cmds;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataFile;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataMysql;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.*;
+import org.bukkit.entity.Player;
+
+import java.util.*;
 
 public class PVCommands implements CommandExecutor, TabCompleter {
 
@@ -482,7 +471,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 	 */	
 	public boolean vipTime(CommandSender sender, String[] args) {		
 		if (sender instanceof Player && args.length == 0){
-			plugin.getUtil().sendVipTime(sender, ((Player)sender).getUniqueId().toString(), ((Player)sender).getName());
+			plugin.getUtil().sendVipTime(sender, ((Player)sender).getUniqueId().toString(), sender.getName());
 			return true;			
 		}		
 		if (args.length == 1 && sender.hasPermission("pixelvip.cmd.player.others")){

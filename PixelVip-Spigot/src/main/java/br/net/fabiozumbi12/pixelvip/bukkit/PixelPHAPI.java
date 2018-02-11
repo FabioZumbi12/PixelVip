@@ -1,7 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
 import me.clip.placeholderapi.external.EZPlaceholderHook;
-
 import org.bukkit.entity.Player;
 
 public class PixelPHAPI extends EZPlaceholderHook{

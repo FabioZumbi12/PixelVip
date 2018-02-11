@@ -1,18 +1,8 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-
+import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
+import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -27,9 +17,11 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
-
-import com.earth2me.essentials.Essentials;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class PixelVip extends JavaPlugin implements Listener {
 	
@@ -222,19 +214,13 @@ public class PixelVip extends JavaPlugin implements Listener {
 	//check if plugin Vault is installed
     private boolean checkVault(){
     	Plugin pVT = Bukkit.getPluginManager().getPlugin("Vault");
-    	if (pVT != null && pVT.isEnabled()){
-    		return true;
-    	}
-    	return false;
+        return pVT != null && pVT.isEnabled();
     }
     
     private boolean checkPHAPI() {
 		Plugin p = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
-    	if (p != null && p.isEnabled()){
-    		return true;
-    	}
-		return false;
-	}
+        return p != null && p.isEnabled();
+    }
     
     public void addLog(String log){
     	String timeStamp = new SimpleDateFormat("dd.MM.yyyy - HH:mm:ss").format(Calendar.getInstance().getTime());

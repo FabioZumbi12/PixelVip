@@ -1,14 +1,13 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
+import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
+import org.bukkit.configuration.file.YamlConfiguration;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 
 public class PVDataFile implements PVDataManager {
 	private YamlConfiguration vipsFile;

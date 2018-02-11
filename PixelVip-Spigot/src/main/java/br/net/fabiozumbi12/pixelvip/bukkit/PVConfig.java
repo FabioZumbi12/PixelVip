@@ -1,16 +1,15 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataFile;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataMysql;
+import com.earth2me.essentials.User;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
-import com.earth2me.essentials.User;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class PVConfig {	
 	
@@ -654,7 +653,7 @@ plugin.getUtil().ExecuteCmd(cmdf);
 		plugin.addLog("RemoveVip | "+pname+" | "+group);
 		
 		dataManager.removeVip(uuid, group);
-		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.<String>ofNullable(pname).get()).replace("{vip}", group)),delay*5);
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("","configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group)),delay*5);
 		delay++;
 		
 		if (plugin.getConfig().getBoolean("configs.Vault.use")){

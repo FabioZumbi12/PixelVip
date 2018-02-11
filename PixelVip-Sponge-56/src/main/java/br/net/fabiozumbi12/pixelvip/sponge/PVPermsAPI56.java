@@ -1,6 +1,5 @@
 package br.net.fabiozumbi12.pixelvip.sponge;
 
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
