@@ -686,7 +686,7 @@ public class PVConfig {
 	
 	/**Return player's vip info.<p>
 	 * [0] = Duration, [1] = Vip Group, [2] = Player Group, [3] = Is Active, [4] = Player Nick
-	 * @param puuid Player UUID as string or nickname.
+	 * @param playName Player UUID as string or nickname.
 	 * @return {@code String[5]}
 	 */
 	public String[] getActiveVipInfo(String playName){
