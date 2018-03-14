@@ -366,9 +366,9 @@ public class PVDataMysql implements PVDataManager {
 			PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+keyTable+"` ("+colKey+","+colKCmds+") VALUES (?,?) ON DUPLICATE KEY UPDATE "+colKCmds+"=?");		
 			StringBuilder strBuilder = new StringBuilder();
 			String[] cmdsArr = cmds.toArray(new String[cmds.size()]);
-			for (int i = 0; i < cmdsArr.length; i++) {
-				strBuilder.append(cmdsArr[i]+",");
-			}
+            for (String aCmdsArr : cmdsArr) {
+                strBuilder.append(aCmdsArr).append(",");
+            }
 			String cmdsB = strBuilder.toString().substring(0, strBuilder.toString().length()-1);
 			st.setString(1, key);
 			st.setString(2, cmdsB);			
