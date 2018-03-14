@@ -226,7 +226,10 @@ public class PVDataMysql implements PVDataManager {
                 for (String str:pgroup){
                     builder.append(str).append(",");
                 }
-                String pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
+                String pgroupStr = "";
+                if (builder.toString().length() > 0){
+                    pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
+                }
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
 						+colVUUID+","
 						+colVVip+","
@@ -272,7 +275,10 @@ public class PVDataMysql implements PVDataManager {
 				for (String str:pgroup){
 					builder.append(str).append(",");
 				}
-				String pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
+				String pgroupStr = "";
+				if (builder.toString().length() > 0){
+                    pgroupStr = builder.toString().substring(0, builder.toString().length()-1);
+                }
 				PreparedStatement st = this.con.prepareStatement("INSERT INTO `"+vipTable+"` ("
 						+colVUUID+","
 						+colVVip+","
