@@ -600,7 +600,7 @@ plugin.getUtil().ExecuteCmd(cmdf);
 			if (p.getName() == null){break;}
 			
 			String cmdf = cmd.replace("{p}", p.getName());
-			if (!oldVip.equals("") && cmdf.contains("{oldvip}")){
+			if (oldVip != null && !oldVip.equals("") && cmdf.contains("{oldvip}")){
 				plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip)), delay*5);
 				delay++;
 			} else

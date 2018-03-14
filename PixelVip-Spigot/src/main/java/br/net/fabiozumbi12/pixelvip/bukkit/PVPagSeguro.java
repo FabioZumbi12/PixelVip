@@ -78,6 +78,7 @@ public class PVPagSeguro {
             		String cmdId = id.replace("id:", "");
             		String command = plugin.getConfig().getString("apis.commandIds."+cmdId);
             		if (command != null){
+                        command = command.replace("{p}", player.getName());
             			for (int i = 0; i < amount; i++){
             				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
             			}            			
