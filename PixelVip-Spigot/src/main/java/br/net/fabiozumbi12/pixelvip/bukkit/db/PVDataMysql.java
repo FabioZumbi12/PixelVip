@@ -730,7 +730,7 @@ public class PVDataMysql implements PVDataManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return uuid.toLowerCase();
+		return uuid != null ? uuid.toLowerCase() : null;
 	}
 
 	@Override
