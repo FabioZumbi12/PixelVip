@@ -55,18 +55,28 @@ public class PVPagSeguro {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		
-		//printTransaction(trans);		
+
+		//debug
+        boolean debug = plugin.getPVConfig().getBoolean(true, "apis.pagseguro.debug");
+
+		if (debug) printTransaction(trans);
+
 		int log = 0;
 		for (Item item:trans.getItems()){
-            System.out.println("item: " + item.getDescription());
-            String[] ids = item.getDescription().split(" ");
+            if (debug) System.out.println("item ID: >" + item.getId() + "<");
+            String[] ids = item.getId().split(" ");
+
+            if (!item.getDescription().isEmpty()){
+                ids = item.getDescription().split(" ");
+                if (debug) System.out.println("item Description: >" + item.getDescription() + "<");
+            }
             int amount = item.getQuantity();
             for (String id:ids){
             	// description "id:<id from config>"
+                if (debug) System.out.println("Command ID: >" + id + "<");
             	if (id.startsWith("id:")){
             		String cmdId = id.replace("id:", "");
-            		String command = plugin.getConfig().getString("apis.comandIds."+cmdId);
+            		String command = plugin.getConfig().getString("apis.commandIds."+cmdId);
             		if (command != null){
             			for (int i = 0; i < amount; i++){
             				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
@@ -87,7 +97,7 @@ public class PVPagSeguro {
 		return true;
 	}
 	
-	/*
+
 	private static void printTransaction(Transaction transaction) {
         System.out.println("code: " + transaction.getCode());
         System.out.println("date: " + transaction.getDate());
@@ -133,5 +143,5 @@ public class PVPagSeguro {
         }
         System.out.println("status: " + transaction.getStatus().getValue());
         System.out.println("type: " + transaction.getType().getValue());
-    }*/
+    }
 }

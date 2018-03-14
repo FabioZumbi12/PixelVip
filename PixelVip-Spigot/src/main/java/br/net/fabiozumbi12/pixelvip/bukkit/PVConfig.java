@@ -95,7 +95,7 @@ public class PVConfig {
         
         try {
 			plugin.serv.spigot();
-			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(true ,"configs.spigot.clickKeySuggest"));
+			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(false ,"configs.spigot.clickKeySuggest"));
 		} catch (NoSuchMethodError e) {
 			plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(false ,"configs.spigot.clickKeySuggest"));
 		}
@@ -121,6 +121,7 @@ public class PVConfig {
         
         
         plugin.getConfig().set("apis.pagseguro.use", getObj(false,"apis.pagseguro.use"));
+		plugin.getConfig().set("apis.pagseguro.debug", getObj(false,"apis.pagseguro.debug"));
         plugin.getConfig().set("apis.pagseguro.email", getObj("your@email.com","apis.pagseguro.email"));
         plugin.getConfig().set("apis.pagseguro.token", getObj("yourtoken","apis.pagseguro.token"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
