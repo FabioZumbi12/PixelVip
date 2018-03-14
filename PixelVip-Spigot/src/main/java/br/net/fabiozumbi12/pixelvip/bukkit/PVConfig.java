@@ -467,7 +467,7 @@ plugin.getUtil().ExecuteCmd(cmdf);
 			plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 String cmdf = cmd.replace("{p}", p.getName())
                         .replace("{vip}", group)
-                        .replace("{playergroup}", pdGroup.get(0))
+                        .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                         .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
                 if (p.isOnline()){
                     plugin.getUtil().ExecuteCmd(cmdf);
