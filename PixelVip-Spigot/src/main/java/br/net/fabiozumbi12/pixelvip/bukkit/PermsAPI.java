@@ -86,7 +86,7 @@ public class PermsAPI {
             } else {
                 OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
                 if (p.getName() != null){
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group), (1+delay)*10);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, group), (1+delay)*10);
                     delay++;
                 }
             }
