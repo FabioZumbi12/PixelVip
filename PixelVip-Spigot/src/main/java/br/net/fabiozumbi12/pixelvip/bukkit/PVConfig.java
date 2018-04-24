@@ -633,19 +633,23 @@ plugin.getUtil().ExecuteCmd(cmdf);
 	private void changeVipKit(String uuid, String oldVip, String newVip){
 		if (plugin.ess != null){
 		    long now = System.currentTimeMillis();
-			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");	
-			User user = plugin.ess.getUser(UUID.fromString(uuid));
-			if (!oldKit.isEmpty() && user != null){				
-				long oldTime = user.getKitTimestamp(oldKit.toLowerCase(Locale.ENGLISH));
-				dataManager.setVipKitCooldown(uuid, oldVip, now - oldTime);
-			}
-			
-			String newKit = this.getString("", "groups."+newVip+".essentials-kit");			
-			if (!newKit.isEmpty() && user != null){
-				long newTime = dataManager.getVipCooldown(uuid, newVip);
-				if (newTime > 0){
-					user.setKitTimestamp(newKit.toLowerCase(Locale.ENGLISH), now - newTime);
+			String oldKit = this.getString("", "groups."+oldVip+".essentials-kit");
+			try {
+				User user = plugin.ess.getUser(UUID.fromString(uuid));
+				if (!oldKit.isEmpty() && user != null){
+					long oldTime = user.getKitTimestamp(oldKit.toLowerCase(Locale.ENGLISH));
+					dataManager.setVipKitCooldown(uuid, oldVip, now - oldTime);
 				}
+
+				String newKit = this.getString("", "groups."+newVip+".essentials-kit");
+				if (!newKit.isEmpty() && user != null){
+					long newTime = dataManager.getVipCooldown(uuid, newVip);
+					if (newTime > 0){
+						user.setKitTimestamp(newKit.toLowerCase(Locale.ENGLISH), now - newTime);
+					}
+				}
+			} catch (Exception ignored){
+				plugin.getPVLogger().warning("An old version of Essentials plugin was detected! Ignoring kit timer handler.");
 			}
 		}
 	}
