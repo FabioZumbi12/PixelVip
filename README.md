@@ -13,7 +13,7 @@ See commands, API and bungee usage: https://github.com/FabioZumbi12/PixelVip/wik
 The source is available on GitHub: https://github.com/FabioZumbi12/PixelVip
 
 ## Dev Builds:
-Dev builds on Jenkins: [![Build Status](http://areaz12server.net.br:8080/buildStatus/icon?job=PixelVip)](http://areaz12server.net.br:8080/job/PixelVip/)
+Dev builds on Jenkins: [![Build Status](https://host.areaz12server.net.br:8080/buildStatus/icon?job=PixelVip)](https://host.areaz12server.net.br:8080/job/PixelVip/)
 
 ## Jenkins Builds:
 
