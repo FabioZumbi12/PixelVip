@@ -103,6 +103,8 @@ public class PVConfig {
         
         plugin.getConfig().set("configs.key-size", getObj(10,"configs.key-size"));
 
+        plugin.getConfig().set("configs.useKeyWarning", getObj(true,"configs.useKeyWarning"));
+
 		plugin.getConfig().set("configs.Vault.use", getObj(true ,"configs.Vault.use"));
 		plugin.getConfig().set("configs.Vault.mode", getObj("set" ,"configs.Vault.mode"));
 
@@ -182,7 +184,8 @@ public class PVConfig {
         plugin.getConfig().set("strings.true", getObj("&atrue","strings.true"));
         plugin.getConfig().set("strings.false", getObj("&cfalse","strings.false"));
         plugin.getConfig().set("strings.reload", getObj("&aPixelvip reloaded with success!","strings.reload"));
-        
+        plugin.getConfig().set("strings.confirmUsekey", getObj("&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!","strings.confirmUsekey"));
+
         plugin.getConfig().set("strings.pagseguro.waiting", getObj("&cPagSeguro: Your purchase has not yet been approved!","strings.pagseguro.waiting"));
         plugin.getConfig().set("strings.pagseguro.codeused", getObj("&cPagSeguro: This code has already been used!","strings.pagseguro.codeused"));
         plugin.getConfig().set("strings.pagseguro.expired", getObj("&cPagSeguro: This code has expired!","strings.pagseguro.expired"));
@@ -372,9 +375,20 @@ public class PVConfig {
 			return false;
 		}
 	}
-	
+
+	private HashMap<String, String> comandAlert = new HashMap<>();
 	public boolean activateVip(OfflinePlayer p, String key, String group, long days, String pname) {
-		boolean hasItemkey = key != null && dataManager.getItemListKeys().contains(key);
+
+		if (plugin.getPVConfig().getBoolean(true, "configs.useKeyWarning") && p.isOnline() && !key.isEmpty()){
+			if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)){
+				comandAlert.put(p.getName(), key);
+				p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","confirmUsekey")));
+				return true;
+			}
+			comandAlert.remove(p.getName());
+		}
+
+		boolean hasItemkey = dataManager.getItemListKeys().contains(key);
 		if (hasItemkey){		
 			StringBuilder cmdsBuilder = new StringBuilder();
 			List<String> cmds = dataManager.getItemKeyCmds(key);
@@ -383,7 +397,7 @@ public class PVConfig {
 				plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                     String cmdf = cmd.replace("{p}", p.getName());
                     if (p.isOnline()){
-plugin.getUtil().ExecuteCmd(cmdf);
+                    	plugin.getUtil().ExecuteCmd(cmdf);
                     }
                 }, delay*2);
 				delay++;

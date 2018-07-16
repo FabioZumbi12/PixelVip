@@ -455,7 +455,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 						return true;
 					}
 					plugin.processTrans.remove(key);
-	    		}	    		
+	    		}
 	    		plugin.getPVConfig().activateVip(p, key, "", 0, p.getName());
 	    	} else {
 	    		sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","onlyPlayers")));

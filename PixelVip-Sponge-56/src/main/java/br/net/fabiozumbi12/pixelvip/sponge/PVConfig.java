@@ -61,6 +61,9 @@ public class PVConfig {
 	        	        
 	        config.getNode("configs","key-size").setComment("Sets the length of your vip keys.");
 	        config.getNode("configs","key-size").setValue(getInt(10,"configs","key-size"));
+
+			config.getNode("configs","useKeyWarning").setComment("Should we alert the player about free inventory space before use the key?");
+			config.getNode("configs","useKeyWarning").setValue(getBoolean(true,"configs","useKeyWarning"));
 	        
 	        config.getNode("configs","cmdToReloadPermPlugin").setComment("Command to reload the permissions plugin after some action.");
 	        config.getNode("configs","cmdToReloadPermPlugin").setValue(getString("pex reload","configs","cmdToReloadPermPlugin"));
@@ -139,7 +142,8 @@ public class PVConfig {
 	        config.getNode("strings","itemsAdded").setValue(getString("&aItem(s) added to key:","strings","itemsAdded"));
 	        config.getNode("strings","keyRemoved").setValue(getString("&aKey removed with success: &b","strings","keyRemoved"));
 	        config.getNode("strings","noKeyRemoved").setValue(getString("&cTheres no keys to remove!","strings","noKeyRemoved"));
-			
+	        config.getNode("strings","confirmUsekey").setValue(getString("&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!","strings","confirmUsekey"));
+
 	        /*---------------------------------------------------------*/
 	        //move vips to new file if is in config.conf
 	        vipConfig.getNode("activeVips").setComment("Your active vips will be listed here!");
@@ -278,22 +282,30 @@ public class PVConfig {
 			return false;
 		}
 	}
-	
+
+	private HashMap<String, String> comandAlert = new HashMap<>();
 	public CommandResult activateVip(User p, String key, String group, long days, String pname) throws CommandException {
+
+		if (getBoolean(true, "configs","useKeyWarning") && p.isOnline() && !key.isEmpty()){
+			if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)){
+				comandAlert.put(p.getName(), key);
+				p.getPlayer().get().sendMessage(plugin.getUtil().toText(getLang("_pluginTag","confirmUsekey")));
+				return CommandResult.success();
+			}
+			comandAlert.remove(p.getName());
+		}
+
 		boolean hasItemkey = key != null && config.getNode("itemKeys",key).hasMapChildren();
 		if (hasItemkey){
 			try {
 				StringBuilder cmdsBuilder = new StringBuilder();
-				List<String> cmds = config.getNode("itemKeys",key,"cmds").getList(TypeToken.of(String.class), new ArrayList<String>());
+				List<String> cmds = config.getNode("itemKeys",key,"cmds").getList(TypeToken.of(String.class), new ArrayList<>());
 				for (String cmd:cmds){
 					cmdsBuilder.append(cmd+", ");
-					Sponge.getGame().getScheduler().createSyncExecutor(plugin).schedule(new Runnable(){
-						@Override
-						public void run() {
-							String cmdf = cmd.replace("{p}", p.getName());
-							if (p.isOnline()){
-								Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmdf);							
-							} 					
+					Sponge.getGame().getScheduler().createSyncExecutor(plugin).schedule(() -> {
+						String cmdf = cmd.replace("{p}", p.getName());
+						if (p.isOnline()){
+							Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
 						}
 					}, delay*100, TimeUnit.MILLISECONDS);
 					delay++;
