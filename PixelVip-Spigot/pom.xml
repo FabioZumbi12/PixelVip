@@ -3,7 +3,7 @@
   <parent>
     <groupId>br.net.fabiozumbi12.pixelvip</groupId>
     <artifactId>PixelVip</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
   </parent>
   <artifactId>PixelVip-Spigot</artifactId>
   
@@ -57,7 +57,7 @@
   </dependencies>
   
   <properties>
-  	<mineVersion>1.13-pre7-R0.1-SNAPSHOT</mineVersion>
+  	<mineVersion>1.13-R0.1-SNAPSHOT</mineVersion>
   </properties>
 
     <build>

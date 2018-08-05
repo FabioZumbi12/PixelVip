@@ -12,14 +12,14 @@ public class PixelVipProxy extends Plugin implements Listener {
 
 	@Override
     public void onEnable() {
-		getProxy().registerChannel("PixelVipProxy");
+		getProxy().registerChannel("bungee:pixelvip");
 		getProxy().getPluginManager().registerListener(this, this);
         getLogger().info("PixelVip Bungee Bridge enabled!");        
     }
 	
 	@EventHandler	
 	public void onPluginMessage(PluginMessageEvent e) {
-		if (!e.getTag().equals("PixelVipProxy")){
+		if (!e.getTag().equals("bungee:pixelvip")){
 			return;
 		}
 		
@@ -59,7 +59,7 @@ public class PixelVipProxy extends Plugin implements Listener {
 	    	if (si.getName().equalsIgnoreCase(id)){
 	    		continue;
 	    	}
-	    	si.sendData("PixelVipProxy", stream.toByteArray());
+	    	si.sendData("bungee:pixelvip", stream.toByteArray());
 	    }	    
 	}
 }

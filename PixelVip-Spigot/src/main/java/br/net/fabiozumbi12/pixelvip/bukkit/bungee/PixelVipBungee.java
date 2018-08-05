@@ -29,7 +29,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 	
 	@Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {		
-		if (!channel.equals("PixelVipBungee")){
+		if (!channel.equals("bungee:pixelvip")){
 			return;
 		}		
 		if (!plugin.getPVConfig().bungeeSyncEnabled()){
@@ -133,7 +133,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 	private void sendPendentBungee(final byte[] out){
 		if (plugin.serv.getOnlinePlayers().size() > 0){
 			Player play = Iterables.getFirst(plugin.serv.getOnlinePlayers(), null);
-			play.sendPluginMessage(plugin, "PixelVipBungee", out);					
+			play.sendPluginMessage(plugin, "bungee:pixelvip", out);
 		} else {
 			pendentBytes.add(out);
 		}		
@@ -145,16 +145,13 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
 			return;
 		}
 		Player p = e.getPlayer();
-		plugin.serv.getScheduler().runTaskLater(plugin, new Runnable(){
-			@Override
-			public void run() {
-				if (p.isOnline()){
-					for (byte[] b:pendentBytes){
-						p.sendPluginMessage(plugin, "PixelVipBungee", b);	
-					}
-					pendentBytes.clear();
+		plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+			if (p.isOnline()){
+				for (byte[] b:pendentBytes){
+					p.sendPluginMessage(plugin, "PixelVipBungee", b);
 				}
-			}			
-		}, 40);		
+				pendentBytes.clear();
+			}
+		}, 40);
 	}
 }

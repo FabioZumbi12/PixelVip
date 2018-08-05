@@ -95,8 +95,8 @@ public class PixelVip extends JavaPlugin implements Listener {
 		//register bungee
 		pvBungee = new PixelVipBungee(this);
 		serv.getPluginManager().registerEvents(pvBungee, this);
-		serv.getMessenger().registerOutgoingPluginChannel(this,"PixelVipBungee");
-		serv.getMessenger().registerIncomingPluginChannel(this, "PixelVipBungee", pvBungee);
+		serv.getMessenger().registerOutgoingPluginChannel(this,"bungee:pixelvip");
+		serv.getMessenger().registerIncomingPluginChannel(this, "bungee:pixelvip", pvBungee);
 		
 		logger = new PVLogger();
         pdf = getDescription();
