@@ -286,7 +286,7 @@ public class PVConfig {
 	private HashMap<String, String> comandAlert = new HashMap<>();
 	public CommandResult activateVip(User p, String key, String group, long days, String pname) throws CommandException {
 
-		if (getBoolean(true, "configs","useKeyWarning") && p.isOnline() && !key.isEmpty()){
+		if (getBoolean(true, "configs","useKeyWarning") && p.isOnline() && (key != null && !key.isEmpty())){
 			if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)){
 				comandAlert.put(p.getName(), key);
 				p.getPlayer().get().sendMessage(plugin.getUtil().toText(getLang("_pluginTag","confirmUsekey")));

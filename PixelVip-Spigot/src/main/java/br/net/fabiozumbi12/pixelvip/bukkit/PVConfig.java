@@ -379,7 +379,7 @@ public class PVConfig {
 	private HashMap<String, String> comandAlert = new HashMap<>();
 	public boolean activateVip(OfflinePlayer p, String key, String group, long days, String pname) {
 
-		if (plugin.getPVConfig().getBoolean(true, "configs.useKeyWarning") && p.isOnline() && !key.isEmpty()){
+		if (plugin.getPVConfig().getBoolean(true, "configs.useKeyWarning") && p.isOnline() && (key != null && !key.isEmpty())){
 			if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)){
 				comandAlert.put(p.getName(), key);
 				p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag","confirmUsekey")));
