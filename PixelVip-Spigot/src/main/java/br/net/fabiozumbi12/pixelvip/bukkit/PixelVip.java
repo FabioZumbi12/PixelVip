@@ -24,219 +24,218 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class PixelVip extends JavaPlugin implements Listener {
-	
-	public PixelVip plugin;
-	public Server serv;
-	public PluginDescriptionFile pdf;
-	private PVLogger logger;
-	public Essentials ess;
-	private int task = 0;
-	public List<String> processTrans;
-	
-	private PVPagSeguro pag;
-	public PVPagSeguro getPagSeguro(){
-		return this.pag;
-	}
-	
-	private PVUtil util;
-	public PVUtil getUtil(){
-		return this.util;
-	}
-	
-	public PVLogger getPVLogger(){
-		return this.logger;
-	}
-	
-	private Permission perms;
-		
-	private PVConfig config;		
-	public PVConfig getPVConfig(){
-		return this.config;
-	}
-	
-	public void reloadCmd(CommandSender sender){
-		logger.info("Reloading config module...");		
-		reloadConfig();
-		if (config != null){
-			config.closeCon();		
-		}
-		if (this.permApi != null){
-		    Bukkit.getScheduler().cancelTask(this.permApi.taskId);
+
+    public PixelVip plugin;
+    public Server serv;
+    public PluginDescriptionFile pdf;
+    public Essentials ess;
+    public List<String> processTrans;
+    private PVLogger logger;
+    private int task = 0;
+    private PVPagSeguro pag;
+    private PVUtil util;
+    private Permission perms;
+    private PVConfig config;
+    private PermsAPI permApi;
+    private PixelVipBungee pvBungee;
+
+    public PVPagSeguro getPagSeguro() {
+        return this.pag;
+    }
+
+    public PVUtil getUtil() {
+        return this.util;
+    }
+
+    public PVLogger getPVLogger() {
+        return this.logger;
+    }
+
+    public PVConfig getPVConfig() {
+        return this.config;
+    }
+
+    public void reloadCmd(CommandSender sender) {
+        logger.info("Reloading config module...");
+        reloadConfig();
+        if (config != null) {
+            config.closeCon();
+        }
+        if (this.permApi != null) {
+            Bukkit.getScheduler().cancelTask(this.permApi.taskId);
             this.permApi = new PermsAPI(perms, this);
         }
-		this.config = new PVConfig(this);
-		reloadVipTask();
-		saveConfig();
-				
-		if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null){
-			this.pag = new PVPagSeguro(this);
-			logger.info("-> PagSeguroAPI found and hooked.");
-		}
+        this.config = new PVConfig(this);
+        reloadVipTask();
+        saveConfig();
+
+        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null) {
+            this.pag = new PVPagSeguro(this);
+            logger.info("-> PagSeguroAPI found and hooked.");
+        }
         sender.sendMessage(plugin.getUtil().toColor(getConfig().getString("strings.reload")));
-		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
-	}
-	
-	private PermsAPI permApi;	
-	public PermsAPI getPerms(){
-		return this.permApi;
-	}
-	
-	private PixelVipBungee pvBungee;
-	public PixelVipBungee getPVBungee(){
-		return this.pvBungee;
-	}
-	
-	public void onEnable(){		
-		plugin = this;
-		serv = getServer();
-		serv.getPluginManager().registerEvents(this, this);
-		processTrans = new ArrayList<>();
-		
-		//register bungee
-		pvBungee = new PixelVipBungee(this);
-		serv.getPluginManager().registerEvents(pvBungee, this);
-		serv.getMessenger().registerOutgoingPluginChannel(this,"bungee:pixelvip");
-		serv.getMessenger().registerIncomingPluginChannel(this, "bungee:pixelvip", pvBungee);
-		
-		logger = new PVLogger();
+        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
+    }
+
+    public PermsAPI getPerms() {
+        return this.permApi;
+    }
+
+    public PixelVipBungee getPVBungee() {
+        return this.pvBungee;
+    }
+
+    public void onEnable() {
+        plugin = this;
+        serv = getServer();
+        serv.getPluginManager().registerEvents(this, this);
+        processTrans = new ArrayList<>();
+
+        //register bungee
+        pvBungee = new PixelVipBungee(this);
+        serv.getPluginManager().registerEvents(pvBungee, this);
+        serv.getMessenger().registerOutgoingPluginChannel(this, "bungee:pixelvip");
+        serv.getMessenger().registerIncomingPluginChannel(this, "bungee:pixelvip", pvBungee);
+
+        logger = new PVLogger();
         pdf = getDescription();
 
-        logger.info("Init config module...");			
-        if (!getDataFolder().exists()){
-			getDataFolder().mkdir();
-		}
-		this.config = new PVConfig(this);
-        
+        logger.info("Init config module...");
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdir();
+        }
+        this.config = new PVConfig(this);
+
         logger.info("Init utils module...");
-		this.util = new PVUtil(this);
-		
-		logger.info("Init essentials module...");
-		Plugin essPl = Bukkit.getServer().getPluginManager().getPlugin("Essentials");
-		if (essPl != null && essPl.isEnabled()){
-			logger.info(util.toColor("Essentials found. Hooked!"));
-			ess = (Essentials) essPl;
-		}		
-				
-		logger.info("Init economy module...");
-		if (checkVault()){
-        	RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-            if (rsp == null) { 
-            	super.setEnabled(false);
-            	logger.severe("-> Vault not found. This plugin needs Vault to work! Disabling...");
-            	return;
+        this.util = new PVUtil(this);
+
+        logger.info("Init essentials module...");
+        Plugin essPl = Bukkit.getServer().getPluginManager().getPlugin("Essentials");
+        if (essPl != null && essPl.isEnabled()) {
+            logger.info(util.toColor("Essentials found. Hooked!"));
+            ess = (Essentials) essPl;
+        }
+
+        logger.info("Init economy module...");
+        if (checkVault()) {
+            RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+            if (rsp == null) {
+                super.setEnabled(false);
+                logger.severe("-> Vault not found. This plugin needs Vault to work! Disabling...");
+                return;
             } else {
-            	perms = rsp.getProvider();
-            	logger.info("-> Vault found. Hooked.");                	
+                perms = rsp.getProvider();
+                logger.info("-> Vault found. Hooked.");
             }
             this.permApi = new PermsAPI(perms, this);
         } else {
-        	super.setEnabled(false);
-        	logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");  
-        	return;
+            super.setEnabled(false);
+            logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");
+            return;
         }
-		if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null){
-			this.pag = new PVPagSeguro(this);
-			logger.info("-> PagSeguroAPI found and hooked.");
-		}
-		
-		logger.info("Init commands module...");
-		new PVCommands(this);
-		
-		logger.info("Init scheduler module...");	
-		reloadVipTask();		
-		
-		if (checkPHAPI()){
-			new PixelPHAPI(this).hook();
-			logger.info("-> PlaceHolderAPI found. Hooked.");
-		}
-		
-		logger.warning(util.toColor("We have "+config.getVipList().size()+" active Vips on "+getConfig().getString("configs.database.type")));
-		logger.sucess(util.toColor("PixelVip enabled!"));
-	}
-	
-	public void onDisable() {
-		saveConfig();
-		Bukkit.getScheduler().cancelTasks(plugin);
-		logger.severe(util.toColor("PixelVip disabled!"));
-	}
-		
-	private void reloadVipTask(){
-		logger.info("Reloading tasks...");
-		if (task != 0){
-			Bukkit.getScheduler().cancelTask(task);
-			logger.info("-> Task stoped");
-		}
-				
-		task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, () -> getPVConfig().getVipList().forEach((uuid, value)->{
+        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null) {
+            this.pag = new PVPagSeguro(this);
+            logger.info("-> PagSeguroAPI found and hooked.");
+        }
+
+        logger.info("Init commands module...");
+        new PVCommands(this);
+
+        logger.info("Init scheduler module...");
+        reloadVipTask();
+
+        if (checkPHAPI()) {
+            new PixelPHAPI(this).hook();
+            logger.info("-> PlaceHolderAPI found. Hooked.");
+        }
+
+        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
+        logger.sucess(util.toColor("PixelVip enabled!"));
+    }
+
+    public void onDisable() {
+        saveConfig();
+        Bukkit.getScheduler().cancelTasks(plugin);
+        logger.severe(util.toColor("PixelVip disabled!"));
+    }
+
+    private void reloadVipTask() {
+        logger.info("Reloading tasks...");
+        if (task != 0) {
+            Bukkit.getScheduler().cancelTask(task);
+            logger.info("-> Task stoped");
+        }
+
+        task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-            getPVConfig().getVipList().get(uuid).forEach((vipInfo)->{
+            getPVConfig().getVipList().get(uuid).forEach((vipInfo) -> {
                 long dur = new Long(vipInfo[0]);
-                if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])){
+                if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
                     config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
                 }
-                if (dur <= util.getNowMillis()){
+                if (dur <= util.getNowMillis()) {
                     getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
-                    if (p.isOnline()){
-                        p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag","vipEnded").replace("{vip}", vipInfo[1])));
+                    if (p.isOnline()) {
+                        p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
                     }
-                    Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag")+"&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
+                    Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
                 }
             });
-        }), 0, 20*60);
-		logger.info("-> Task started");
-	}
-	
-	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent e){
-		Player p = e.getPlayer();
-		
-		//check player groups if is on vip group without vip info
-		serv.getScheduler().runTaskLater(plugin, () -> {
-            if (permApi.getGroups(p) != null){
-                for (String g:permApi.getGroups(p)){
-                    if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()){
+        }), 0, 20 * 60);
+        logger.info("-> Task started");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+
+        //check player groups if is on vip group without vip info
+        serv.getScheduler().runTaskLater(plugin, () -> {
+            if (permApi.getGroups(p) != null) {
+                for (String g : permApi.getGroups(p)) {
+                    if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
                         permApi.removeGroup(p.getUniqueId().toString(), g);
                     }
                 }
             }
         }, 40);
-		
-		if (getPVConfig().queueCmds()){
-			plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+
+        if (getPVConfig().queueCmds()) {
+            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());
-                qcmds.forEach((cmd)->{
+                qcmds.forEach((cmd) -> {
                     plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd), 10);
                 });
             }, 60);
-		}
-	}
-	
-	//check if plugin Vault is installed
-    private boolean checkVault(){
-    	Plugin pVT = Bukkit.getPluginManager().getPlugin("Vault");
+        }
+    }
+
+    //check if plugin Vault is installed
+    private boolean checkVault() {
+        Plugin pVT = Bukkit.getPluginManager().getPlugin("Vault");
         return pVT != null && pVT.isEnabled();
     }
-    
+
     private boolean checkPHAPI() {
-		Plugin p = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+        Plugin p = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
         return p != null && p.isEnabled();
     }
-    
-    public void addLog(String log){
-    	String timeStamp = new SimpleDateFormat("dd.MM.yyyy - HH:mm:ss").format(Calendar.getInstance().getTime());
-    	try {
-    		File folder = new File(this.getDataFolder()+File.separator+"logs");
-    		if (!folder.exists()){
-    			folder.mkdir();
-    		}
-    		File logs = new File(folder+File.separator+"logs.log");    		
-    		
-			FileWriter fw = new FileWriter(logs,true);
-			fw.append(timeStamp+" - PixelVip Log: "+log);
-			fw.append("\n");
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
+
+    public void addLog(String log) {
+        String timeStamp = new SimpleDateFormat("dd.MM.yyyy - HH:mm:ss").format(Calendar.getInstance().getTime());
+        try {
+            File folder = new File(this.getDataFolder() + File.separator + "logs");
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+            File logs = new File(folder + File.separator + "logs.log");
+
+            FileWriter fw = new FileWriter(logs, true);
+            fw.append(timeStamp + " - PixelVip Log: " + log);
+            fw.append("\n");
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

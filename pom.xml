@@ -1,121 +1,121 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>br.net.fabiozumbi12.pixelvip</groupId>
-  <artifactId>PixelVip</artifactId>
-  <version>2.0.4</version>
-  <packaging>pom</packaging>
+    <groupId>br.net.fabiozumbi12.pixelvip</groupId>
+    <artifactId>PixelVip</artifactId>
+    <version>2.0.4</version>
+    <packaging>pom</packaging>
 
-  <name>PixelVip</name>
+    <name>PixelVip</name>
 
-  <repositories>
-    <!-- Sponge repos -->
-    <repository>
-        <id>sponge-maven-repo</id>
-        <name>Sponge maven repo</name>
-        <url>http://repo.spongepowered.org/maven</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-     
-    <!-- Spigot repos -->
-    <repository>
+    <repositories>
+        <!-- Sponge repos -->
+        <repository>
+            <id>sponge-maven-repo</id>
+            <name>Sponge maven repo</name>
+            <url>http://repo.spongepowered.org/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- Spigot repos -->
+        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-     </repository>
-     <repository>
+        </repository>
+        <repository>
             <id>vault-repo</id>
             <url>http://nexus.hc.to/content/repositories/pub_releases</url>
         </repository>
-     <repository>
+        <repository>
             <id>placeholderapi</id>
             <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-     </repository>
-     
-     <!-- Bungee repo -->
-     <repository>
+        </repository>
+
+        <!-- Bungee repo -->
+        <repository>
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-     </repository>         
-  </repositories>
-  
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  </properties>
-  
-  <scm>
-     <connection>scm:git:git@github.com:FabioZumbi12/PixelVip.git</connection>
-     <developerConnection>scm:git:git@github.com:FabioZumbi12/PixelVip.git</developerConnection>
-     <url>https://github.com/FabioZumbi12/PixelVip/tree/master</url>
-     <tag>${project.version}</tag>
-  </scm>
-    
-  <build>
-    <finalName>${project.name}-${project.version}</finalName>
-    <resources>
-        <resource>
-            <targetPath>.</targetPath>
-            <filtering>true</filtering>
-            <directory>src/main/resources/</directory>
-        </resource>
-    </resources>
-    
-    
-    <plugins>       
-    
-    <!-- Parse Version to plugin.yml -->
-      <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.10</version>
-          <executions>
-              <execution>
-                  <id>parse-version</id>
-                  <goals>
-                      <goal>parse-version</goal>
-                  </goals>
-              </execution>
-          </executions>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>templating-maven-plugin</artifactId>
-        <version>1.0.0</version>
-            <executions>
-               <execution>
-                  <id>filter-src</id>
-                    <goals>
-                      <goal>filter-sources</goal>
-                    </goals>
-               </execution>
-            </executions>
-      </plugin>   
+        </repository>
+    </repositories>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
-    </plugins>   
-  </build>
-  <description>A plugin to manage vips on your server!</description>
-  
-  <modules>
-      <module>PixelVip-Bungee</module>
-      <module>PixelVip-Spigot</module>
-      <module>PixelVip-Sponge-56</module>
-      <module>PixelVip-Sponge-78</module>
-  </modules>
+    <scm>
+        <connection>scm:git:git@github.com:FabioZumbi12/PixelVip.git</connection>
+        <developerConnection>scm:git:git@github.com:FabioZumbi12/PixelVip.git</developerConnection>
+        <url>https://github.com/FabioZumbi12/PixelVip/tree/master</url>
+        <tag>${project.version}</tag>
+    </scm>
+
+    <build>
+        <finalName>${project.name}-${project.version}</finalName>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>src/main/resources/</directory>
+            </resource>
+        </resources>
+
+
+        <plugins>
+
+            <!-- Parse Version to plugin.yml -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+    <description>A plugin to manage vips on your server!</description>
+
+    <modules>
+        <module>PixelVip-Bungee</module>
+        <module>PixelVip-Spigot</module>
+        <module>PixelVip-Sponge-56</module>
+        <module>PixelVip-Sponge-78</module>
+    </modules>
 </project>

@@ -12,16 +12,16 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 public class PVPermsAPI78 implements PVPermsAPI {
-	private PermissionService permissionService;
+    private PermissionService permissionService;
 
-	public PVPermsAPI78(){
-		this.permissionService = Sponge.getGame().getServiceManager().getRegistration(PermissionService.class).get().getProvider();
-	}
+    public PVPermsAPI78() {
+        this.permissionService = Sponge.getGame().getServiceManager().getRegistration(PermissionService.class).get().getProvider();
+    }
 
-	public String getGroup(User player) {
+    public String getGroup(User player) {
         HashMap<Integer, Subject> subs = new HashMap<>();
-        for (SubjectReference sub:player.getParents()){
-            if (sub.getCollectionIdentifier().equals(getGroups().getIdentifier()) && (sub.getSubjectIdentifier() != null)){
+        for (SubjectReference sub : player.getParents()) {
+            if (sub.getCollectionIdentifier().equals(getGroups().getIdentifier()) && (sub.getSubjectIdentifier() != null)) {
                 Subject subj = null;
                 try {
                     subj = sub.resolve().get();
@@ -32,7 +32,7 @@ public class PVPermsAPI78 implements PVPermsAPI {
             }
         }
         return subs.isEmpty() ? null : subs.get(Collections.max(subs.keySet())).getIdentifier();
-	}
+    }
 /*
 	public Subject getGroups(User player){
 		for (SubjectReference sub:player.getParents()){
@@ -42,8 +42,8 @@ public class PVPermsAPI78 implements PVPermsAPI {
 		}
 		return null;
 	}*/
-	
-	public SubjectCollection getGroups(){
-		return permissionService.getGroupSubjects();		
-	}
+
+    public SubjectCollection getGroups() {
+        return permissionService.getGroupSubjects();
+    }
 }

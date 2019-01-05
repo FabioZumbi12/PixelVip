@@ -13,93 +13,20 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class PVPagSeguro {
-	private Transaction trans;
-	private PixelVip plugin;
-	private Credentials accCred;
-	
-	public PVPagSeguro(PixelVip plugin){
-		this.plugin = plugin;
-		try {
-			this.accCred = new AccountCredentials(plugin.getConfig().getString("apis.pagseguro.email"), plugin.getConfig().getString("apis.pagseguro.token"));
-		} catch (PagSeguroServiceException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public boolean checkTransaction(CommandSender player, String transCode){
-		try {
-			trans = TransactionSearchService.searchByCode(accCred, transCode);
-		} catch (Exception e) {
-			plugin.processTrans.remove(transCode);
-			return false;
-		}
-		
-		if (trans == null){
-			plugin.processTrans.remove(transCode);
-			return false;
-		}
-		
-		if (trans.getStatus().getValue() != 3 && trans.getStatus().getValue() != 4){
-			plugin.processTrans.remove(transCode);
-			player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","pagseguro.waiting")));
-			return true;
-		}
-				
-		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
-			Date oldCf = sdf.parse(plugin.getConfig().getString("apis.pagseguro.ignoreOldest"));			
-			if (trans.getLastEventDate().compareTo(oldCf) < 0){
-				player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","pagseguro.expired")));
-				return true;
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+    private Transaction trans;
+    private PixelVip plugin;
+    private Credentials accCred;
 
-		//debug
-        boolean debug = plugin.getPVConfig().getBoolean(true, "apis.pagseguro.debug");
-
-		if (debug) printTransaction(trans);
-
-		int log = 0;
-		for (Item item:trans.getItems()){
-            if (debug) System.out.println("item ID: >" + item.getId() + "<");
-            String[] ids = item.getId().split(" ");
-
-            if (!item.getDescription().isEmpty()){
-                ids = item.getDescription().split(" ");
-                if (debug) System.out.println("item Description: >" + item.getDescription() + "<");
-            }
-            int amount = item.getQuantity();
-            for (String id:ids){
-            	// description "id:<id from config>"
-                if (debug) System.out.println("Command ID: >" + id + "<");
-            	if (id.startsWith("id:")){
-            		String cmdId = id.replace("id:", "");
-            		String command = plugin.getConfig().getString("apis.commandIds."+cmdId);
-            		if (command != null){
-                        command = command.replace("{p}", player.getName());
-            			for (int i = 0; i < amount; i++){
-            				plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
-            			}            			
-            			plugin.addLog("API:Pagseguro | "+player.getName()+" | Item Cmd:"+command+" | Transaction Code: "+trans);
-            			log++;
-            		}            		
-            	}
-            }            
+    public PVPagSeguro(PixelVip plugin) {
+        this.plugin = plugin;
+        try {
+            this.accCred = new AccountCredentials(plugin.getConfig().getString("apis.pagseguro.email"), plugin.getConfig().getString("apis.pagseguro.token"));
+        } catch (PagSeguroServiceException e) {
+            e.printStackTrace();
         }
-		
-		if (log == 0){
-			player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag","pagseguro.noitems")));
-		}
-		//if success
-		plugin.getPVConfig().addTrans(transCode, player.getName());
-		plugin.processTrans.remove(transCode);
-		return true;
-	}
-	
+    }
 
-	private static void printTransaction(Transaction transaction) {
+    private static void printTransaction(Transaction transaction) {
         System.out.println("code: " + transaction.getCode());
         System.out.println("date: " + transaction.getDate());
         System.out.println("discountAmount: " + transaction.getDiscountAmount());
@@ -113,11 +40,11 @@ public class PVPagSeguro {
             System.out.println("item[" + (i + 1) + "]: " + transaction.getItems().get(i).getDescription());
             System.out.println("item[" + (i + 1) + "]: " + transaction.getItems().get(i).getQuantity());
             System.out.println("item[" + (i + 1) + "]: " + transaction.getItems().get(i).getAmount());
-            
-            
+
+
         }
         System.out.println("lastEventDate: " + transaction.getLastEventDate());
-                
+
         System.out.println("netAmount: " + transaction.getNetAmount());
         System.out.println("paymentMethodType: " + transaction.getPaymentMethod().getCode().getValue());
         System.out.println("paymentMethodcode: " + transaction.getPaymentMethod().getType().getValue());
@@ -144,5 +71,77 @@ public class PVPagSeguro {
         }
         System.out.println("status: " + transaction.getStatus().getValue());
         System.out.println("type: " + transaction.getType().getValue());
+    }
+
+    public boolean checkTransaction(CommandSender player, String transCode) {
+        try {
+            trans = TransactionSearchService.searchByCode(accCred, transCode);
+        } catch (Exception e) {
+            plugin.processTrans.remove(transCode);
+            return false;
+        }
+
+        if (trans == null) {
+            plugin.processTrans.remove(transCode);
+            return false;
+        }
+
+        if (trans.getStatus().getValue() != 3 && trans.getStatus().getValue() != 4) {
+            plugin.processTrans.remove(transCode);
+            player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pagseguro.waiting")));
+            return true;
+        }
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
+            Date oldCf = sdf.parse(plugin.getConfig().getString("apis.pagseguro.ignoreOldest"));
+            if (trans.getLastEventDate().compareTo(oldCf) < 0) {
+                player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pagseguro.expired")));
+                return true;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //debug
+        boolean debug = plugin.getPVConfig().getBoolean(true, "apis.pagseguro.debug");
+
+        if (debug) printTransaction(trans);
+
+        int log = 0;
+        for (Item item : trans.getItems()) {
+            if (debug) System.out.println("item ID: >" + item.getId() + "<");
+            String[] ids = item.getId().split(" ");
+
+            if (!item.getDescription().isEmpty()) {
+                ids = item.getDescription().split(" ");
+                if (debug) System.out.println("item Description: >" + item.getDescription() + "<");
+            }
+            int amount = item.getQuantity();
+            for (String id : ids) {
+                // description "id:<id from config>"
+                if (debug) System.out.println("Command ID: >" + id + "<");
+                if (id.startsWith("id:")) {
+                    String cmdId = id.replace("id:", "");
+                    String command = plugin.getConfig().getString("apis.commandIds." + cmdId);
+                    if (command != null) {
+                        command = command.replace("{p}", player.getName());
+                        for (int i = 0; i < amount; i++) {
+                            plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), command);
+                        }
+                        plugin.addLog("API:Pagseguro | " + player.getName() + " | Item Cmd:" + command + " | Transaction Code: " + trans);
+                        log++;
+                    }
+                }
+            }
+        }
+
+        if (log == 0) {
+            player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pagseguro.noitems")));
+        }
+        //if success
+        plugin.getPVConfig().addTrans(transCode, player.getName());
+        plugin.processTrans.remove(transCode);
+        return true;
     }
 }

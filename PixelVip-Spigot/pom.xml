@@ -1,38 +1,39 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>br.net.fabiozumbi12.pixelvip</groupId>
-    <artifactId>PixelVip</artifactId>
-    <version>2.0.4</version>
-  </parent>
-  <artifactId>PixelVip-Spigot</artifactId>
-  
-  <dependencies>    
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.net.fabiozumbi12.pixelvip</groupId>
+        <artifactId>PixelVip</artifactId>
+        <version>2.0.4</version>
+    </parent>
+    <artifactId>PixelVip-Spigot</artifactId>
+
+    <dependencies>
         <dependency>
-          <groupId>org.spigotmc</groupId>
-          <artifactId>spigot-api</artifactId>
-          <version>${mineVersion}</version>
-        </dependency>
-        
-        <dependency>
-          <groupId>org.spigotmc</groupId>
-          <artifactId>spigot-api</artifactId>
-          <version>${mineVersion}</version>
-          <classifier>javadoc</classifier>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${mineVersion}</version>
         </dependency>
 
         <dependency>
-           <groupId>net.milkbowl.vault</groupId>
-           <artifactId>VaultAPI</artifactId>            
-           <version>LATEST</version>
-           <scope>provided</scope>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${mineVersion}</version>
+            <classifier>javadoc</classifier>
         </dependency>
-      <dependency>
-          <groupId>net.milkbowl.vault</groupId>
-          <artifactId>VaultAPI</artifactId>
-          <version>LATEST</version>
-          <classifier>javadoc</classifier>
-      </dependency>
+
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>LATEST</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>LATEST</version>
+            <classifier>javadoc</classifier>
+        </dependency>
 
         <dependency>
             <groupId>me.clip</groupId>
@@ -44,21 +45,21 @@
             <groupId>net.ess3</groupId>
             <artifactId>EssentialsX</artifactId>
             <version>2.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/EssentialsX-2.0.1.jar</systemPath>
-        </dependency> 
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/EssentialsX-2.0.1.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>PagSeguro-API</groupId>
             <artifactId>PagSeguro-API</artifactId>
             <version>2.2.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/PagSeguro-2.2.1.jar</systemPath>
-        </dependency>  
-  </dependencies>
-  
-  <properties>
-  	<mineVersion>1.13-R0.1-SNAPSHOT</mineVersion>
-  </properties>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/PagSeguro-2.2.1.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <mineVersion>1.13.2-R0.1-SNAPSHOT</mineVersion>
+    </properties>
 
     <build>
         <finalName>DONT-DOWNLOAD-Spigot-Reference</finalName>

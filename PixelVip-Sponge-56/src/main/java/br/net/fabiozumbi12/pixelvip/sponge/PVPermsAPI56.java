@@ -7,20 +7,20 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
 public class PVPermsAPI56 implements PVPermsAPI {
-	private PermissionService permissionService;
+    private PermissionService permissionService;
 
-	public PVPermsAPI56(){
-		this.permissionService = Sponge.getGame().getServiceManager().getRegistration(PermissionService.class).get().getProvider();
-	}
-	
-	public String getGroup(User player){
-		for (Subject sub:player.getParents()){
-			if (sub.getContainingCollection().equals(getGroups()) && (sub.getIdentifier() != null)){				
-				return sub.getIdentifier();
-			}
-		}
-		return null;	
-	}
+    public PVPermsAPI56() {
+        this.permissionService = Sponge.getGame().getServiceManager().getRegistration(PermissionService.class).get().getProvider();
+    }
+
+    public String getGroup(User player) {
+        for (Subject sub : player.getParents()) {
+            if (sub.getContainingCollection().equals(getGroups()) && (sub.getIdentifier() != null)) {
+                return sub.getIdentifier();
+            }
+        }
+        return null;
+    }
 	/*
 	public Subject getGroups(User player){
 		for (Subject sub:player.getParents()){
@@ -31,7 +31,7 @@ public class PVPermsAPI56 implements PVPermsAPI {
 		return null;	
 	}*/
 
-	public SubjectCollection getGroups(){
-		return permissionService.getGroupSubjects();		
-	}
+    public SubjectCollection getGroups() {
+        return permissionService.getGroupSubjects();
+    }
 }

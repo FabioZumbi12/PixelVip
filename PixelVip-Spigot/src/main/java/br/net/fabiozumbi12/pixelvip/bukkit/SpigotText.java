@@ -8,23 +8,24 @@ import org.bukkit.command.CommandSender;
 public class SpigotText {
 
     TextComponent text;
-    public SpigotText(){
+
+    public SpigotText() {
         this.text = new TextComponent();
     }
 
-    public void setText(String text){
+    public void setText(String text) {
         this.text.setText(text);
     }
 
-    public void setHover(String hover){
+    public void setHover(String hover) {
         this.text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(hover)));
     }
 
-    public void setClick(String click){
+    public void setClick(String click) {
         this.text.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, click));
     }
 
-    public void sendMessage(CommandSender sender){
+    public void sendMessage(CommandSender sender) {
         sender.spigot().sendMessage(this.text);
     }
 }

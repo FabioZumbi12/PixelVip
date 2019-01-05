@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" version="4">
+  <component name="FacetManager">
+    <facet type="minecraft" name="Minecraft">
+      <configuration>
+        <autoDetectTypes>
+          <platformType>SPIGOT</platformType>
+          <platformType>SPONGE</platformType>
+        </autoDetectTypes>
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -37,13 +47,13 @@
     <orderEntry type="library" name="Maven: org.spongepowered:spongeapi:javadoc:8.0.0-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="PixelVip-Bungee" />
     <orderEntry type="module" module-name="PixelVip-Spigot" />
-    <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:1.13-R0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
-    <orderEntry type="library" name="Maven: net.md-5:bungeecord-chat:1.12-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:javadoc:1.13-R0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: net.md-5:bungeecord-chat:1.13-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:javadoc:1.13.2-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.milkbowl.vault:VaultAPI:javadoc:1.6" level="project" />
     <orderEntry type="library" name="Maven: org.bukkit:bukkit:1.9-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.avaje:ebean:2.8.1" level="project" />
