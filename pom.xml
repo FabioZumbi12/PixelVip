@@ -4,7 +4,7 @@
 
     <groupId>br.net.fabiozumbi12.pixelvip</groupId>
     <artifactId>PixelVip</artifactId>
-    <version>2.0.4</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
 
     <name>PixelVip</name>
@@ -42,7 +42,39 @@
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
+
+        <repository>
+            <id>EssentialsX</id>
+            <url>https://ci.ender.zone/plugin/repository/everything/</url>
+        </repository>
+
     </repositories>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/br.com.uol.pagseguro/pagseguro-api -->
+        <dependency>
+            <groupId>br.com.uol.pagseguro</groupId>
+            <artifactId>pagseguro-api</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>dx-java</artifactId>
+            <version>1.0.36</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>merchantsdk</artifactId>
+            <version>2.15.122</version>
+        </dependency>
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>paypal-core</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
+    </dependencies>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

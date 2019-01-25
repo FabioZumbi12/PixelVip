@@ -49,27 +49,35 @@ public class PVDataFile implements PVDataManager {
     }
 
     @Override
-    public boolean transactionExist(String trans) {
-        return this.transFile.contains(trans);
+    public boolean transactionExist(String payment, String trans) {
+        return this.transFile.contains(payment + "." + trans);
     }
 
     @Override
-    public void addTras(String trans, String player) {
-        this.transFile.set(trans, player);
+    public void addTras(String payment, String trans, String player) {
+        this.transFile.set(payment + "." + trans, player);
         saveTrans();
     }
 
     @Override
-    public void removeTrans(String trans) {
-        this.transFile.set(trans, null);
+    public void removeTrans(String payment, String trans) {
+        this.transFile.set(payment + "." + trans, null);
         saveTrans();
     }
 
     @Override
-    public HashMap<String, String> getAllTrans() {
-        HashMap<String, String> trans = new HashMap<String, String>();
-        for (String code : this.transFile.getKeys(false)) {
-            trans.put(code, this.transFile.getString(code));
+    public HashMap<String, Map<String, String>> getAllTrans() {
+        HashMap<String, Map<String, String>> trans = new HashMap<>();
+        //payment:
+        for (String payment : this.transFile.getKeys(false)) {
+            //trans: player
+            for (Map<?, ?> tr : this.transFile.getMapList(payment)) {
+                for (Map.Entry tv : tr.entrySet()) {
+                    trans.put(payment, new HashMap<String, String>() {{
+                        put(tv.getKey().toString(), tv.getValue().toString());
+                    }});
+                }
+            }
         }
         return trans;
     }

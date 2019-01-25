@@ -3,7 +3,7 @@ main: br.net.fabiozumbi12.pixelvip.bukkit.PixelVip
 version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}
-softdepend: [Vault, Essentials, PagSeguroAPI, PlaceholderAPI]
+softdepend: [Vault, Essentials, PagSeguroAPI, PayPalAPI, MercadoPagoAPI, PlaceholderAPI]
 commands:
   pixelvip:
     description: "Main command for PixelVip."
@@ -74,6 +74,21 @@ commands:
     permission: "pixelvip.cmd.listvips"
     usage: "/listvips"
     aliases: []
+  givepackage:
+    description: "Give a package with optional variant to player."
+    permission: "pixelvip.cmd.givepackage"
+    usage: "/givepackage <player> <id>"
+    aliases: [gpkg, gpackage, givep]
+  getvariant:
+    description: "Get a package available for you."
+    permission: "pixelvip.cmd.player"
+    usage: "/getvar <variant>"
+    aliases: [getv, getvar]
+  listpackages:
+    description: "List all available packages"
+    permission: "pixelvip.cmd.listpackages"
+    usage: "/listpackages"
+    aliases: [listp]
 permissions:
   pixelvip.normal:
     description: "Player commands."
@@ -96,3 +111,4 @@ permissions:
       pixelvip.cmd.addvip: true
       pixelvip.cmd.setvip: true
       pixelvip.cmd.listvips: true
+      pixelvip.cmd.givepackage: true

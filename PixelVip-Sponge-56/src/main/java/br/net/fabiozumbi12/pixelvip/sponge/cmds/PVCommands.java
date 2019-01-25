@@ -73,7 +73,7 @@ public class PVCommands {
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "keyGenerated")));
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeKey") + key));
-                        for (String cmd : Arrays.asList(cmdLine)) {
+                        for (String cmd : cmdLine) {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("item") + cmd));
                         }
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
@@ -101,7 +101,7 @@ public class PVCommands {
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "itemsAdded")));
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeKey") + key));
-                        for (String cmd : Arrays.asList(cmdLine)) {
+                        for (String cmd : cmdLine) {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("item") + cmd));
                         }
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));

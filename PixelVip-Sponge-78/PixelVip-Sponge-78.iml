@@ -45,10 +45,9 @@
     <orderEntry type="library" name="Maven: com.flowpowered:flow-noise:1.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.ow2.asm:asm:5.2" level="project" />
     <orderEntry type="library" name="Maven: org.spongepowered:spongeapi:javadoc:8.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="module" module-name="PixelVip-Bungee" />
-    <orderEntry type="module" module-name="PixelVip-Spigot" />
+    <orderEntry type="library" name="Maven: br.net.fabiozumbi12.pixelvip:PixelVip-Bungee:2.0.4" level="project" />
+    <orderEntry type="library" name="Maven: br.net.fabiozumbi12.pixelvip:PixelVip-Spigot:2.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
@@ -58,24 +57,21 @@
     <orderEntry type="library" name="Maven: org.bukkit:bukkit:1.9-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.avaje:ebean:2.8.1" level="project" />
     <orderEntry type="library" name="Maven: javax.persistence:persistence-api:1.0" level="project" />
-    <orderEntry type="module-library">
-      <library name="Maven: net.ess3:EssentialsX:2.0.1">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../PixelVip-Spigot/libs/EssentialsX-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Maven: PagSeguro-API:PagSeguro-API:2.2.0">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../PixelVip-Spigot/libs/PagSeguro-2.2.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module" module-name="PixelVip-Sponge-56" />
+    <orderEntry type="library" name="Maven: net.ess3:EssentialsX:2.15.0" level="project" />
+    <orderEntry type="library" name="Maven: br.net.fabiozumbi12.pixelvip:PixelVip-Sponge-56:2.0.4" level="project" />
+    <orderEntry type="library" name="Maven: br.com.uol.pagseguro:pagseguro-api:4.3.2" level="project" />
+    <orderEntry type="library" name="Maven: com.mercadopago:dx-java:1.0.36" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.5" level="project" />
+    <orderEntry type="library" name="Maven: commons-validator:commons-validator:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.8.3" level="project" />
+    <orderEntry type="library" name="Maven: commons-digester:commons-digester:1.8" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-core:1.17.1" level="project" />
+    <orderEntry type="library" name="Maven: com.paypal.sdk:merchantsdk:2.15.122" level="project" />
+    <orderEntry type="library" name="Maven: com.paypal.sdk:paypal-core:1.7.2" level="project" />
   </component>
 </module>

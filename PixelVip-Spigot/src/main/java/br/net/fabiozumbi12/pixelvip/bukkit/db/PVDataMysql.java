@@ -37,9 +37,8 @@ public class PVDataMysql implements PVDataManager {
     private String colVComment;
 
     private String transTable;
-
+    private String colTPay;
     private String colTID;
-
     private String colTNick;
 
 
@@ -72,6 +71,7 @@ public class PVDataMysql implements PVDataManager {
         this.colVComment = plugin.getConfig().getString("configs.database.mysql.vips.columns.comments");
 
         this.transTable = plugin.getConfig().getString("configs.database.mysql.transactions.table-name");
+        this.colTPay = plugin.getConfig().getString("configs.database.mysql.transactions.columns.payment");
         this.colTID = plugin.getConfig().getString("configs.database.mysql.transactions.columns.idt");
         this.colTNick = plugin.getConfig().getString("configs.database.mysql.transactions.columns.nick");
 
@@ -130,6 +130,7 @@ public class PVDataMysql implements PVDataManager {
             if (!checkTransTable()) {
                 PreparedStatement st = this.con.prepareStatement("CREATE TABLE `" + transTable + "` ("
                         + colTID + " varchar(128) PRIMARY KEY, "
+                        + colTPay + " varchar(128), "
                         + colTNick + " varchar(128))");
                 st.executeUpdate();
                 st.close();
@@ -137,6 +138,10 @@ public class PVDataMysql implements PVDataManager {
                 st = this.con.prepareStatement("ALTER TABLE `" + transTable + "` ADD INDEX `" + colTID + "` (`" + colTID + "`)");
                 st.executeUpdate();
                 st.close();
+            }
+
+            if (checkColummForAdd()){
+                plugin.getPVLogger().info("Updated the database to support the latest changes.");
             }
 
         } catch (SQLException e) {
@@ -189,6 +194,20 @@ public class PVDataMysql implements PVDataManager {
             return true;
         }
         rs.close();
+        return false;
+    }
+
+    private boolean checkColummForAdd() throws SQLException {
+        DatabaseMetaData md = con.getMetaData();
+        ResultSet rs = md.getColumns(null, null, transTable, colTPay);
+        if (!rs.next()) {
+            rs.close();
+
+            PreparedStatement st = this.con.prepareStatement("ALTER TABLE " + transTable + " ADD " + colTPay + " " + "varchar(128)");
+            st.executeUpdate();
+            st.close();
+            return true;
+        }
         return false;
     }
 
@@ -349,11 +368,11 @@ public class PVDataMysql implements PVDataManager {
             st.setString(2, group);
             st.setLong(3, duration);
             st.setInt(4, uses);
-            st.setString(5, String.valueOf(plugin.getUtil().millisToDay(duration)) + plugin.getConfig().getString("strings.days"));
+            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getString("strings.days"));
             st.setString(6, group);
             st.setLong(7, duration);
             st.setInt(8, uses);
-            st.setString(9, String.valueOf(plugin.getUtil().millisToDay(duration)) + plugin.getConfig().getString("strings.days"));
+            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getString("strings.days"));
             st.executeUpdate();
             st.close();
         } catch (SQLException e) {
@@ -366,7 +385,7 @@ public class PVDataMysql implements PVDataManager {
         try {
             PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` (" + colKey + "," + colKCmds + ") VALUES (?,?) ON DUPLICATE KEY UPDATE " + colKCmds + "=?");
             StringBuilder strBuilder = new StringBuilder();
-            String[] cmdsArr = cmds.toArray(new String[cmds.size()]);
+            String[] cmdsArr = cmds.toArray(new String[0]);
             for (String aCmdsArr : cmdsArr) {
                 strBuilder.append(aCmdsArr).append(",");
             }
@@ -389,7 +408,7 @@ public class PVDataMysql implements PVDataManager {
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 String uuid = rs.getString(colVUUID);
-                List<String[]> actives = new ArrayList<String[]>();
+                List<String[]> actives = new ArrayList<>();
                 getVipInfo(uuid).stream().filter(vip -> vip[3].equals("true")).forEach(actives::add);
                 activeVips.put(uuid.toLowerCase(), actives);
             }
@@ -741,11 +760,12 @@ public class PVDataMysql implements PVDataManager {
     }
 
     @Override
-    public void removeTrans(String trans) {
-        if (transactionExist(trans)) {
+    public void removeTrans(String payment, String trans) {
+        if (transactionExist(payment, trans)) {
             try {
-                PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + transTable + "` WHERE " + colTID + "=?");
+                PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + transTable + "` WHERE " + colTID + "=? AND " + colTPay + "=?");
                 st.setString(1, trans);
+                st.setString(2, payment);
                 st.executeUpdate();
                 st.close();
             } catch (SQLException e) {
@@ -755,12 +775,13 @@ public class PVDataMysql implements PVDataManager {
     }
 
     @Override
-    public void addTras(String trans, String player) {
+    public void addTras(String payment, String trans, String player) {
         try {
-            PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + transTable + "` (" + colTID + "," + colTNick + ") VALUES (?,?) ON DUPLICATE KEY UPDATE " + colTNick + "=?");
+            PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + transTable + "` (" + colTID + "," + colTPay + "," + colTNick + ") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + colTNick + "=?");
             st.setString(1, trans);
-            st.setString(2, player);
+            st.setString(2, payment);
             st.setString(3, player);
+            st.setString(4, player);
             st.executeUpdate();
             st.close();
         } catch (SQLException e) {
@@ -769,11 +790,12 @@ public class PVDataMysql implements PVDataManager {
     }
 
     @Override
-    public boolean transactionExist(String trans) {
+    public boolean transactionExist(String payment, String trans) {
         int total = 0;
         try {
-            PreparedStatement st = this.con.prepareStatement("SELECT COUNT(*) FROM `" + transTable + "` WHERE " + colTID + " = ?");
+            PreparedStatement st = this.con.prepareStatement("SELECT COUNT(*) FROM `" + transTable + "` WHERE " + colTID + " =? AND " + colTPay + "=?");
             st.setString(1, trans);
+            st.setString(2, payment);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 total = rs.getInt("COUNT(*)");
@@ -787,13 +809,15 @@ public class PVDataMysql implements PVDataManager {
     }
 
     @Override
-    public HashMap<String, String> getAllTrans() {
-        HashMap<String, String> trans = new HashMap<String, String>();
+    public HashMap<String, Map<String, String>> getAllTrans() {
+        HashMap<String, Map<String, String>> trans = new HashMap<>();
         try {
             PreparedStatement st = this.con.prepareStatement("SELECT * FROM `" + transTable + "`");
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                trans.put(rs.getString(colTID), rs.getString(colTNick));
+                trans.put(rs.getString(colTPay), new HashMap<String, String>() {{
+                    put(rs.getString(colTID), rs.getString(colTNick));
+                }});
             }
             st.close();
             rs.close();

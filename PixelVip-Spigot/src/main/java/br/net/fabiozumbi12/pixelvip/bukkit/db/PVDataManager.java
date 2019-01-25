@@ -2,6 +2,7 @@ package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface PVDataManager {
@@ -9,13 +10,15 @@ public interface PVDataManager {
 
     void saveKeys();
 
-    void removeTrans(String trans);
 
-    void addTras(String trans, String player);
+    void removeTrans(String payment, String trans);
 
-    boolean transactionExist(String trans);
+    void addTras(String payment, String trans, String player);
 
-    HashMap<String, String> getAllTrans();
+    boolean transactionExist(String payment, String trans);
+
+    HashMap<String, Map<String, String>> getAllTrans();
+
 
     void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires);
 

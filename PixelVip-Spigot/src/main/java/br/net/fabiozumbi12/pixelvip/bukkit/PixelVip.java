@@ -1,5 +1,10 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
+import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PackageManager;
+import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.MercadoPagoHook;
+import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PagSeguroHook;
+import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PayPalHook;
+import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
 import com.earth2me.essentials.Essentials;
@@ -29,18 +34,23 @@ public class PixelVip extends JavaPlugin implements Listener {
     public Server serv;
     public PluginDescriptionFile pdf;
     public Essentials ess;
-    public List<String> processTrans;
+    public HashMap<String, String> processTrans;
     private PVLogger logger;
     private int task = 0;
-    private PVPagSeguro pag;
+    private List<PaymentModel> payments;
     private PVUtil util;
     private Permission perms;
     private PVConfig config;
     private PermsAPI permApi;
     private PixelVipBungee pvBungee;
+    private PackageManager packageManager;
 
-    public PVPagSeguro getPagSeguro() {
-        return this.pag;
+    public PackageManager getPackageManager(){
+        return this.packageManager;
+    }
+
+    public List<PaymentModel> getPayments() {
+        return this.payments;
     }
 
     public PVUtil getUtil() {
@@ -69,10 +79,12 @@ public class PixelVip extends JavaPlugin implements Listener {
         reloadVipTask();
         saveConfig();
 
-        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null) {
-            this.pag = new PVPagSeguro(this);
-            logger.info("-> PagSeguroAPI found and hooked.");
-        }
+        //payment apis
+        setupPayments();
+
+        //package manager
+        packageManager = new PackageManager(this);
+
         sender.sendMessage(plugin.getUtil().toColor(getConfig().getString("strings.reload")));
         logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
     }
@@ -89,7 +101,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         plugin = this;
         serv = getServer();
         serv.getPluginManager().registerEvents(this, this);
-        processTrans = new ArrayList<>();
+        processTrans = new HashMap<>();
 
         //register bungee
         pvBungee = new PixelVipBungee(this);
@@ -133,10 +145,12 @@ public class PixelVip extends JavaPlugin implements Listener {
             logger.info("-> Vault not found. This plugin needs Vault to work! Disabling...");
             return;
         }
-        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguro API") != null) {
-            this.pag = new PVPagSeguro(this);
-            logger.info("-> PagSeguroAPI found and hooked.");
-        }
+
+        //payment apis
+        setupPayments();
+
+        //package manager
+        packageManager = new PackageManager(this);
 
         logger.info("Init commands module...");
         new PVCommands(this);
@@ -151,6 +165,27 @@ public class PixelVip extends JavaPlugin implements Listener {
 
         logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
         logger.sucess(util.toColor("PixelVip enabled!"));
+    }
+
+    private void setupPayments() {
+        payments = new ArrayList<>();
+        //pagseguro
+        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
+            this.payments.add(new PagSeguroHook(this));
+            logger.info("-> PagSeguroAPI found and hooked.");
+        }
+
+        //mercadopago
+        if (getConfig().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
+            this.payments.add(new MercadoPagoHook(this));
+            logger.info("-> MercadoPagoAPI found and hooked.");
+        }
+
+        //paypal
+        if (getConfig().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
+            this.payments.add(new PayPalHook(this));
+            logger.info("-> PayPalAPI found and hooked.");
+        }
     }
 
     public void onDisable() {
@@ -231,7 +266,7 @@ public class PixelVip extends JavaPlugin implements Listener {
             File logs = new File(folder + File.separator + "logs.log");
 
             FileWriter fw = new FileWriter(logs, true);
-            fw.append(timeStamp + " - PixelVip Log: " + log);
+            fw.append(timeStamp).append(" - PixelVip Log: ").append(log);
             fw.append("\n");
             fw.close();
         } catch (IOException e) {

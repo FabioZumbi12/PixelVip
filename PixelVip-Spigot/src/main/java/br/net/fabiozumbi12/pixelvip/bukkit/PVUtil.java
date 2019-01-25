@@ -1,14 +1,13 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
+import br.net.fabiozumbi12.pixelvip.bukkit.bungee.SpigotText;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class PVUtil {
@@ -112,13 +111,41 @@ public class PVUtil {
 
     public String expiresOn(Long millis) {
         Date date = new Date(millis);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         return sdf.format(date);
     }
 
-    public void ExecuteCmd(String cmd) {
+    public void ExecuteCmd(String cmd, Player player) {
         if (cmd == null || cmd.isEmpty()) return;
+        if (player != null) cmd = cmd.replace("{p}", player.getName());
+
         plugin.addLog("Running Command - \"" + cmd + "\"");
-        plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd);
+        String finalCmd = cmd;
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), finalCmd));
+    }
+
+    public boolean paymentItems(HashMap<Integer,String> items, Player player, String payment, String transCode){
+        int log = 0;
+        for (Map.Entry<Integer, String> item:items.entrySet()){
+            int multipl = item.getKey();
+            String key = item.getValue();
+
+            plugin.getPVLogger().severe("Key: " + key);
+
+            for (int i = 0; i < multipl; i++){
+                String cmd = "givepackage " + player.getName() + " " + key;
+                plugin.getUtil().ExecuteCmd(cmd, null);
+                plugin.addLog("API:" + payment + " | " + player.getName() + " | Item Cmd:" + cmd + " | Transaction Code: " + transCode);
+                log++;
+            }
+        }
+
+        if (log == 0) {
+            player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.noitems")
+                    .replace("{payment}",payment)
+                    .replace("{transaction}", transCode)));
+            return false;
+        }
+        return true;
     }
 }

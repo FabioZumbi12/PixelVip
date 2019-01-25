@@ -75,7 +75,7 @@ public class PVUtil {
             src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             vips.stream().filter(v -> v.length == 5).forEach((vipInfo) -> {
                 String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
-                if (plugin.getConfig().getVipBoolean(true, "activeVips", vipInfo[1], UUID.toString(), "active")) {
+                if (plugin.getConfig().getVipBoolean(true, "activeVips", vipInfo[1], UUID, "active")) {
                     time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeLeft") + time));

@@ -127,17 +127,22 @@ public class PVConfig {
         plugin.getConfig().set("apis.pagseguro.debug", getObj(false, "apis.pagseguro.debug"));
         plugin.getConfig().set("apis.pagseguro.email", getObj("your@email.com", "apis.pagseguro.email"));
         plugin.getConfig().set("apis.pagseguro.token", getObj("yourtoken", "apis.pagseguro.token"));
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
-        sdf.format(Calendar.getInstance().getTime());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         plugin.getConfig().set("apis.pagseguro.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.pagseguro.ignoreOldest"));
 
-        plugin.getConfig().set("apis.paypal.use", getObj(false, "apis.paypal.use"));
 
-        if (!plugin.getConfig().contains("apis.commandsIds")) {
-            plugin.getConfig().set("apis.commandIds.1", getObj("darvip {p} Vip1 15", "apis.commandIds.1"));
-            plugin.getConfig().set("apis.commandIds.2", getObj("silk give {p} iron_golem 2", "apis.commandIds.2"));
-            plugin.getConfig().set("apis.commandIds.3", getObj("eco give {p} 10000", "apis.commandIds.3"));
-        }
+        plugin.getConfig().set("apis.mercadopago.use", getObj(false, "apis.mercadopago.use"));
+        plugin.getConfig().set("apis.mercadopago.sandbox", getObj(false, "apis.mercadopago.sandbox"));
+        plugin.getConfig().set("apis.mercadopago.access-token", getObj("ACCESS-TOKEN", "apis.mercadopago.access-token"));
+        plugin.getConfig().set("apis.mercadopago.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.mercadopago.ignoreOldest"));
+
+
+        plugin.getConfig().set("apis.paypal.use", getObj(false, "apis.paypal.use"));
+        plugin.getConfig().set("apis.paypal.sandbox", getObj(false, "apis.paypal.sandbox"));
+        plugin.getConfig().set("apis.paypal.username", getObj("username", "apis.paypal.username"));
+        plugin.getConfig().set("apis.paypal.password", getObj("password", "apis.paypal.password"));
+        plugin.getConfig().set("apis.paypal.signature", getObj("signature", "apis.paypal.signature"));
+        plugin.getConfig().set("apis.paypal.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.paypal.ignoreOldest"));
 
         //strings
         plugin.getConfig().set("strings._pluginTag", getObj("&7[&6PixelVip&7] ", "strings._pluginTag"));
@@ -185,12 +190,13 @@ public class PVConfig {
         plugin.getConfig().set("strings.true", getObj("&atrue", "strings.true"));
         plugin.getConfig().set("strings.false", getObj("&cfalse", "strings.false"));
         plugin.getConfig().set("strings.reload", getObj("&aPixelvip reloaded with success!", "strings.reload"));
+        plugin.getConfig().set("strings.wait-cmd", getObj("&cWait before use a pixelvip command again!", "strings.wait-cmd"));
         plugin.getConfig().set("strings.confirmUsekey", getObj("&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!", "strings.confirmUsekey"));
 
-        plugin.getConfig().set("strings.pagseguro.waiting", getObj("&cPagSeguro: Your purchase has not yet been approved!", "strings.pagseguro.waiting"));
-        plugin.getConfig().set("strings.pagseguro.codeused", getObj("&cPagSeguro: This code has already been used!", "strings.pagseguro.codeused"));
-        plugin.getConfig().set("strings.pagseguro.expired", getObj("&cPagSeguro: This code has expired!", "strings.pagseguro.expired"));
-        plugin.getConfig().set("strings.pagseguro.noitems", getObj("&cPagSeguro: No items delivered. Contact an administrator to help you!", "strings.pagseguro.noitems"));
+        plugin.getConfig().set("strings.payment.waiting", getObj("&c{payment}: Your purchase has not yet been approved!", "strings.payment.waiting"));
+        plugin.getConfig().set("strings.payment.codeused", getObj("&c{payment}: This code has already been used!", "strings.payment.codeused"));
+        plugin.getConfig().set("strings.payment.expired", getObj("&c{payment}: This code has expired!", "strings.payment.expired"));
+        plugin.getConfig().set("strings.payment.noitems", getObj("&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!", "strings.payment.noitems"));
 
         //init database
         reloadVips();
@@ -259,19 +265,19 @@ public class PVConfig {
         }
     }
 
-    public boolean transExist(String trans) {
-        return dataManager.transactionExist(trans);
+    public boolean transExist(String payment, String trans) {
+        return dataManager.transactionExist(payment, trans);
     }
 
-    public void addTrans(String trans, String player) {
-        dataManager.addTras(trans, player);
+    public void addTrans(String payment, String trans, String player) {
+        dataManager.addTras(payment, trans, player);
     }
 
-    public void removeTrans(String trans) {
-        dataManager.removeTrans(trans);
+    public void removeTrans(String payment, String trans) {
+        dataManager.removeTrans(payment, trans);
     }
 
-    public HashMap<String, String> getAllTrans() {
+    public HashMap<String, Map<String, String>> getAllTrans() {
         return dataManager.getAllTrans();
     }
 
@@ -397,7 +403,7 @@ public class PVConfig {
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                     String cmdf = cmd.replace("{p}", p.getName());
                     if (p.isOnline()) {
-                        plugin.getUtil().ExecuteCmd(cmdf);
+                        plugin.getUtil().ExecuteCmd(cmdf, null);
                     }
                 }, delay * 2);
                 delay++;
@@ -486,7 +492,7 @@ public class PVConfig {
                         .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                         .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
                 if (p.isOnline()) {
-                    plugin.getUtil().ExecuteCmd(cmdf);
+                    plugin.getUtil().ExecuteCmd(cmdf, null);
                 } else {
                     normCmds.add(cmdf);
                 }
@@ -509,7 +515,7 @@ public class PVConfig {
                                 .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                                 .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
                         if (p.isOnline()) {
-                            plugin.getUtil().ExecuteCmd(cmdf);
+                            plugin.getUtil().ExecuteCmd(cmdf, null);
                         } else {
                             chanceCmds.add(cmdf);
                         }
@@ -619,13 +625,13 @@ public class PVConfig {
 
             String cmdf = cmd.replace("{p}", p.getName());
             if (oldVip != null && !oldVip.equals("") && cmdf.contains("{oldvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip)), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay * 5);
                 delay++;
             } else if (!newVip.equals("") && cmdf.contains("{newvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip)), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip), null), delay * 5);
                 delay++;
             } else {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay * 5);
                 delay++;
             }
         }
@@ -675,7 +681,7 @@ public class PVConfig {
         plugin.addLog("RemoveVip | " + pname + " | " + group);
 
         dataManager.removeVip(uuid, group);
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group)), delay * 5);
+        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group), null), delay * 5);
         delay++;
 
         if (plugin.getConfig().getBoolean("configs.Vault.use")) {
@@ -721,12 +727,12 @@ public class PVConfig {
                 if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                     for (String group : oldGroup) {
                         String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
-                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), 1 + delay * 5);
+                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
                         delay++;
                     }
                 } else {
                     String cmdf = cmd.replace("{p}", nick);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), 1 + delay * 5);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
                     delay++;
                 }
             }
@@ -738,12 +744,12 @@ public class PVConfig {
             if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                 for (String group : oldGroup) {
                     String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), 1 + delay * 5);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
                     delay++;
                 }
             } else {
                 String cmdf = cmd.replace("{p}", nick);
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf), 1 + delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
                 delay++;
             }
         }
@@ -761,7 +767,7 @@ public class PVConfig {
     }
 
     public void reloadPerms() {
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin")), (1 + delay) * 10);
+        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin"), null), (1 + delay) * 10);
         delay = 0;
     }
 

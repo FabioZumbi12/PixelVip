@@ -57,7 +57,7 @@ public class PermsAPI {
         delay = 10;
         if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
             Player p = Bukkit.getPlayer(UUID.fromString(uuid));
-            List<String> groups = Arrays.asList(getGroups(p));
+            String[] groups = getGroups(p);
             for (String pGroup : groups) {
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
                 delay++;
@@ -67,7 +67,7 @@ public class PermsAPI {
         } else {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             if (p.getName() != null) {
-                List<String> groups = Arrays.asList(getGroups(p));
+                String[] groups = getGroups(p);
                 for (String pGroup : groups) {
                     plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
                     delay++;
