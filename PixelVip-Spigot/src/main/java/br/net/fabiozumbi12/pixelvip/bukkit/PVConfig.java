@@ -91,6 +91,7 @@ public class PVConfig {
 
         plugin.getConfig().set("configs.database.mysql.transactions.table-name", getObj("pixelvip_transactions", "configs.database.mysql.transactions.table-name"));
         plugin.getConfig().set("configs.database.mysql.transactions.columns.idt", getObj("col_idt", "configs.database.mysql.transactions.columns.idt"));
+        plugin.getConfig().set("configs.database.mysql.transactions.columns.payment", getObj("col_payment", "configs.database.mysql.transactions.columns.payment"));
         plugin.getConfig().set("configs.database.mysql.transactions.columns.nick", getObj("col_nick", "configs.database.mysql.transactions.columns.nick"));
         //end database
 

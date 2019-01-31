@@ -130,11 +130,9 @@ public class PVUtil {
             int multipl = item.getKey();
             String key = item.getValue();
 
-            plugin.getPVLogger().severe("Key: " + key);
-
             for (int i = 0; i < multipl; i++){
                 String cmd = "givepackage " + player.getName() + " " + key;
-                plugin.getUtil().ExecuteCmd(cmd, null);
+                ExecuteCmd(cmd, null);
                 plugin.addLog("API:" + payment + " | " + player.getName() + " | Item Cmd:" + cmd + " | Transaction Code: " + transCode);
                 log++;
             }

@@ -169,9 +169,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                                     plugin.getPVConfig().getLang("_pluginTag")+plugin.getPackageManager().getPackages().getString("strings.no-pendent")));
                         }
-                    } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                                plugin.getPVConfig().getLang("_pluginTag")+plugin.getPackageManager().getPackages().getString("strings.no-package").replace("{id}",idv)));
+                        break;
                     }
                 }
                 return true;
@@ -208,11 +206,11 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                             SpigotText text = new SpigotText(ChatColor.translateAlternateColorCodes('&',
                                     plugin.getPVConfig().getLang("_pluginTag")+packages.getString("packages." + pkg.getID() + ".variants.message")), null, null, null);
                             String start = "";
-                            for (Map.Entry<String, String> var : pkg.getVariants().entrySet()) {
+                            for (String var : pkg.getVariants().keySet()) {
                                 text.getText().addExtra(new SpigotText(
-                                        ChatColor.translateAlternateColorCodes('&',start + "&e"+var.getKey()),
+                                        ChatColor.translateAlternateColorCodes('&',start + "&e"+var),
                                         null,
-                                        String.format("/getvariant %s %s", pkg.getID(), var.getKey()),
+                                        String.format("/getvariant %s %s", pkg.getID(), var),
                                         ChatColor.translateAlternateColorCodes('&', packages.getString("strings.hover-info"))).getText());
                                 if (start.equals("")) start = ", ";
                             }
@@ -222,7 +220,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                                     plugin.getPVConfig().getLang("_pluginTag")+String.format(packages.getString("strings.use-cmd"), pkg.getID())));
 
                             StringBuilder vars = new StringBuilder();
-                            for (Map.Entry<String, String> var : pkg.getVariants().entrySet()) {
+                            for (String var : pkg.getVariants().keySet()) {
                                 vars.append(", ").append(var);
                             }
                             p.sendMessage(ChatColor.translateAlternateColorCodes('&',

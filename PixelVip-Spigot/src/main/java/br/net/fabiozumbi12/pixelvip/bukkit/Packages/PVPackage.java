@@ -16,7 +16,7 @@ public class PVPackage {
     private PixelVip plugin;
     private String id;
     private List<String> commands;
-    private HashMap<String,String> variants;
+    private HashMap<String,List<String>> variants;
     private YamlConfiguration packages;
 
     public PVPackage(PixelVip plugin, String id, YamlConfiguration packages){
@@ -28,7 +28,7 @@ public class PVPackage {
         if (packages.getConfigurationSection("packages." + id + ".variants.options") != null && !packages.getConfigurationSection("packages." + id + ".variants.options").getKeys(false).isEmpty()){
             variants = new HashMap<>();
             for (String var:packages.getConfigurationSection("packages." + id + ".variants.options").getKeys(false)){
-                variants.put(var, packages.getString("packages." + id + ".variants.options." + var));
+                variants.put(var, packages.getStringList("packages." + id + ".variants.options." + var));
             }
         }
     }
@@ -41,7 +41,7 @@ public class PVPackage {
         return this.commands;
     }
 
-    public HashMap<String,String> getVariants(){
+    public HashMap<String,List<String>> getVariants(){
         return this.variants;
     }
 

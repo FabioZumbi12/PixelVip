@@ -4,9 +4,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.ClickAction;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.security.SecureRandom;
@@ -75,7 +79,7 @@ public class PVUtil {
             src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             vips.stream().filter(v -> v.length == 5).forEach((vipInfo) -> {
                 String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
-                if (plugin.getConfig().getVipBoolean(true, "activeVips", vipInfo[1], UUID, "active")) {
+                if (plugin.getConfig().isVipActive(vipInfo[1], UUID)) {
                     time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeLeft") + time));
@@ -115,5 +119,46 @@ public class PVUtil {
         Date date = new Date(millis);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         return sdf.format(date);
+    }
+
+    public void sendHoverKey(CommandSource src, String key) {
+        Text text = Text.builder()
+                .append(Text.of(plugin.getUtil().toColor(plugin.getConfig().getLang("timeKey") + key + " " + plugin.getConfig().getLang("hoverKey"))))
+                .onHover(TextActions.showText(Text.of(plugin.getUtil().toColor(plugin.getConfig().getLang("hoverKey")))))
+                .onClick(TextActions.suggestCommand(plugin.getConfig().root().configs.clickSuggest.replace("{key}", key))).toText();
+        src.sendMessage(text);
+    }
+
+    public boolean paymentItems(HashMap<Integer,String> items, Player player, String payment, String transCode){
+        int log = 0;
+        for (Map.Entry<Integer, String> item:items.entrySet()){
+            int multipl = item.getKey();
+            String key = item.getValue();
+
+            for (int i = 0; i < multipl; i++){
+                String cmd = "givepackage " + player.getName() + " " + key;
+                ExecuteCmd(cmd, null);
+                plugin.addLog("API:" + payment + " | " + player.getName() + " | Item Cmd:" + cmd + " | Transaction Code: " + transCode);
+                log++;
+            }
+        }
+
+        if (log == 0) {
+            player.sendMessage(toText(plugin.getUtil().toColor(plugin.getConfig().getLang("_pluginTag", "payment.noitems")
+                    .replace("{payment}",payment)
+                    .replace("{transaction}", transCode))));
+            return false;
+        }
+        return true;
+    }
+
+    public void ExecuteCmd(String cmd, Player player) {
+        if (cmd == null || cmd.isEmpty()) return;
+        if (player != null) cmd = cmd.replace("{p}", player.getName());
+
+        plugin.addLog("Running Command - \"" + cmd + "\"");
+        String finalCmd = cmd;
+        Sponge.getScheduler().createTaskBuilder().execute(() -> Sponge.getCommandManager().process(Sponge.getServer().getConsole(), finalCmd))
+        .submit(plugin);
     }
 }

@@ -1,10 +1,17 @@
 package br.net.fabiozumbi12.pixelvip.sponge;
 
+import br.net.fabiozumbi12.pixelvip.sponge.Packages.PackageManager;
+import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.MercadoPagoHook;
+import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PagSeguroHook;
+import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PayPalHook;
+import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.sponge.cmds.PVCommands;
+import br.net.fabiozumbi12.pixelvip.sponge.config.PVConfig;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
@@ -21,6 +28,7 @@ import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -30,23 +38,26 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static org.spongepowered.api.Sponge.*;
 
 @Plugin(id = "pixelvip",
         name = "PixelVip",
         version = VersionData.VERSION,
         authors = "FabioZumbi12",
-        description = "Plugin to give VIP to your players.")
+        description = "Plugin to give VIP to your players.",
+        dependencies = {
+                @Dependency(id = "PagSeguroAPI", optional = true),
+                @Dependency(id = "MercadoPagoAPI", optional = true),
+                @Dependency(id = "PayPalAPI", optional = true)})
 public class PixelVip {
     PVPermsAPI perms;
     @Inject
     private Logger logger;
     @Inject
-    @ConfigDir(sharedRoot = true)
+    @ConfigDir(sharedRoot = false)
     private Path configDir;
 
     @Inject
@@ -54,33 +65,33 @@ public class PixelVip {
     private File defConfig;
 
     @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> configManager;
+    public GuiceObjectMapperFactory factory;
     private PVConfig config;
-    @Inject
-    private Game game;
     private PVUtil util;
     private PVCommands cmds;
     private Task task;
+    private List<PaymentModel> payments;
+    public HashMap<String, String> processTrans;
 
     public Logger getLogger() {
         return logger;
     }
 
-    public ConfigurationLoader<CommentedConfigurationNode> getCfManager() {
-        return configManager;
+    public File configDir() {
+        return this.configDir.toFile();
     }
 
     public PVConfig getConfig() {
         return config;
     }
 
-    public PVPermsAPI getPerms() {
-        return this.perms;
+    private static PixelVip plugin;
+    public static PixelVip get(){
+        return plugin;
     }
 
-    public Game getGame() {
-        return this.game;
+    public PVPermsAPI getPerms() {
+        return this.perms;
     }
 
     public PVUtil getUtil() {
@@ -91,15 +102,25 @@ public class PixelVip {
         return this.cmds;
     }
 
+    public List<PaymentModel> getPayments() {
+        return this.payments;
+    }
+
+    private PackageManager packageManager;
+
+    public PackageManager getPackageManager(){
+        return this.packageManager;
+    }
+
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
         try {
+            plugin = this;
             logger.info("Init utils module...");
             this.util = new PVUtil(this);
 
             logger.info("Init config module...");
-            configManager = HoconConfigurationLoader.builder().setFile(defConfig).build();
-            this.config = new PVConfig(this, configDir, defConfig);
+            this.config = new PVConfig(factory);
 
             logger.info("Init perms module...");
             this.setCompatperms();
@@ -113,7 +134,7 @@ public class PixelVip {
                     .executor((src, args) -> {
                         {
                             if (args.hasAny("reload")) {
-                                this.config = new PVConfig(this, configDir, defConfig);
+                                this.config = new PVConfig(factory);
                                 this.cmds.reload();
                                 reloadVipTask();
                                 src.sendMessage(util.toText("&aPixelVip reloaded"));
@@ -129,6 +150,12 @@ public class PixelVip {
             logger.info("Init scheduler module...");
             reloadVipTask();
 
+            //payment apis
+            setupPayments();
+
+            //package manager
+            packageManager = new PackageManager(this, factory);
+
             logger.info(util.toColor("We have &6" + config.getVipList().size() + " &ractive Vips"));
             logger.info(util.toColor("&aPixelVip enabled!&r"));
         } catch (Exception e) {
@@ -136,10 +163,31 @@ public class PixelVip {
         }
     }
 
+    private void setupPayments() {
+        payments = new ArrayList<>();
+        //pagseguro
+        if (getConfig().root().apis.pagseguro.use && getPluginManager().getPlugin("PagSeguroAPI").isPresent()) {
+            this.payments.add(new PagSeguroHook(this));
+            logger.info("-> PagSeguroAPI found and hooked.");
+        }
+
+        //mercadopago
+        if (getConfig().root().apis.mercadopago.use && getPluginManager().getPlugin("MercadoPagoAPI").isPresent()) {
+            this.payments.add(new MercadoPagoHook(this));
+            logger.info("-> MercadoPagoAPI found and hooked.");
+        }
+
+        //paypal
+        if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("PayPalAPI").isPresent()) {
+            this.payments.add(new PayPalHook(this));
+            logger.info("-> PayPalAPI found and hooked.");
+        }
+    }
+
     private void setCompatperms() {
         //init perms
         try {
-            String v = this.game.getPlatform().getContainer(Platform.Component.API).getVersion().get();
+            String v = getPlatform().getContainer(Platform.Component.API).getVersion().get();
             getLogger().info("Sponge version " + v);
 
             if (v.startsWith("5") || v.startsWith("6")) {
@@ -153,7 +201,7 @@ public class PixelVip {
         }
     }
 
-    public void reloadCmd(CommandSource src) {
+    public void reloadCmd() {
         logger.info("Reloading config module...");
         config.reloadVips();
         reloadVipTask();
@@ -165,13 +213,13 @@ public class PixelVip {
     @Listener
     public void onStopServer(GameStoppingServerEvent e) {
         task.cancel();
-        config.saveConfigAll();
+        getConfig().saveConfigAll();
         logger.info(util.toColor("&aPixelVip disabled!&r"));
     }
 
     @Listener
     public void onReloadPlugins(GameReloadEvent event) {
-        this.config = new PVConfig(this, configDir, defConfig);
+        this.config = new PVConfig(factory);
         this.cmds.reload();
         reloadVipTask();
         logger.info(util.toColor("&aPixelVip reloaded"));
@@ -182,16 +230,13 @@ public class PixelVip {
         User p = e.getTargetUser();
 
         if (getConfig().queueCmds()) {
-            game.getScheduler().createSyncExecutor(this).schedule(new Runnable() {
+            getScheduler().createSyncExecutor(this).schedule(new Runnable() {
                 @Override
                 public void run() {
                     List<String> qcmds = getConfig().getQueueCmds(p.getUniqueId().toString());
                     qcmds.forEach((cmd) -> {
-                        game.getScheduler().createSyncExecutor(this).schedule(new Runnable() {
-                            @Override
-                            public void run() {
-                                Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmd);
-                            }
+                        getScheduler().createSyncExecutor(this).schedule(() -> {
+                            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmd);
                         }, 500, TimeUnit.MILLISECONDS);
                     });
                 }
@@ -206,7 +251,7 @@ public class PixelVip {
             logger.info("-> Task stoped");
         }
 
-        task = game.getScheduler().createTaskBuilder().interval(60, TimeUnit.SECONDS).execute(t -> {
+        task = getScheduler().createTaskBuilder().interval(60, TimeUnit.SECONDS).execute(t -> {
             getConfig().getVipList().forEach((uuid, value) -> {
                 Optional<User> p = util.getUser(UUID.fromString(uuid));
                 getConfig().getVipList().get(uuid).forEach((vipInfo) -> {
