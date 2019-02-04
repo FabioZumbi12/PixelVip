@@ -1,15 +1,11 @@
 package br.net.fabiozumbi12.pixelvip.sponge;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.ClickAction;
-import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -72,7 +68,7 @@ public class PVUtil {
         return uss.get(uuid);
     }
 
-    public CommandResult sendVipTime(CommandSource src, String UUID, String name) throws CommandException {
+    public Text sendVipTime(CommandSource src, String UUID, String name) {
         List<String[]> vips = plugin.getConfig().getVipInfo(UUID);
         if (vips.size() > 0) {
             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipInfoFor") + name + ":"));
@@ -87,9 +83,9 @@ public class PVUtil {
                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeActive") + vipInfo[3]));
                 src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             });
-            return CommandResult.success();
+            return Text.of();
         } else {
-            throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "playerNotVip")));
+            return plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "playerNotVip"));
         }
     }
 
@@ -129,13 +125,13 @@ public class PVUtil {
         src.sendMessage(text);
     }
 
-    public boolean paymentItems(HashMap<Integer,String> items, Player player, String payment, String transCode){
+    public boolean paymentItems(HashMap<Integer, String> items, Player player, String payment, String transCode) {
         int log = 0;
-        for (Map.Entry<Integer, String> item:items.entrySet()){
+        for (Map.Entry<Integer, String> item : items.entrySet()) {
             int multipl = item.getKey();
             String key = item.getValue();
 
-            for (int i = 0; i < multipl; i++){
+            for (int i = 0; i < multipl; i++) {
                 String cmd = "givepackage " + player.getName() + " " + key;
                 ExecuteCmd(cmd, null);
                 plugin.addLog("API:" + payment + " | " + player.getName() + " | Item Cmd:" + cmd + " | Transaction Code: " + transCode);
@@ -144,8 +140,8 @@ public class PVUtil {
         }
 
         if (log == 0) {
-            player.sendMessage(toText(plugin.getUtil().toColor(plugin.getConfig().getLang("_pluginTag", "payment.noitems")
-                    .replace("{payment}",payment)
+            player.sendMessage(toText(plugin.getUtil().toColor(plugin.getConfig().getLang("_pluginTag", "pay-noitems")
+                    .replace("{payment}", payment)
                     .replace("{transaction}", transCode))));
             return false;
         }
@@ -159,6 +155,6 @@ public class PVUtil {
         plugin.addLog("Running Command - \"" + cmd + "\"");
         String finalCmd = cmd;
         Sponge.getScheduler().createTaskBuilder().execute(() -> Sponge.getCommandManager().process(Sponge.getServer().getConsole(), finalCmd))
-        .submit(plugin);
+                .submit(plugin);
     }
 }

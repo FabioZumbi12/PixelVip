@@ -11,52 +11,52 @@ import java.util.Map;
 public class PVPackage {
     private PixelVip plugin;
     private String id;
-    private HashMap<String,List<String>> variants;
+    private HashMap<String, List<String>> variants;
     private PackagesCategory packages;
     private PackagesCategory.Packs pack;
 
-    public PVPackage(PixelVip plugin, String id, PackagesCategory packages){
+    public PVPackage(PixelVip plugin, String id, PackagesCategory packages) {
         this.packages = packages;
         this.plugin = plugin;
         this.id = id;
         this.pack = packages.packages.get(id);
 
-        if (!packages.packages.get(id).variants.options.isEmpty()){
+        if (!packages.packages.get(id).variants.options.isEmpty()) {
             variants = new HashMap<>();
-            for (Map.Entry<String, PackagesCategory.Packs.VariantsCat.OptionsCat> var:packages.packages.get(id).variants.options.entrySet()){
+            for (Map.Entry<String, PackagesCategory.Packs.VariantsCat.OptionsCat> var : packages.packages.get(id).variants.options.entrySet()) {
                 variants.put(var.getKey(), var.getValue().commands);
             }
         }
     }
 
-    public String getVarMessage(){
+    public String getVarMessage() {
         return this.pack.variants.message;
     }
 
-    public String getID(){
+    public String getID() {
         return this.id;
     }
 
-    public List<String> getCommands(){
+    public List<String> getCommands() {
         return this.pack.commands;
     }
 
-    public HashMap<String,List<String>> getVariants(){
+    public HashMap<String, List<String>> getVariants() {
         return this.variants;
     }
 
-    public void runCommands(Player player){
-        for (String cmd:this.pack.commands){
+    public void runCommands(Player player) {
+        for (String cmd : this.pack.commands) {
             plugin.getUtil().ExecuteCmd(cmd, player);
         }
     }
 
-    public boolean hasVariant(String variant){
+    public boolean hasVariant(String variant) {
         return variants != null && variants.containsKey(variant);
     }
 
-    public void giveVariant(Player player, String var){
-        for (String cmd:variants.get(var))
+    public void giveVariant(Player player, String var) {
+        for (String cmd : variants.get(var))
             plugin.getUtil().ExecuteCmd(cmd, player);
 
         List<String> pending = this.packages.pending_variants.get(player.getName());

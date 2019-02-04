@@ -26,6 +26,10 @@ public class DatabaseCategory {
 
         @Setting
         public VipKeysCat keys = new VipKeysCat();
+        @Setting
+        public VipCat vips = new VipCat();
+        @Setting
+        public TransCat transactions = new TransCat();
 
         @ConfigSerializable
         public static class VipKeysCat {
@@ -35,6 +39,7 @@ public class DatabaseCategory {
 
             @Setting
             public ColumsKeysCat columns = new ColumsKeysCat();
+
             @ConfigSerializable
             public static class ColumsKeysCat {
 
@@ -55,9 +60,6 @@ public class DatabaseCategory {
             }
         }
 
-        @Setting
-        public VipCat vips = new VipCat();
-
         @ConfigSerializable
         public static class VipCat {
 
@@ -66,6 +68,7 @@ public class DatabaseCategory {
 
             @Setting
             public ColumsVipCat columns = new ColumsVipCat();
+
             @ConfigSerializable
             public static class ColumsVipCat {
 
@@ -91,9 +94,6 @@ public class DatabaseCategory {
             }
         }
 
-        @Setting
-        public TransCat transactions = new TransCat();
-
         @ConfigSerializable
         public static class TransCat {
 
@@ -102,6 +102,7 @@ public class DatabaseCategory {
 
             @Setting
             public ColumsTransCat columns = new ColumsTransCat();
+
             @ConfigSerializable
             public static class ColumsTransCat {
 

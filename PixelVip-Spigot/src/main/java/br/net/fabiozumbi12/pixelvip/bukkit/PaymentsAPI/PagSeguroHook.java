@@ -7,13 +7,11 @@ import br.com.uol.pagseguro.api.common.domain.TransactionStatus;
 import br.com.uol.pagseguro.api.credential.Credential;
 import br.com.uol.pagseguro.api.transaction.search.TransactionDetail;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 public class PagSeguroHook implements PaymentModel {
     private PixelVip plugin;
@@ -65,7 +63,7 @@ public class PagSeguroHook implements PaymentModel {
             HashMap<Integer, String> items = new HashMap<>();
             for (PaymentItem item : trans.getItems()) {
                 String[] ids = item.getId().split(" ");
-                for (String id:ids)
+                for (String id : ids)
                     if (id.startsWith("#"))
                         items.put(item.getQuantity(), id.substring(1));
             }

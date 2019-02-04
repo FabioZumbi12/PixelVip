@@ -1,7 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import urn.ebay.api.PayPalAPI.GetTransactionDetailsReq;
 import urn.ebay.api.PayPalAPI.GetTransactionDetailsRequestType;
@@ -23,8 +22,8 @@ public class PayPalHook implements PaymentModel {
         this.plugin = plugin;
         this.sandbox = plugin.getConfig().getBoolean("apis.paypal.sandbox");
         try {
-            Map<String, String> customProperties = new HashMap<String, String>(){{
-                put("mode",sandbox ? "sandbox" : "live");
+            Map<String, String> customProperties = new HashMap<String, String>() {{
+                put("mode", sandbox ? "sandbox" : "live");
                 put("acct1.UserName", plugin.getConfig().getString("apis.paypal.username"));
                 put("acct1.Password", plugin.getConfig().getString("apis.paypal.password"));
                 put("acct1.Signature", plugin.getConfig().getString("apis.paypal.signature"));
@@ -52,7 +51,7 @@ public class PayPalHook implements PaymentModel {
             getTransactionDetailsReq.setGetTransactionDetailsRequest(requestType);
             GetTransactionDetailsResponseType trans = payPalAPIInterfaceServiceService.getTransactionDetails(getTransactionDetailsReq);
 
-            if (!trans.getErrors().isEmpty()){
+            if (!trans.getErrors().isEmpty()) {
                 return false;
             }
 
@@ -76,9 +75,9 @@ public class PayPalHook implements PaymentModel {
             }
 
             HashMap<Integer, String> items = new HashMap<>();
-            for (PaymentItemType pay:trans.getPaymentTransactionDetails().getPaymentItemInfo().getPaymentItem()) {
+            for (PaymentItemType pay : trans.getPaymentTransactionDetails().getPaymentItemInfo().getPaymentItem()) {
                 String[] ids = pay.getName().split(" ");
-                for (String id:ids)
+                for (String id : ids)
                     if (id.startsWith("#"))
                         items.put(Integer.parseInt(pay.getQuantity()), id.substring(1));
             }

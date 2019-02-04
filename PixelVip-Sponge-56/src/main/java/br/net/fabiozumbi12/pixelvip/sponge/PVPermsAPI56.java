@@ -6,6 +6,11 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 public class PVPermsAPI56 implements PVPermsAPI {
     private PermissionService permissionService;
 
@@ -13,23 +18,28 @@ public class PVPermsAPI56 implements PVPermsAPI {
         this.permissionService = Sponge.getGame().getServiceManager().getRegistration(PermissionService.class).get().getProvider();
     }
 
-    public String getGroup(User player) {
+    public List<String> getPlayerGroups(User player) {
+        List<String> subs = new ArrayList<>();
         for (Subject sub : player.getParents()) {
-            if (sub.getContainingCollection().equals(getGroups()) && (sub.getIdentifier() != null)) {
-                return sub.getIdentifier();
+            if (sub.getContainingCollection().equals(getGroups()) && sub.getIdentifier() != null) {
+                subs.add(sub.getIdentifier());
             }
+        }
+        return subs;
+    }
+
+    public String getHighestGroup(User player) {
+        HashMap<Integer, String> subs = new HashMap<>();
+        for (Subject sub : player.getParents()) {
+            if (sub.getContainingCollection().equals(getGroups()) && sub.getIdentifier() != null) {
+                subs.put(sub.getParents().size(), sub.getIdentifier());
+            }
+        }
+        if (!subs.isEmpty()) {
+            return subs.get(Collections.max(subs.keySet()));
         }
         return null;
     }
-	/*
-	public Subject getGroups(User player){
-		for (Subject sub:player.getParents()){
-			if (sub.getContainingCollection().equals(getGroups()) && (sub.getIdentifier() != null)){				
-				return sub;
-			}
-		}
-		return null;	
-	}*/
 
     public SubjectCollection getGroups() {
         return permissionService.getGroupSubjects();

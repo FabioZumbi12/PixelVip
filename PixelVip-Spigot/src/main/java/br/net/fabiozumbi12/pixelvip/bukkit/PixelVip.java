@@ -45,7 +45,7 @@ public class PixelVip extends JavaPlugin implements Listener {
     private PixelVipBungee pvBungee;
     private PackageManager packageManager;
 
-    public PackageManager getPackageManager(){
+    public PackageManager getPackageManager() {
         return this.packageManager;
     }
 
@@ -201,7 +201,7 @@ public class PixelVip extends JavaPlugin implements Listener {
             logger.info("-> Task stoped");
         }
 
-        task = serv.getScheduler().scheduleSyncRepeatingTask(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
+        task = serv.getScheduler().runTaskTimerAsynchronously(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             getPVConfig().getVipList().get(uuid).forEach((vipInfo) -> {
                 long dur = new Long(vipInfo[0]);
@@ -216,13 +216,24 @@ public class PixelVip extends JavaPlugin implements Listener {
                     Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
                 }
             });
-        }), 0, 20 * 60);
+        }), 0, 20 * 60).getTaskId();
         logger.info("-> Task started");
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+
+        //check player uuid async
+        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+                getPVConfig().getVipList().forEach((key, value) -> {
+                    for (String[] vipInfo : value) {
+                        String oldUUid = getPVConfig().getVipUUID(p.getName());
+                        if (vipInfo[4].equals(p.getName()) && !p.getUniqueId().toString().equals(oldUUid)) {
+                            getPVConfig().changeUUIDs(oldUUid, p.getUniqueId().toString());
+                        }
+                    }
+                }));
 
         //check player groups if is on vip group without vip info
         serv.getScheduler().runTaskLater(plugin, () -> {

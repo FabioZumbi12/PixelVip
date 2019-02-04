@@ -8,16 +8,11 @@ import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.sponge.cmds.PVCommands;
 import br.net.fabiozumbi12.pixelvip.sponge.config.PVConfig;
 import com.google.inject.Inject;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.ConfigDir;
@@ -53,25 +48,29 @@ import static org.spongepowered.api.Sponge.*;
                 @Dependency(id = "MercadoPagoAPI", optional = true),
                 @Dependency(id = "PayPalAPI", optional = true)})
 public class PixelVip {
+    private static PixelVip plugin;
+    @Inject
+    public GuiceObjectMapperFactory factory;
+    public HashMap<String, String> processTrans;
     PVPermsAPI perms;
     @Inject
     private Logger logger;
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path configDir;
-
     @Inject
     @DefaultConfig(sharedRoot = false)
     private File defConfig;
-
-    @Inject
-    public GuiceObjectMapperFactory factory;
     private PVConfig config;
     private PVUtil util;
     private PVCommands cmds;
     private Task task;
     private List<PaymentModel> payments;
-    public HashMap<String, String> processTrans;
+    private PackageManager packageManager;
+
+    public static PixelVip get() {
+        return plugin;
+    }
 
     public Logger getLogger() {
         return logger;
@@ -83,11 +82,6 @@ public class PixelVip {
 
     public PVConfig getConfig() {
         return config;
-    }
-
-    private static PixelVip plugin;
-    public static PixelVip get(){
-        return plugin;
     }
 
     public PVPermsAPI getPerms() {
@@ -106,9 +100,7 @@ public class PixelVip {
         return this.payments;
     }
 
-    private PackageManager packageManager;
-
-    public PackageManager getPackageManager(){
+    public PackageManager getPackageManager() {
         return this.packageManager;
     }
 
@@ -130,7 +122,10 @@ public class PixelVip {
             CommandSpec spongevip = CommandSpec.builder()
                     .description(Text.of("Use to see the plugin info and reload."))
                     .permission("pixelvip.cmd.reload")
-                    .arguments(GenericArguments.optional(GenericArguments.string(Text.of("reload"))))
+                    .arguments(GenericArguments.optional(GenericArguments.choices(Text.of("reload"),
+                            new HashMap<String, String>(){{
+                                put("reload","reload");
+                    }})))
                     .executor((src, args) -> {
                         {
                             if (args.hasAny("reload")) {
@@ -188,7 +183,7 @@ public class PixelVip {
         //init perms
         try {
             String v = getPlatform().getContainer(Platform.Component.API).getVersion().get();
-            getLogger().info("Sponge version " + v);
+            logger.info("Sponge version " + v);
 
             if (v.startsWith("5") || v.startsWith("6")) {
                 this.perms = (PVPermsAPI) Class.forName("br.net.fabiozumbi12.pixelvip.sponge.PVPermsAPI56").newInstance();
@@ -204,6 +199,10 @@ public class PixelVip {
     public void reloadCmd() {
         logger.info("Reloading config module...");
         config.reloadVips();
+
+        //package manager
+        packageManager = new PackageManager(this, factory);
+
         reloadVipTask();
 
         logger.info(util.toColor("We have " + config.getVipList().size() + " active Vips"));
@@ -229,16 +228,25 @@ public class PixelVip {
     public void onPlayerJoin(ClientConnectionEvent.Login e) {
         User p = e.getTargetUser();
 
+        //check player uuid async
+        Sponge.getScheduler().createAsyncExecutor(this).schedule(() ->
+                getConfig().getVipList().forEach((key, value) -> {
+                    for (String[] vipInfo : value) {
+                        String oldUUid = getConfig().getVipUUID(p.getName());
+                        if (vipInfo[4].equals(p.getName()) && !p.getUniqueId().toString().equals(oldUUid)) {
+                            getConfig().changeUUIDs(oldUUid, p.getUniqueId().toString());
+                        }
+                    }
+                }), 0, TimeUnit.SECONDS);
+
         if (getConfig().queueCmds()) {
             getScheduler().createSyncExecutor(this).schedule(new Runnable() {
                 @Override
                 public void run() {
                     List<String> qcmds = getConfig().getQueueCmds(p.getUniqueId().toString());
-                    qcmds.forEach((cmd) -> {
-                        getScheduler().createSyncExecutor(this).schedule(() -> {
-                            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmd);
-                        }, 500, TimeUnit.MILLISECONDS);
-                    });
+                    qcmds.forEach((cmd) -> getScheduler().createSyncExecutor(this).schedule(() -> {
+                        Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmd);
+                    }, 500, TimeUnit.MILLISECONDS));
                 }
             }, 3, TimeUnit.SECONDS);
         }
@@ -257,20 +265,21 @@ public class PixelVip {
                 getConfig().getVipList().get(uuid).forEach((vipInfo) -> {
                     long dur = new Long(vipInfo[0]);
                     if (p.isPresent()) {
-                        if (!perms.getGroup(p.get()).equals(vipInfo[1])) {
-                            config.runChangeVipCmds(uuid, vipInfo[1], perms.getGroup(p.get()));
+                        User user = p.get();
+                        if (!perms.getPlayerGroups(user).contains(vipInfo[1])) {
+                            config.runChangeVipCmds(uuid, vipInfo[1], perms.getHighestGroup(p.get()));
                         }
                         if (dur <= util.getNowMillis()) {
-                            getConfig().removeVip(p.get(), Optional.of(vipInfo[1]));
+                            getConfig().removeVip(p.get().getUniqueId().toString(), Optional.of(vipInfo[1]));
                             if (p.get().isOnline()) {
                                 p.get().getPlayer().get().sendMessage(util.toText(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
                             }
-                            getLogger().info(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.get().getName() + " &bhas ended!"));
+                            logger.info(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.get().getName() + " &bhas ended!"));
                         }
                     }
                 });
             });
-        }).submit(this);
+        }).async().submit(this);
         logger.info("-> Task started");
     }
 

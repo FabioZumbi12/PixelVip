@@ -1,6 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -169,11 +170,13 @@ public class PVDataFile implements PVDataManager {
     @Override
     public void removeKey(String key) {
         keysFile.set("keys.keys." + key, null);
+        saveKeys();
     }
 
     @Override
     public void removeItemKey(String key) {
         keysFile.set("keys.itemKeys." + key, null);
+        saveKeys();
     }
 
     @Override
@@ -197,6 +200,7 @@ public class PVDataFile implements PVDataManager {
         id = id.toLowerCase();
         vipsFile.set("activeVips." + group + "." + id + ".active", active);
         addRawVip(group, id, pgroup, duration, nick, expires);
+        saveVips();
     }
 
     @Override
@@ -206,6 +210,7 @@ public class PVDataFile implements PVDataManager {
         vipsFile.set("activeVips." + group + "." + id + ".duration", duration);
         vipsFile.set("activeVips." + group + "." + id + ".nick", nick);
         vipsFile.set("activeVips." + group + "." + id + ".expires-on-exact", expires);
+        saveVips();
     }
 
     @Override
@@ -213,11 +218,13 @@ public class PVDataFile implements PVDataManager {
         keysFile.set("keys.keys." + key + ".group", group);
         keysFile.set("keys.keys." + key + ".duration", duration);
         keysFile.set("keys.keys." + key + ".uses", uses);
+        saveKeys();
     }
 
     @Override
     public void addRawItemKey(String key, List<String> cmds) {
         keysFile.set("keys.itemKeys." + key + ".cmds", cmds);
+        saveKeys();
     }
 
     @Override
@@ -238,11 +245,13 @@ public class PVDataFile implements PVDataManager {
     @Override
     public void setVipActive(String id, String vip, boolean active) {
         vipsFile.set("activeVips." + vip + "." + id.toLowerCase() + ".active", active);
+        saveVips();
     }
 
     @Override
     public void setVipDuration(String id, String vip, long duration) {
         vipsFile.set("activeVips." + vip + "." + id.toLowerCase() + ".duration", duration);
+        saveVips();
     }
 
     @Override
@@ -253,11 +262,13 @@ public class PVDataFile implements PVDataManager {
     @Override
     public void setVipKitCooldown(String id, String vip, long cooldown) {
         vipsFile.set("activeVips." + vip + "." + id + ".kit-cooldown", cooldown);
+        saveVips();
     }
 
     @Override
     public void removeVip(String id, String vip) {
         vipsFile.set("activeVips." + vip + "." + id, null);
+        saveVips();
     }
 
     @Override
@@ -281,6 +292,15 @@ public class PVDataFile implements PVDataManager {
     }
 
     @Override
+    public void changeUUID(String oldUUID, String newUUID) {
+        plugin.getPVConfig().getGroupList().stream().filter(k -> vipsFile.contains("activeVips." + k + "." + oldUUID)).forEach(key -> {
+            ConfigurationSection config = vipsFile.getConfigurationSection("activeVips." + key + "." + oldUUID);
+            vipsFile.set("activeVips." + key + "." + oldUUID, null);
+            vipsFile.set("activeVips." + key + "." + newUUID, config);
+        });
+    }
+
+    @Override
     public String getVipUUID(String player) {
         Iterator<String> it = vipsFile.getKeys(true).stream().filter(key -> key.contains(".nick")).iterator();
         while (it.hasNext()) {
@@ -288,7 +308,7 @@ public class PVDataFile implements PVDataManager {
             if (vipsFile.getString(key).equals(player)) {
                 Pattern pairRegex = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}");
                 Matcher matcher = pairRegex.matcher(key);
-                while (matcher.find()) {
+                if (matcher.find()) {
                     return matcher.group(0).toLowerCase();
                 }
             }

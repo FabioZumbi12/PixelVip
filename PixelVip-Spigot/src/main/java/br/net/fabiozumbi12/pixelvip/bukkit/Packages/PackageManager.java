@@ -12,18 +12,18 @@ public class PackageManager {
     private YamlConfiguration packages;
     private PixelVip plugin;
 
-    public PackageManager(PixelVip plugin){
+    public PackageManager(PixelVip plugin) {
         this.plugin = plugin;
 
         packages = new YamlConfiguration();
         File fPack = new File(plugin.getDataFolder(), "packages.yml");
         try {
-            if (!fPack.exists()){
+            if (!fPack.exists()) {
                 fPack.createNewFile();
             }
 
             packages.load(fPack);
-            if (!packages.contains("packages")){
+            if (!packages.contains("packages")) {
                 packages.set("pending-variants", new HashMap<>());
                 packages.set("packages.999.commands", Arrays.asList("givevip {p} vip1 10", "eco add {p} 1000"));
                 packages.set("packages.999.variants.options", new HashMap<>());
@@ -35,7 +35,7 @@ public class PackageManager {
                 packages.set("packages.998.variants.message", "&aSelect your tag gender (click): ");
                 packages.save(fPack);
             }
-            if (!packages.contains("strings")){
+            if (!packages.contains("strings")) {
                 packages.set("strings.choose", "&bClick in one of the available variants to choose one: ");
                 packages.set("strings.hover-info", "&eClick to select this variant!");
                 packages.set("strings.use-cmd", "&bUse the following command to select your variant: &e\\givepackage %s [variant]");
@@ -49,19 +49,19 @@ public class PackageManager {
         }
     }
 
-    public boolean hasPendingPlayer(Player player){
+    public boolean hasPendingPlayer(Player player) {
         return !packages.getStringList("pending-variants." + player.getName()).isEmpty();
     }
 
-    public List<String> getPendingVariant(Player player){
+    public List<String> getPendingVariant(Player player) {
         return this.packages.getStringList("pending-variants." + player.getName());
     }
 
-    public YamlConfiguration getPackages(){
+    public YamlConfiguration getPackages() {
         return this.packages;
     }
 
-    public PVPackage getPackage(String id){
+    public PVPackage getPackage(String id) {
         if (packages.contains("packages." + id))
             return new PVPackage(plugin, id, packages);
         return null;

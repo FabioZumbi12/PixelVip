@@ -19,7 +19,6 @@ public interface PVDataManager {
 
     HashMap<String, Map<String, String>> getAllTrans();
 
-
     void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires);
 
     void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active);
@@ -65,6 +64,8 @@ public interface PVDataManager {
     boolean isVipActive(String uuid, String vip);
 
     String getVipUUID(String player);
+
+    void changeUUID(String oldUUID, String newUUID);
 
     void closeCon();
 }

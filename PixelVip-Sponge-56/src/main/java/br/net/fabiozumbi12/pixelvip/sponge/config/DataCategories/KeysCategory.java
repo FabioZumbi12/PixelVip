@@ -1,4 +1,4 @@
-package br.net.fabiozumbi12.pixelvip.sponge.config;
+package br.net.fabiozumbi12.pixelvip.sponge.config.DataCategories;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
@@ -12,34 +12,37 @@ public class KeysCategory {
 
     @Setting(comment = "All available item keys will be here.")
     public Map<String, ItemKeysCat> itemKeys = new HashMap<>();
-
-    @ConfigSerializable
-    public static class ItemKeysCat {
-        public ItemKeysCat(){}
-        public ItemKeysCat(List<String> cmds){
-            this.cmds = cmds;
-        }
-        @Setting
-        public List<String> cmds;
-    }
-
     @Setting(comment = "All available keys will be here.")
     public Map<String, KeysCat> keys = new HashMap<>();
 
     @ConfigSerializable
+    public static class ItemKeysCat {
+        @Setting
+        public List<String> cmds;
+
+        public ItemKeysCat() {
+        }
+
+        public ItemKeysCat(List<String> cmds) {
+            this.cmds = cmds;
+        }
+    }
+
+    @ConfigSerializable
     public static class KeysCat {
-        public KeysCat(){}
-        public KeysCat(String duration, long group, int uses){
+        @Setting
+        public long duration;
+        @Setting
+        public String group;
+        @Setting
+        public int uses;
+        public KeysCat() {
+        }
+        public KeysCat(long duration, String group, int uses) {
             this.duration = duration;
             this.group = group;
             this.uses = uses;
         }
-        @Setting
-        public String duration;
-        @Setting
-        public long group;
-        @Setting
-        public int uses;
     }
 
 }

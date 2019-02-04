@@ -13,14 +13,15 @@ public class SpigotText {
         this.text = new TextComponent();
     }
 
-    public SpigotText(String text, String click, String run, String hover){
+    public SpigotText(String text, String click, String run, String hover) {
         this.text = new TextComponent(text);
         if (click != null) this.text.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, click));
         if (run != null) this.text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, run));
-        if (hover != null) this.text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(hover)));
+        if (hover != null)
+            this.text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(hover)));
     }
 
-    public TextComponent getText(){
+    public TextComponent getText() {
         return this.text;
     }
 

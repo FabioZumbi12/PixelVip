@@ -124,13 +124,13 @@ public class PVUtil {
         Bukkit.getScheduler().runTask(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), finalCmd));
     }
 
-    public boolean paymentItems(HashMap<Integer,String> items, Player player, String payment, String transCode){
+    public boolean paymentItems(HashMap<Integer, String> items, Player player, String payment, String transCode) {
         int log = 0;
-        for (Map.Entry<Integer, String> item:items.entrySet()){
+        for (Map.Entry<Integer, String> item : items.entrySet()) {
             int multipl = item.getKey();
             String key = item.getValue();
 
-            for (int i = 0; i < multipl; i++){
+            for (int i = 0; i < multipl; i++) {
                 String cmd = "givepackage " + player.getName() + " " + key;
                 ExecuteCmd(cmd, null);
                 plugin.addLog("API:" + payment + " | " + player.getName() + " | Item Cmd:" + cmd + " | Transaction Code: " + transCode);
@@ -140,7 +140,7 @@ public class PVUtil {
 
         if (log == 0) {
             player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.noitems")
-                    .replace("{payment}",payment)
+                    .replace("{payment}", payment)
                     .replace("{transaction}", transCode)));
             return false;
         }

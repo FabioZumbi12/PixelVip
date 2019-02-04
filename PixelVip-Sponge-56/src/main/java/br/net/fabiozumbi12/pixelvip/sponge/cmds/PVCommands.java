@@ -14,8 +14,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class PVCommands {
@@ -49,42 +47,44 @@ public class PVCommands {
                 .description(Text.of("List all available packages."))
                 .permission("pixelvip.cmd.listpackages")
                 .executor((src, args) -> {
-                    for (String pkg:plugin.getPackageManager().getPackages().packages.keySet()){
+                    for (String pkg : plugin.getPackageManager().getPackages().packages.keySet()) {
                         src.sendMessage(plugin.getUtil().toText("&aID: " + pkg + " - Variants: " + (plugin.getPackageManager().getPackage(pkg).getVariants() != null)));
                     }
                     return CommandResult.success();
-                        }).build();
+                }).build();
     }
 
     private CommandSpec getVariant() {
         return CommandSpec.builder()
                 .description(Text.of("Allow player to get a pendent variant from a previous key activation"))
                 .permission("pixelvip.cmd.player")
-                .arguments(GenericArguments.string(Text.of("id")), GenericArguments.string(Text.of("variant")))
+                .arguments(GenericArguments.string(Text.of("id")),
+                        GenericArguments.string(Text.of("variant")))
                 .executor((src, args) -> {
-                    PackagesCategory packages = PixelVip.get().getPackageManager().getPackages();
-                    if (src instanceof Player){
-                        Player p = (Player)src;
-                        String id = args.<String>getOne("id").get();
-                        String variant = args.<String>getOne("variant").get();
-                        if (plugin.getPackageManager().hasPendingPlayer(p)){
-                            for (String idv:plugin.getPackageManager().getPendingVariant(p)){
-                                if (idv.equalsIgnoreCase(id)){
-                                    PVPackage pkg = plugin.getPackageManager().getPackage(idv);
-                                    if (pkg.hasVariant(variant)){
-                                        pkg.giveVariant(p, variant);
-                                    } else {
-                                        throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-pendent")), true);
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                        PackagesCategory packages = PixelVip.get().getPackageManager().getPackages();
+                        if (src instanceof Player) {
+                            Player p = (Player) src;
+                            String id = args.<String>getOne("id").get();
+                            String variant = args.<String>getOne("variant").get();
+                            if (plugin.getPackageManager().hasPendingPlayer(p)) {
+                                for (String idv : plugin.getPackageManager().getPendingVariant(p)) {
+                                    if (idv.equalsIgnoreCase(id)) {
+                                        PVPackage pkg = plugin.getPackageManager().getPackage(idv);
+                                        if (pkg.hasVariant(variant)) {
+                                            pkg.giveVariant(p, variant);
+                                        } else {
+                                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-pendent")));
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
+                            } else {
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-pendent")));
                             }
-                            return CommandResult.success();
-                        } else {
-                            throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-pendent")), true);
                         }
-                    }
-                    throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-package")), true);
+                    });
+                    return CommandResult.success();
                 }).build();
     }
 
@@ -92,37 +92,41 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Gives a package to player."))
                 .permission("pixelvip.cmd.givepackage")
-                .arguments(GenericArguments.player(Text.of("player")), GenericArguments.string(Text.of("id")))
+                .arguments(GenericArguments.player(Text.of("player")),
+                        GenericArguments.string(Text.of("id")))
                 .executor((src, args) -> {
-                    Player p = args.<Player>getOne("player").get();
-                    String id = args.<String>getOne("id").get();
-                    PackagesCategory packages = plugin.getPackageManager().getPackages();
-                    if (plugin.getPackageManager().getPackage(id) != null){
-                        PVPackage pkg = plugin.getPackageManager().getPackage(id);
-                        pkg.runCommands(p);
-                        if (pkg.getVariants() != null){
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                        Player p = args.<Player>getOne("player").get();
+                        String id = args.<String>getOne("id").get();
+                        PackagesCategory packages = plugin.getPackageManager().getPackages();
+                        if (plugin.getPackageManager().getPackage(id) != null) {
+                            PVPackage pkg = plugin.getPackageManager().getPackage(id);
+                            pkg.runCommands(p);
+                            if (pkg.getVariants() != null) {
 
-                            //add for usage
-                            List<String> pending = packages.pending_variants.getOrDefault(p.getName(), new ArrayList<>());
-                            pending.add(pkg.getID());
-                            packages.pending_variants.put(p.getName(),pending);
-                            PixelVip.get().getPackageManager().savePackages(packages);
+                                //add for usage
+                                List<String> pending = packages.pending_variants.getOrDefault(p.getName(), new ArrayList<>());
+                                pending.add(pkg.getID());
+                                packages.pending_variants.put(p.getName(), pending);
+                                PixelVip.get().getPackageManager().savePackages(packages);
 
-                            Text.Builder text = Text.builder().append(plugin.getUtil().toText(
-                                    plugin.getConfig().getLang("_pluginTag") +
-                                    pkg.getVarMessage()));
-                            String start = "";
-                            for (String var : pkg.getVariants().keySet()) {
-                                text.append(plugin.getUtil().toText(start + "&e"+var))
-                                        .onClick(TextActions.runCommand(String.format("/getvariant %s %s", pkg.getID(), var)))
-                                        .onHover(TextActions.showText(plugin.getUtil().toText(packages.strings.get("hover-info"))))
-                                        .build();
-                                if (start.equals("")) start = ", ";
+                                p.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + pkg.getVarMessage()));
+                                Text.Builder text = Text.builder();
+                                String start = "";
+                                for (String var : pkg.getVariants().keySet()) {
+                                    text.append(plugin.getUtil().toText(start + "&e" + var))
+                                            .onClick(TextActions.runCommand(String.format("/getvariant %s %s", pkg.getID(), var)))
+                                            .onHover(TextActions.showText(plugin.getUtil().toText(packages.strings.get("hover-info"))))
+                                            .build();
+                                    if (start.equals("")) start = ", ";
+                                }
+                                p.sendMessage(text.build());
                             }
-                            p.sendMessage(text.build());
+                            return;
                         }
-                    }
-                    throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-package")), true);
+                        src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag") + packages.strings.get("no-package")));
+                    });
+                    return CommandResult.success();
                 }).build();
     }
 
@@ -132,7 +136,7 @@ public class PVCommands {
                 .permission("pixelvip.cmd.delkey")
                 .arguments(GenericArguments.string(Text.of("key")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (args.getOne("key").isPresent()) {
                             String key = args.<String>getOne("key").get();
                             if (plugin.getConfig().delKey(key, 1) || plugin.getConfig().delItemKey(key)) {
@@ -140,10 +144,11 @@ public class PVCommands {
                             } else {
                                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noKeyRemoved")));
                             }
-                            return CommandResult.success();
+                            return;
                         }
-                        throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noKeyRemoved")), true);
-                    }
+                        src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noKeyRemoved")));
+                    });
+                    return CommandResult.success();
                 }).build();
     }
 
@@ -158,7 +163,7 @@ public class PVCommands {
                 .permission("pixelvip.cmd.newitemkey")
                 .arguments(GenericArguments.remainingJoinedStrings(Text.of("cmds")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         String[] cmdLine = args.<String>getOne("cmds").get().replace(", ", ",").split(",");
                         String key = plugin.getUtil().genKey(plugin.getConfig().root().configs.key_size);
                         plugin.getConfig().addItemKey(key, Arrays.asList(cmdLine));
@@ -170,8 +175,8 @@ public class PVCommands {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("item") + cmd));
                         }
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
-                        return CommandResult.success();
-                    }
+                    });
+                    return CommandResult.success();
                 }).build();
     }
 
@@ -183,10 +188,11 @@ public class PVCommands {
     private CommandSpec addItemKey() {
         return CommandSpec.builder()
                 .description(Text.of("Add items to keys."))
-                .permission("pixelvip.cmd.additemkey  ")
-                .arguments(GenericArguments.string(Text.of("key")), GenericArguments.remainingJoinedStrings(Text.of("cmds")))
+                .permission("pixelvip.cmd.additemkey")
+                .arguments(GenericArguments.string(Text.of("key")),
+                        GenericArguments.remainingJoinedStrings(Text.of("cmds")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         String key = args.<String>getOne("key").get();
                         String[] cmdLine = args.<String>getOne("cmds").get().replace(", ", ",").split(",");
                         plugin.getConfig().addItemKey(key, new ArrayList<String>(Arrays.asList(cmdLine)));
@@ -198,8 +204,8 @@ public class PVCommands {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("item") + cmd));
                         }
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
-                        return CommandResult.success();
-                    }
+                    });
+                    return CommandResult.success();
                 }).build();
     }
 
@@ -208,7 +214,7 @@ public class PVCommands {
                 .description(Text.of("List all player vips."))
                 .permission("pixelvip.cmd.newkey")
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         HashMap<String, List<String[]>> vips = plugin.getConfig().getVipList();
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "list-of-vips")));
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
@@ -223,12 +229,12 @@ public class PVCommands {
                                 src.sendMessage(plugin.getUtil().toText("&7> Player &3" + pname + "&7:"));
                                 src.sendMessage(plugin.getUtil().toText("  " + plugin.getConfig().getLang("timeGroup") + vipinfo[1]));
                                 src.sendMessage(plugin.getUtil().toText("  " + plugin.getConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
-                            } catch (Exception e) {
+                            } catch (Exception ignored) {
                             }
                         }));
                         src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
-                        return CommandResult.success();
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
 
@@ -265,22 +271,26 @@ public class PVCommands {
                         GenericArguments.longNum(Text.of("days")),
                         GenericArguments.optional(GenericArguments.integer(Text.of("uses"))))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+
                         if (args.hasAny("uses")) {
                             String group = args.<String>getOne("group").get();
                             long days = args.<Long>getOne("days").get();
                             int uses = args.<Integer>getOne("uses").get();
 
                             if (days <= 0) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                return;
                             }
 
                             if (uses <= 0) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                return;
                             }
 
                             if (!plugin.getConfig().groupExists(group)) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
+                                return;
                             }
                             String key = plugin.getUtil().genKey(plugin.getConfig().root().configs.key_size);
                             plugin.getConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), uses);
@@ -289,17 +299,18 @@ public class PVCommands {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeGroup") + group));
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("totalTime") + days));
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("infoUses") + uses));
-                            return CommandResult.success();
                         } else {
                             String group = args.<String>getOne("group").get();
                             long days = args.<Long>getOne("days").get();
 
                             if (days <= 0) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "moreThanZero")));
+                                return;
                             }
 
                             if (!plugin.getConfig().groupExists(group)) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
+                                return;
                             }
                             String key = plugin.getUtil().genKey(plugin.getConfig().root().configs.key_size);
                             plugin.getConfig().addKey(key, group, plugin.getUtil().dayToMillis(days), 1);
@@ -307,9 +318,9 @@ public class PVCommands {
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeKey") + key));
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeGroup") + group));
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("totalTime") + days));
-                            return CommandResult.success();
                         }
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -325,7 +336,7 @@ public class PVCommands {
                 .description(Text.of("List all available keys."))
                 .permission("pixelvip.cmd.listkeys")
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         Collection<String> keys = plugin.getConfig().getListKeys();
                         Collection<String> itemKeys = plugin.getConfig().getItemListKeys();
 
@@ -359,8 +370,8 @@ public class PVCommands {
                         } else {
                             src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
                         }
-                        return CommandResult.success();
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -376,7 +387,7 @@ public class PVCommands {
                 .permission("pixelvip.cmd.player")
                 .arguments(GenericArguments.string(Text.of("key")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (src instanceof Player) {
                             Player p = (Player) src;
                             String key = args.<String>getOne(Text.of("key")).get().toUpperCase();
@@ -384,15 +395,19 @@ public class PVCommands {
                                 for (PaymentModel pay : plugin.getPayments()) {
                                     plugin.processTrans.put(pay.getPayname(), key);
                                     if (pay.checkTransaction(p, key)) {
-                                        return CommandResult.success();
+                                        return;
                                     }
                                 }
                                 plugin.processTrans.remove(key);
                             }
-                            return plugin.getConfig().activateVip(p, key, "", 0, p.getName());
+                            Text result = plugin.getConfig().activateVip(p, key, "", 0, p.getName());
+                            if (!result.isEmpty())
+                                src.sendMessage(result);
+                            return;
                         }
-                        throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")));
-                    }
+                        src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")));
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -408,22 +423,33 @@ public class PVCommands {
                 .permission("pixelvip.cmd.player")
                 .arguments(GenericArguments.optional(GenericArguments.user(Text.of("player"))))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (!(src instanceof Player) && !args.hasAny("player")) {
-                            throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")), true);
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")));
+                            return;
                         }
                         if (src.hasPermission("pixelvip.cmd.player.others") && args.hasAny("player")) {
                             Optional<User> optp = args.getOne("player");
                             if (optp.isPresent()) {
                                 User p = optp.get();
-                                return plugin.getUtil().sendVipTime(src, p.getUniqueId().toString(), p.getName());
+                                String puuid = p.getUniqueId().toString();
+                                if (plugin.getConfig().getVipUUID(p.getName()) != null)
+                                    puuid = plugin.getConfig().getVipUUID(p.getName());
+                                Text result = plugin.getUtil().sendVipTime(src, puuid, p.getName());
+                                if (!result.isEmpty()) src.sendMessage(result);
                             } else {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noPlayersByName")));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noPlayersByName")));
                             }
                         } else {
-                            return plugin.getUtil().sendVipTime(src, ((Player) src).getUniqueId().toString(), src.getName());
+                            Player p = ((Player) src);
+                            String puuid = p.getUniqueId().toString();
+                            if (plugin.getConfig().getVipUUID(p.getName()) != null)
+                                puuid = plugin.getConfig().getVipUUID(p.getName());
+                            Text result = plugin.getUtil().sendVipTime(src, puuid, p.getName());
+                            if (!result.isEmpty()) src.sendMessage(result);
                         }
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -437,30 +463,33 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Use to remove a vip of player."))
                 .permission("pixelvip.cmd.removevip")
-                .arguments(GenericArguments.user(Text.of("player")), GenericArguments.optional(GenericArguments.string(Text.of("vip"))))
+                .arguments(GenericArguments.user(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices())))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (args.hasAny("vip")) {
-                            User optp = args.<User>getOne("player").get();
+                            Optional<User> optp = args.getOne("player");
                             Optional<String> group = args.getOne("vip");
                             if (!plugin.getConfig().groupExists(group.get())) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group.get()));
+                                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group.get()));
+                                return;
                             }
 
-                            if (optp != null) {
-                                plugin.getConfig().removeVip(optp, group);
+                            if (optp.isPresent()) {
+                                String puuid = plugin.getConfig().getVipUUID(optp.get().getName());
+                                plugin.getConfig().removeVip(puuid, group);
                                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipsRemoved")));
                             } else {
                                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noPlayersByName")));
                             }
-                            return CommandResult.success();
                         } else {
                             User optp = args.<User>getOne("player").get();
-                            plugin.getConfig().removeVip(optp, Optional.empty());
+                            String puuid = plugin.getConfig().getVipUUID(optp.getName());
+                            plugin.getConfig().removeVip(puuid, Optional.empty());
                             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipsRemoved")));
-                            return CommandResult.success();
                         }
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -474,31 +503,39 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Use to change your active VIP, if more keys activated."))
                 .permission("pixelvip.cmd.player")
-                .arguments(GenericArguments.string(Text.of("vip")))
+                .arguments(GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()),
+                        GenericArguments.optional(GenericArguments.user(Text.of("player"))))
                 .executor((src, args) -> {
-                    {
-                        if (src instanceof Player) {
-                            Player p = (Player) src;
-                            String group = args.<String>getOne("vip").get();
-                            if (!plugin.getConfig().groupExists(group)) {
-                                throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
-                            }
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                        String group = args.<String>getOne("vip").get();
+                        if (!plugin.getConfig().groupExists(group)) {
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
+                            return;
+                        }
 
-                            List<String[]> vipInfo = plugin.getConfig().getVipInfo(p.getUniqueId().toString());
+                        String puuid = "";
+                        if (src instanceof Player)
+                            puuid = ((Player) src).getUniqueId().toString();
 
-                            if (vipInfo.size() > 0) {
-                                for (String[] vip : vipInfo) {
-                                    if (vip[1].equalsIgnoreCase(group)) {
-                                        plugin.getConfig().setActive(p.getUniqueId().toString(), vip[1], vip[2]);
-                                        p.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "activeVipSetTo") + vip[1]));
-                                        return CommandResult.success();
-                                    }
+                        if (args.<User>getOne("player").isPresent() && src.hasPermission("pixelvip.cmd.setactive")) {
+                            String pname = args.<User>getOne("player").get().getName();
+                            puuid = plugin.getConfig().getVipUUID(pname);
+                        }
+
+                        List<String[]> vipInfo = plugin.getConfig().getVipInfo(puuid);
+
+                        if (vipInfo.size() > 0) {
+                            for (String[] vip : vipInfo) {
+                                if (vip[1].equalsIgnoreCase(group)) {
+                                    plugin.getConfig().setActive(puuid, vip[1], Arrays.asList(vip[2].split(",")));
+                                    src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "activeVipSetTo") + vip[1]));
+                                    return;
                                 }
                             }
-                            throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "noGroups") + group));
                         }
-                        throw new CommandException(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")));
-                    }
+                        src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "onlyPlayers")));
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -517,13 +554,18 @@ public class PVCommands {
                         GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()),
                         GenericArguments.longNum(Text.of("days")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         User p = args.<User>getOne("player").get();
                         String group = args.<String>getOne(Text.of("vip")).get();
                         long days = args.<Long>getOne(Text.of("days")).get();
 
-                        return plugin.getConfig().activateVip(p, null, group, days, p.getName());
-                    }
+                        Text result = plugin.getConfig().activateVip(p, null, group, days, p.getName());
+                        if (!result.isEmpty())
+                            src.sendMessage(result);
+                        else
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipAdded")));
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }
@@ -539,15 +581,15 @@ public class PVCommands {
                 .permission("pixelvip.cmd.setvip")
                 .arguments(GenericArguments.user(Text.of("player")), GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()), GenericArguments.longNum(Text.of("days")))
                 .executor((src, args) -> {
-                    {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         User p = args.<User>getOne("player").get();
                         String group = args.<String>getOne(Text.of("vip")).get();
                         long days = args.<Long>getOne(Text.of("days")).get();
 
                         plugin.getConfig().setVip(p.getUniqueId().toString(), group, plugin.getUtil().dayToMillis(days), p.getName());
                         src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipSet")));
-                        return CommandResult.success();
-                    }
+                    });
+                    return CommandResult.success();
                 })
                 .build();
     }

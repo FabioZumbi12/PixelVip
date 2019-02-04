@@ -63,7 +63,7 @@ public class PagSeguroHook implements PaymentModel {
             HashMap<Integer, String> items = new HashMap<>();
             for (PaymentItem item : trans.getItems()) {
                 String[] ids = item.getId().split(" ");
-                for (String id:ids)
+                for (String id : ids)
                     if (id.startsWith("#"))
                         items.put(item.getQuantity(), id.substring(1));
             }

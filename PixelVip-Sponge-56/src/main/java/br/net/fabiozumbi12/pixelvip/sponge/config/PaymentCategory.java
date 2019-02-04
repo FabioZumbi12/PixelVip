@@ -8,6 +8,10 @@ public class PaymentCategory {
 
     @Setting(comment = "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil")
     public PagSeguroCat pagseguro = new PagSeguroCat();
+    @Setting(comment = "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal")
+    public PayPalCat paypal = new PayPalCat();
+    @Setting(comment = "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago")
+    public MercadoPagoCat mercadopago = new MercadoPagoCat();
 
     @ConfigSerializable
     public static class PagSeguroCat {
@@ -23,9 +27,6 @@ public class PaymentCategory {
         @Setting
         public String ignoreOldest = "";
     }
-
-    @Setting(comment = "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal")
-    public PayPalCat paypal = new PayPalCat();
 
     @ConfigSerializable
     public static class PayPalCat {
@@ -43,9 +44,6 @@ public class PaymentCategory {
         @Setting
         public String ignoreOldest = "";
     }
-
-    @Setting(comment = "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago")
-    public MercadoPagoCat mercadopago = new MercadoPagoCat();
 
     @ConfigSerializable
     public static class MercadoPagoCat {

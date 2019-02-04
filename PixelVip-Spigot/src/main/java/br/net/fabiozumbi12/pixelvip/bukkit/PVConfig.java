@@ -255,6 +255,10 @@ public class PVConfig {
         plugin.saveConfig();
     }
 
+    public void changeUUIDs(String oldUUID, String newUUID) {
+        dataManager.changeUUID(oldUUID, newUUID);
+    }
+
     public void reloadVips() {
         if (dataManager != null) {
             dataManager.closeCon();

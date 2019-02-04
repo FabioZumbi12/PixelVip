@@ -1,7 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.sponge.db;
 
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
-import org.spongepowered.api.Sponge;
 
 import java.sql.*;
 import java.util.*;
@@ -140,7 +139,7 @@ public class PVDataMysql implements PVDataManager {
                 st.close();
             }
 
-            if (checkColummForAdd()){
+            if (checkColummForAdd()) {
                 plugin.getLogger().info("Updated the database to support the latest changes.");
             }
 
@@ -826,4 +825,16 @@ public class PVDataMysql implements PVDataManager {
         return trans;
     }
 
+    @Override
+    public void changeUUID(String oldUUID, String newUUID) {
+        try {
+            PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVUUID + "=? WHERE " + colVUUID + "=?");
+            st.setString(1, newUUID);
+            st.setString(2, oldUUID);
+            st.executeUpdate();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

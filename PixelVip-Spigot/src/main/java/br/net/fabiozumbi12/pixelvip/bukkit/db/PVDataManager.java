@@ -66,5 +66,7 @@ public interface PVDataManager {
 
     String getVipUUID(String player);
 
+    void changeUUID(String oldUUID, String newUUID);
+
     void closeCon();
 }

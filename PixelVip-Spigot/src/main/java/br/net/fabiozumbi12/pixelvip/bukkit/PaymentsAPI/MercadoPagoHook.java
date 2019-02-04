@@ -4,7 +4,6 @@ import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import com.google.gson.JsonElement;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPConfException;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.ParseException;
@@ -37,15 +36,15 @@ public class MercadoPagoHook implements PaymentModel {
     public boolean checkTransaction(Player player, String transCode) {
         boolean success;
         try {
-            JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/"+transCode).getJsonElementResponse();
+            JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/" + transCode).getJsonElementResponse();
 
             //plugin.getPVLogger().severe("All: " + payment_info);
-            if (payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equals("404")){
+            if (payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equals("404")) {
                 return false;
             }
 
             //check if approved
-            if(!payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("approved")){
+            if (!payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("approved")) {
                 player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.waiting").replace("{payment}", getPayname())));
                 return true;
             }
@@ -64,11 +63,11 @@ public class MercadoPagoHook implements PaymentModel {
 
             HashMap<Integer, String> items = new HashMap<>();
             String[] itemArr = payment_info.getAsJsonObject().getAsJsonPrimitive("description").getAsString().split(",");
-            for (String item:itemArr){
+            for (String item : itemArr) {
                 String[] qtdArr = item.split("x");
-                int qtd = Integer.parseInt(qtdArr[qtdArr.length-1].replace(" ",""));
+                int qtd = Integer.parseInt(qtdArr[qtdArr.length - 1].replace(" ", ""));
                 String[] ids = item.split(" ");
-                for (String id:ids)
+                for (String id : ids)
                     if (id.startsWith("#"))
                         items.put(qtd, id.substring(1));
             }

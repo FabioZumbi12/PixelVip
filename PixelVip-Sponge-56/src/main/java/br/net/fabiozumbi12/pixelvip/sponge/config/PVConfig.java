@@ -4,6 +4,7 @@ import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
 import br.net.fabiozumbi12.pixelvip.sponge.db.PVDataFile;
 import br.net.fabiozumbi12.pixelvip.sponge.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.sponge.db.PVDataMysql;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -12,17 +13,14 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -37,12 +35,10 @@ public class PVConfig {
 
     private int delay = 0;
     private HashMap<String, String> comandAlert = new HashMap<>();
-
-    public MainCategory root() {
-        return this.root;
-    }
+    private GuiceObjectMapperFactory factory;
 
     public PVConfig(GuiceObjectMapperFactory factory) {
+        this.factory = factory;
         try {
             Files.createDirectories(PixelVip.get().configDir().toPath());
             if (!defConfig.exists()) {
@@ -95,14 +91,22 @@ public class PVConfig {
         }
     }
 
+    public MainCategory root() {
+        return this.root;
+    }
+
+    public void changeUUIDs(String oldUUID, String newUUID) {
+        dataManager.changeUUID(oldUUID, newUUID);
+    }
+
     public void reloadVips() {
         if (dataManager != null) {
             dataManager.closeCon();
         }
-        if (PixelVip.get().getConfig().root.configs.database.type.equalsIgnoreCase("mysql")) {
+        if (root.configs.database.type.equalsIgnoreCase("mysql")) {
             dataManager = new PVDataMysql(PixelVip.get());
         } else {
-            dataManager = new PVDataFile(PixelVip.get());
+            dataManager = new PVDataFile(PixelVip.get(), factory);
         }
     }
 
@@ -227,13 +231,12 @@ public class PVConfig {
         }
     }
 
-    public CommandResult activateVip(User p, String key, String group, long days, String pname) throws CommandException {
-
+    public Text activateVip(User p, String key, String group, long days, String pname) {
         if (root.configs.useKeyWarning && p.isOnline() && (key != null && !key.isEmpty())) {
             if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)) {
                 comandAlert.put(p.getName(), key);
                 p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(getLang("_pluginTag", "confirmUsekey")));
-                return CommandResult.success();
+                return Text.of();
             }
             comandAlert.remove(p.getName());
         }
@@ -271,15 +274,15 @@ public class PVConfig {
                 p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(getLang("_pluginTag", "usesLeftActivation").replace("{uses}", "" + (uses - 1))));
             }
             enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname);
-            return CommandResult.success();
+            return Text.of();
         } else if (!group.equals("")) {
             enableVip(p, group, PixelVip.get().getUtil().dayToMillis(days), pname);
-            return CommandResult.success();
+            return Text.of();
         } else {
             if (!hasItemkey) {
-                throw new CommandException(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("_pluginTag", "invalidKey")));
+                return PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("_pluginTag", "invalidKey"));
             }
-            return CommandResult.success();
+            return Text.of();
         }
     }
 
@@ -302,9 +305,13 @@ public class PVConfig {
     }
 
     private void enableVip(User p, String group, long durMillis, String pname) {
+        String puuid = p.getUniqueId().toString();
+        if (Sponge.getServer().getPlayer(p.getName()).isPresent())
+            puuid = Sponge.getServer().getPlayer(p.getName()).get().getUniqueId().toString();
+
         int count = 0;
         long durf = durMillis;
-        for (String[] k : getVipInfo(p.getUniqueId().toString())) {
+        for (String[] k : getVipInfo(puuid)) {
             if (k[1].equals(group)) {
                 durMillis += new Long(k[0]);
                 count++;
@@ -316,11 +323,11 @@ public class PVConfig {
             durMillis += PixelVip.get().getUtil().getNowMillis();
         }
 
-        String pGroup = PixelVip.get().getPerms().getGroup(p);
-        String pdGroup = pGroup;
-        List<String[]> vips = getVipInfo(p.getUniqueId().toString());
+        List<String> pGroups = PixelVip.get().getPerms().getPlayerGroups(p);
+        List<String> pdGroup = pGroups;
+        List<String[]> vips = getVipInfo(puuid);
         if (!vips.isEmpty()) {
-            pGroup = vips.get(0)[2];
+            pGroups = new ArrayList<>(Arrays.asList(vips.get(0)[2].split(",")));
         }
 
         List<String> normCmds = new ArrayList<String>();
@@ -331,7 +338,7 @@ public class PVConfig {
             Sponge.getGame().getScheduler().createSyncExecutor(PixelVip.get()).schedule(() -> {
                 String cmdf = cmd.replace("{p}", p.getName())
                         .replace("{vip}", group)
-                        .replace("{playergroup}", pdGroup)
+                        .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                         .replace("{days}", String.valueOf(PixelVip.get().getUtil().millisToDay(durf)));
                 if (p.isOnline()) {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
@@ -354,7 +361,7 @@ public class PVConfig {
                     Sponge.getScheduler().createSyncExecutor(PixelVip.get()).schedule(() -> {
                         String cmdf = cmd.replace("{p}", p.getName())
                                 .replace("{vip}", group)
-                                .replace("{playergroup}", pdGroup)
+                                .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                                 .replace("{days}", String.valueOf(PixelVip.get().getUtil().millisToDay(durf)));
                         if (p.isOnline()) {
                             Sponge.getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
@@ -368,21 +375,22 @@ public class PVConfig {
         });
 
         if (queueCmds() && (normCmds.size() > 0 || chanceCmds.size() > 0)) {
+            String finalPuuid = puuid;
             Sponge.getScheduler().createSyncExecutor(PixelVip.get()).schedule(() -> {
                 PixelVip.get().getLogger().info("Queued cmds for player " + p.getName() + " to run on join.");
-                setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
+                setJoinCmds(finalPuuid, normCmds, chanceCmds);
             }, delay * 100, TimeUnit.MILLISECONDS);
         }
 
         delay = 0;
 
-        dataManager.addRawVip(group, p.getUniqueId().toString(),
-                Collections.singletonList(pGroup),
+        dataManager.addRawVip(group, puuid,
+                pGroups,
                 durMillis,
                 pname,
                 PixelVip.get().getUtil().expiresOn(durMillis));
 
-        setActive(p.getUniqueId().toString(), group, pdGroup);
+        setActive(puuid, group, pdGroup);
 
         if (p.isOnline()) {
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("_pluginTag", "vipActivated")));
@@ -407,31 +415,30 @@ public class PVConfig {
             durMillis += PixelVip.get().getUtil().getNowMillis();
         }
 
-        String pGroup = "";
+        List<String> pGroups = new ArrayList<>();
         Optional<Player> optPlayer = Sponge.getServer().getPlayer(uuid);
         if (optPlayer.isPresent())
-            pGroup = PixelVip.get().getPerms().getGroup(optPlayer.get());
+            pGroups = PixelVip.get().getPerms().getPlayerGroups(optPlayer.get());
 
         List<String[]> vips = PixelVip.get().getConfig().getVipInfo(uuid);
         if (!vips.isEmpty()) {
-            pGroup = vips.get(0)[2];
+            pGroups = new ArrayList<>(Collections.singletonList(vips.get(0)[2]));
         }
         dataManager.addRawVip(group, uuid,
-                Collections.singletonList(pGroup),
+                pGroups,
                 durMillis,
                 pname,
                 PixelVip.get().getUtil().expiresOn(durMillis));
-        setActive(uuid, group, pGroup);
+        setActive(uuid, group, pGroups);
 
-        PixelVip.get().addLog("SetVip | " + optPlayer.get().getName() + " | " + group + " | Expires on: " + PixelVip.get().getUtil().expiresOn(durMillis));
+        PixelVip.get().addLog("SetVip | " + pname + " | " + group + " | Expires on: " + PixelVip.get().getUtil().expiresOn(durMillis));
     }
 
-    public void setActive(String uuid, String group, String pgroup) {
+    public void setActive(String uuid, String group, List<String> pgroup) {
         String newVip = group;
-        String oldVip = pgroup;
-
+        String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
         for (String glist : getGroupList()) {
-            if (dataManager.containsVip(uuid, glist)){
+            if (dataManager.containsVip(uuid, glist)) {
                 if (glist.equals(group)) {
                     if (!dataManager.isVipActive(uuid, glist)) {
                         newVip = glist;
@@ -449,6 +456,7 @@ public class PVConfig {
                 }
             }
         }
+
         runChangeVipCmds(uuid, newVip, oldVip);
         saveConfigAll();
     }
@@ -467,7 +475,7 @@ public class PVConfig {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf.replace("{newvip}", newVip));
                 }).submit(PixelVip.get());
                 delay++;
-            } else {
+            } else if (!cmdf.isEmpty() && !cmdf.equals("/")) {
                 Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
                 }).submit(PixelVip.get());
@@ -487,31 +495,31 @@ public class PVConfig {
         delay++;
     }
 
-    public void removeVip(User p, Optional<String> optg) {
-        String uuid = p.getUniqueId().toString();
-        List<String[]> vipInfo = PixelVip.get().getConfig().getVipInfo(uuid);
+    public void removeVip(String uuid, Optional<String> optg) {
+        List<String[]> vipInfo = getVipInfo(uuid);
         boolean id = false;
         String nick = "";
-        String oldGroup = "";
+        List<String> oldGroup = new ArrayList<>();
         String vipGroup = "";
+
         if (vipInfo.size() > 0) {
             for (String[] key : vipInfo) {
                 vipGroup = key[1];
-                oldGroup = key[2];
+                oldGroup = Lists.reverse(Arrays.asList(key[2].split(",")));
                 nick = key[4];
                 if (vipInfo.size() > 1) {
                     if (optg.isPresent()) {
                         if (optg.get().equals(vipGroup)) {
                             removeVip(uuid, nick, vipGroup);
                         } else if (!id) {
-                            PixelVip.get().getConfig().setActive(uuid, vipGroup, "");
+                            setActive(uuid, vipGroup, new ArrayList<>());
                             id = true;
                         }
                     } else {
-                        PixelVip.get().getConfig().removeVip(uuid, nick, vipGroup);
+                        removeVip(uuid, nick, vipGroup);
                     }
                 } else {
-                    PixelVip.get().getConfig().removeVip(uuid, nick, vipGroup);
+                    removeVip(uuid, nick, vipGroup);
                 }
             }
         }
@@ -522,21 +530,39 @@ public class PVConfig {
                 if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")) {
                     continue;
                 }
-                String cmdf = cmd.replace("{p}", p.getName()).replace("{playergroup}", oldGroup);
-                Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
-                    Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
-                }).submit(PixelVip.get());
-                delay++;
+                if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
+                    for (String group : oldGroup) {
+                        String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                        Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t ->
+                                Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf)).submit(PixelVip.get());
+                        delay++;
+                    }
+                } else {
+                    String cmdf = cmd.replace("{p}", nick);
+                    Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t ->
+                            Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf)).submit(PixelVip.get());
+                    delay++;
+                }
             }
         }
 
         //command to run from vip GROUP on finish
         for (String cmd : getCmdsToRunOnFinish(vipGroup)) {
-            String cmdf = cmd.replace("{p}", p.getName());
-            Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
-                Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
-            }).submit(PixelVip.get());
-            delay++;
+            if (cmd == null || cmd.isEmpty()) continue;
+            if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
+                for (String group : oldGroup) {
+                    String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                    Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t ->
+                            Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf)).submit(PixelVip.get());
+                    delay++;
+                }
+            } else {
+                String cmdf = cmd.replace("{p}", nick);
+                Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
+                    Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
+                }).submit(PixelVip.get());
+                delay++;
+            }
         }
         reloadPerms();
         saveConfigAll();
@@ -552,7 +578,7 @@ public class PVConfig {
     public String getLang(String... nodes) {
         StringBuilder msg = new StringBuilder();
         for (String node : nodes) {
-            if (root.strings.containsKey(node)){
+            if (root.strings.containsKey(node)) {
                 msg.append(root.strings.get(node));
             } else {
                 msg.append("No strings found for node &6").append(node);
@@ -565,7 +591,7 @@ public class PVConfig {
         return root.groups.containsKey(group);
     }
 
-    public Set<Map.Entry<String,List<String>>> getCmdChances(String vip) {
+    public Set<Map.Entry<String, List<String>>> getCmdChances(String vip) {
         return root.groups.get(vip).cmdChances.entrySet();
     }
 
