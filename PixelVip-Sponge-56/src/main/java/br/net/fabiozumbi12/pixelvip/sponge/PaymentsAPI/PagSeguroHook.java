@@ -48,7 +48,7 @@ public class PagSeguroHook implements PaymentModel {
 
             //check if approved
             if (!trans.getStatus().getStatus().equals(TransactionStatus.Status.APPROVED)) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-waiting").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_waiting.replace("{payment}", getPayname())));
                 return true;
             }
 
@@ -56,7 +56,7 @@ public class PagSeguroHook implements PaymentModel {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             Date oldCf = sdf.parse(plugin.getConfig().root().apis.pagseguro.ignoreOldest);
             if (trans.getDate().compareTo(oldCf) < 0) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-expired").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_expired.replace("{payment}", getPayname())));
                 return true;
             }
 

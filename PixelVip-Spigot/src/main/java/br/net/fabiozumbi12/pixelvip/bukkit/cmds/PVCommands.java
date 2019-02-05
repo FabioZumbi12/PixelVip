@@ -97,7 +97,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             }
 
             if (cmd.getName().equalsIgnoreCase("listkeys")) {
-                result[0] = listKeys(sender, args);
+                result[0] = listKeys(sender);
             }
 
             if (cmd.getName().equalsIgnoreCase("usekey")) {
@@ -248,7 +248,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 pname = vipinfo[4];
             }
             sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
-            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + vipinfo[1]));
+            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
             sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
         }));
         sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
@@ -409,7 +409,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
      */
     private boolean newKey(CommandSender sender, String[] args, boolean isSend) {
         if (args.length == 2) {
-            String group = args[0];
+            String group = plugin.getPVConfig().getVipByTitle(args[0]);
             long days;
 
             try {
@@ -435,13 +435,13 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "keyGenerated")));
             }
             plugin.getUtil().sendHoverKey(sender, key);
-            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + group));
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(group)));
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime") + days));
             return true;
         }
 
         if (args.length == 3) {
-            String group = args[0];
+            String group = plugin.getPVConfig().getVipByTitle(args[0]);
             long days;
             int uses;
 
@@ -475,7 +475,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "keyGenerated")));
             }
             plugin.getUtil().sendHoverKey(sender, key);
-            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + group));
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(group)));
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime") + days));
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("infoUses") + uses));
             return true;
@@ -501,7 +501,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
 
             play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "keySendTo")));
             plugin.getUtil().sendHoverKey(play, args[1]);
-            play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + keyInfo[0]));
+            play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(keyInfo[0])));
             play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime") + plugin.getUtil().millisToDay(keyInfo[1])));
             play.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("infoUses") + keyInfo[2]));
             return true;
@@ -530,7 +530,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
      *
      * @return CommandSpec
      */
-    public boolean listKeys(CommandSender sender, String[] args) {
+    public boolean listKeys(CommandSender sender) {
         Collection<String> keys = plugin.getPVConfig().getListKeys();
         Collection<String> itemKeys = plugin.getPVConfig().getItemListKeys();
         int i = 0;
@@ -632,7 +632,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args.length == 2) {
-            Optional<String> group = Optional.of(args[1]);
+            Optional<String> group = Optional.of(plugin.getPVConfig().getVipByTitle(args[1]));
             if (!plugin.getPVConfig().groupExists(group.get())) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[1]));
                 return true;
@@ -659,9 +659,9 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             if (sender instanceof Player) {
                 Player p = (Player) sender;
-                String group = args[0];
+                String group = plugin.getPVConfig().getVipByTitle(args[0]);
                 if (!plugin.getPVConfig().groupExists(group)) {
-                    sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+                    sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
                     return true;
                 }
 
@@ -671,12 +671,12 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                     for (String[] vip : vipInfo) {
                         if (vip[1].equalsIgnoreCase(group)) {
                             plugin.getPVConfig().setActive(p.getUniqueId().toString(), vip[1], Arrays.asList(vip[2].split(",")));
-                            p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + vip[1]));
+                            p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(vip[1])));
                             return true;
                         }
                     }
                 }
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
                 return true;
             } else {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "onlyPlayers")));
@@ -689,9 +689,9 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noPlayersByName")));
                 return true;
             }
-            String group = args[0];
+            String group = plugin.getPVConfig().getVipByTitle(args[0]);
             if (!plugin.getPVConfig().groupExists(group)) {
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
                 return true;
             }
 
@@ -701,12 +701,12 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 for (String[] vip : vipInfo) {
                     if (vip[1].equalsIgnoreCase(group)) {
                         plugin.getPVConfig().setActive(uuid, vip[1], Arrays.asList(vip[2].split(",")));
-                        sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + vip[1]));
+                        sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(vip[1])));
                         return true;
                     }
                 }
             }
-            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
             return true;
         }
         return false;
@@ -725,9 +725,9 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             if (p.getName() != null) {
                 pname = p.getName();
             }
-            String group = args[1];
+            String group = plugin.getPVConfig().getVipByTitle(args[0]);
             if (!plugin.getPVConfig().groupExists(group)) {
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
                 return true;
             }
             long days;
@@ -756,12 +756,12 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             if (uuid == null) {
                 uuid = Bukkit.getOfflinePlayer(pname).getUniqueId().toString();
             }
-            String group = args[1];
+            String group = plugin.getPVConfig().getVipByTitle(args[1]);
             if (!plugin.getPVConfig().groupExists(group)) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
                 return true;
             }
-            long days = 0;
+            long days;
             try {
                 days = Long.parseLong(args[2]);
             } catch (NumberFormatException ex) {

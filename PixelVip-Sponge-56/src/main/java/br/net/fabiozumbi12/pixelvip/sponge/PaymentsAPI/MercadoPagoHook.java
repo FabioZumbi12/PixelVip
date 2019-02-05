@@ -45,7 +45,7 @@ public class MercadoPagoHook implements PaymentModel {
 
             //check if approved
             if (!payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("approved")) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-waiting").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_waiting.replace("{payment}", getPayname())));
                 return true;
             }
 
@@ -54,7 +54,7 @@ public class MercadoPagoHook implements PaymentModel {
                 Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getConfig().root().apis.mercadopago.ignoreOldest);
                 Date transCf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(payment_info.getAsJsonObject().getAsJsonPrimitive("date_last_updated").getAsString());
                 if (transCf.compareTo(oldCf) < 0) {
-                    player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-expired").replace("{payment}", getPayname())));
+                    player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_expired.replace("{payment}", getPayname())));
                     return true;
                 }
             } catch (ParseException e) {

@@ -108,6 +108,15 @@ public class PixelVip {
     public void onServerStart(GameStartedServerEvent event) {
         try {
             plugin = this;
+
+            //make backup of old files
+            File oldConfig = new File(configDir(), "pixevip.conf");
+            if (oldConfig.exists()){
+                oldConfig.renameTo(new File(configDir(), "pixevip_old.conf"));
+                new File(configDir(), "vips.conf").renameTo(new File(configDir(), "vips_old.conf"));
+                logger.warn("Old config found! Created a backup. You need to migrate your vips from \"vips_old.conf\" to new file!");
+            }
+
             logger.info("Init utils module...");
             this.util = new PVUtil(this);
 
@@ -272,9 +281,9 @@ public class PixelVip {
                         if (dur <= util.getNowMillis()) {
                             getConfig().removeVip(p.get().getUniqueId().toString(), Optional.of(vipInfo[1]));
                             if (p.get().isOnline()) {
-                                p.get().getPlayer().get().sendMessage(util.toText(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+                                p.get().getPlayer().get().sendMessage(util.toText(config.root().strings._pluginTag + config.root().strings.vipEnded.replace("{vip}", vipInfo[1])));
                             }
-                            logger.info(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.get().getName() + " &bhas ended!"));
+                            logger.info(util.toColor(config.root().strings._pluginTag + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + p.get().getName() + " &bhas ended!"));
                         }
                     }
                 });

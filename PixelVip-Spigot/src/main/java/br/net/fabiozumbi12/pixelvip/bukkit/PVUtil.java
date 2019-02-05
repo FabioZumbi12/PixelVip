@@ -21,6 +21,10 @@ public class PVUtil {
         return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "\u00A7$2");
     }
 
+    public String removeColor(String str) {
+        return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "");
+    }
+
     public long getNowMillis() {
         Calendar cal = Calendar.getInstance();
         return cal.getTimeInMillis();
@@ -76,7 +80,7 @@ public class PVUtil {
                     time = plugin.getUtil().millisToMessage(Long.valueOf(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
                 src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft") + time));
-                src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + vipInfo[1]));
+                src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipInfo[1])));
                 src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeActive") + plugin.getPVConfig().getLang(vipInfo[3])));
                 src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
             });

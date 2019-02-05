@@ -7,6 +7,8 @@ import java.util.*;
 
 @ConfigSerializable
 public class MainCategory {
+    public MainCategory() {}
+
     @Setting(comment = "Put your permissions plugin vip group names here. Case sensitive!")
     public Map<String, VipsCategory> groups = defaultVips();
     @Setting
@@ -15,66 +17,115 @@ public class MainCategory {
     public ConfigsCat configs = new ConfigsCat();
     @Setting
     public Map<String, JoinCmdsCat> joinCmds;
-    @Setting
-    public Map<String, String> strings = defStrings();
 
-    public MainCategory() {
+    @Setting
+    public StringsCat strings = new StringsCat();
+    @ConfigSerializable
+    public static class StringsCat {
+        @Setting
+        public String _pluginTag = "&7[&6PixelVip&7] ";
+        @Setting
+        public String activeDays = "&b- Days: &6{days} &bdays";
+        @Setting
+        public String activeVip = "&b- Vip: &6{vip}";
+        @Setting
+        public String activeVipSetTo = "&aYour active VIP is ";
+        @Setting
+        public String and = " &band";
+        @Setting(value = "true")
+        public String _true = "&atrue";
+        @Setting(value = "false")
+        public String _false = "&cfalse";
+        @Setting
+        public String confirmUsekey = "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!";
+        @Setting
+        public String days = " &bdays";
+        @Setting
+        public String hours = " &bhours";
+        @Setting
+        public String infoUses = "&b- Uses left: &6";
+        @Setting
+        public String invalidKey = "&cThis key is invalid or not exists!";
+        @Setting
+        public String item = "&a-- Item: &b";
+        @Setting
+        public String itemsAdded = "&aItem(s) added to key: ";
+        @Setting
+        public String itemsGiven = "&aGiven {items} item(s) using a key.";
+        @Setting
+        public String keyGenerated = "&aGenerated a key with the following: ";
+        @Setting
+        public String keyRemoved = "&aKey removed with success: &b";
+        @Setting
+        public String lessThan = "&6Less than one minute to end your vip...";
+        @Setting(value = "list-of-vips")
+        public String list_of_vips = "&aList of active VIPs: ";
+        @Setting
+        public String listItemKeys = "&aList of Item Keys: ";
+        @Setting
+        public String listKeys = "&aList of Keys: ";
+        @Setting
+        public String minutes = " &bminutes";
+        @Setting
+        public String moreThanZero = "&cThe days need to be more than 0";
+        @Setting
+        public String noGroups = "&cTheres no groups with name ";
+        @Setting
+        public String noKeyRemoved = "&cTheres no groups with name ";
+        @Setting
+        public String noKeys = "&aTheres no available keys! Use &6/newkey &ato generate one.";
+        @Setting
+        public String noPlayersByName = "&cTheres no players with this name!";
+        @Setting
+        public String onlyPlayers = "&cOnly players can use this command!";
+        @Setting
+        public String playerNotVip = "&cThis player(or you) is not VIP!";
+        @Setting
+        public String playerNotGroup = "&cYou don't have this vip activated!";
+        @Setting(value = "sync-groups")
+        public String sync_groups = "&aGroup configs send to all servers!";
+        @Setting
+        public String timeActive = "&b- In Use: &6";
+        @Setting
+        public String timeGroup = "&b- Vip: &6";
+        @Setting
+        public String timeKey = "&b- Key: &6";
+        @Setting
+        public String timeLeft = "&b- Time left: &6";
+        @Setting
+        public String totalTime = "&b- Days: &6";
+        @Setting
+        public String usesLeftActivation = "&bThis key can be used for more: &6{uses} &btimes.";
+        @Setting
+        public String vipActivated = "&aVip activated with success: ";
+        @Setting
+        public String vipAdded = "&aVip added with success for this player!";
+        @Setting
+        public String vipEnded = " &bYour vip &6{vip} &bhas ended. &eWe hope you enjoyed your Vip time &a:D";
+        @Setting
+        public String vipInfoFor = "&aVip info for ";
+        @Setting
+        public String vipSet = "&aVip set with success for this player!";
+        @Setting
+        public String vipsRemoved = "&aVip(s) of player removed with success!";
+        @Setting(value = "wait-cmd")
+        public String wait_cmd = "&cWait before use a pixelvip command again!";
+        @Setting
+        public String hoverKey = "&7&o(Click to get the Key)&r";
+
+        @Setting(value = "pay-waiting")
+        public String pay_waiting = "&c{payment}: Your purchase has not yet been approved!";
+        @Setting(value = "pay-codeused")
+        public String pay_codeused = "&c{payment}: This code has already been used!";
+        @Setting(value = "pay-expired")
+        public String pay_expired = "&c{payment}: This code has expired!";
+        @Setting(value = "pay-noitems")
+        public String pay_noitems = "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!";
     }
 
     private Map<String, VipsCategory> defaultVips() {
         Map<String, VipsCategory> map = new HashMap<>();
         map.put("vip-demo", new VipsCategory());
-        return map;
-    }
-
-    private Map<String, String> defStrings() {
-        Map<String, String> map = new HashMap<>();
-        map.put("_pluginTag", "&7[&6PixelVip&7] ");
-        map.put("activeDays", "&b- Days: &6{days} &bdays");
-        map.put("activeVip", "&b- Vip: &6{vip}");
-        map.put("activeVipSetTo", "&aYour active VIP is ");
-        map.put("and", " &band");
-        map.put("confirmUsekey", "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!");
-        map.put("days", " &bdays");
-        map.put("hours", " &bhours");
-        map.put("infoUses", "&b- Uses left: &6");
-        map.put("invalidKey", "&cThis key is invalid or not exists!");
-        map.put("item", "&a-- Item: &b");
-        map.put("itemsAdded", "&aItem(s) added to key: ");
-        map.put("itemsGiven", "&aGiven {items} item(s) using a key.");
-        map.put("keyGenerated", "&aGenerated a key with the following: ");
-        map.put("keyRemoved", "&aKey removed with success: &b");
-        map.put("lessThan", "&6Less than one minute to end your vip...");
-        map.put("list-of-vips", "&aList of active VIPs: ");
-        map.put("listItemKeys", "&aList of Item Keys: ");
-        map.put("listKeys", "&aList of Keys: ");
-        map.put("minutes", " &bminutes");
-        map.put("moreThanZero", "&cThe days need to be more than 0");
-        map.put("noGroups", "&cTheres no groups with name ");
-        map.put("noKeyRemoved", "&cTheres no groups with name ");
-        map.put("noKeys", "&aTheres no available keys! Use &6/newkey &ato generate one.");
-        map.put("noPlayersByName", "&cTheres no players with this name!");
-        map.put("onlyPlayers", "&cOnly players ca use this command!");
-        map.put("playerNotVip", "&cThis player(or you) is not VIP!");
-        map.put("sync-groups", "&aGroup configs send to all servers!");
-        map.put("timeActive", "&b- In Use: &6");
-        map.put("timeGroup", "&b- Vip: &6");
-        map.put("timeKey", "&b- Key: &6");
-        map.put("timeLeft", "&b- Time left: &6");
-        map.put("totalTime", "&b- Days: &6");
-        map.put("usesLeftActivation", "&bThis key can be used for more: &6{uses} &btimes.");
-        map.put("vipActivated", "&aVip activated with success: ");
-        map.put("vipAdded", "&aVip added with success for this player!");
-        map.put("vipEnded", " &bYour vip &6{vip} &bhas ended. &eWe hope you enjoyed your Vip time &a:D");
-        map.put("vipInfoFor", "&aVip info for ");
-        map.put("vipSet", "&aVip set with success for this player!");
-        map.put("vipsRemoved", "&aVip(s) of player removed with success!");
-        map.put("wait-cmd", "&cWait before use a pixelvip command again!");
-
-        map.put("pay-waiting", "&c{payment}: Your purchase has not yet been approved!");
-        map.put("pay-codeused", "&c{payment}: This code has already been used!");
-        map.put("pay-expired", "&c{payment}: This code has expired!");
-        map.put("pay-noitems", "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!");
         return map;
     }
 
@@ -94,6 +145,9 @@ public class MainCategory {
         public Map<String, List<String>> cmdChances = cmdChanges();
         @Setting(value = "run-on-vip-end")
         public List<String> run_on_vip_end = new ArrayList<>();
+
+        @Setting
+        public String title = "&4Vip Demonstration";
 
         private Map<String, List<String>> cmdChanges() {
             Map<String, List<String>> map = new HashMap<>();

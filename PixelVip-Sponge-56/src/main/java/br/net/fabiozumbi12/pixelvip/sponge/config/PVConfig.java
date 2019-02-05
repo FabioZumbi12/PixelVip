@@ -95,6 +95,23 @@ public class PVConfig {
         return this.root;
     }
 
+    public String getVipTitle(String vipGroup){
+        if (root.groups.containsKey(vipGroup)){
+            String title = PixelVip.get().getUtil().toColor(root.groups.get(vipGroup).title);
+            return title.isEmpty() ? vipGroup : title;
+        }
+        return vipGroup;
+    }
+
+    public String getVipByTitle(String vipTitle){
+        vipTitle = vipTitle.replace("_", " ");
+        for (Map.Entry<String, MainCategory.VipsCategory> groups:root.groups.entrySet()){
+            if (!vipTitle.isEmpty() && PixelVip.get().getUtil().removeColor(groups.getValue().title).equalsIgnoreCase(vipTitle))
+                return groups.getKey();
+        }
+        return vipTitle;
+    }
+
     public void changeUUIDs(String oldUUID, String newUUID) {
         dataManager.changeUUID(oldUUID, newUUID);
     }
@@ -235,7 +252,7 @@ public class PVConfig {
         if (root.configs.useKeyWarning && p.isOnline() && (key != null && !key.isEmpty())) {
             if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)) {
                 comandAlert.put(p.getName(), key);
-                p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(getLang("_pluginTag", "confirmUsekey")));
+                p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.confirmUsekey));
                 return Text.of();
             }
             comandAlert.remove(p.getName());
@@ -258,7 +275,7 @@ public class PVConfig {
             dataManager.removeItemKey(key);
             saveConfigAll();
 
-            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(getLang("_pluginTag", "itemsGiven").replace("{items}", cmds.size() + "")));
+            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.itemsGiven.replace("{items}", cmds.size() + "")));
 
             String cmdBuilded = cmdsBuilder.toString();
             PixelVip.get().addLog("ItemKey | " + p.getName() + " | " + key + " | Cmds: " + cmdBuilded.substring(0, cmdBuilded.length() - 2));
@@ -271,7 +288,7 @@ public class PVConfig {
 
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText("&b---------------------------------------------"));
             if (uses - 1 > 0) {
-                p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(getLang("_pluginTag", "usesLeftActivation").replace("{uses}", "" + (uses - 1))));
+                p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.usesLeftActivation.replace("{uses}", "" + (uses - 1))));
             }
             enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname);
             return Text.of();
@@ -280,7 +297,7 @@ public class PVConfig {
             return Text.of();
         } else {
             if (!hasItemkey) {
-                return PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("_pluginTag", "invalidKey"));
+                return PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.invalidKey);
             }
             return Text.of();
         }
@@ -393,9 +410,9 @@ public class PVConfig {
         setActive(puuid, group, pdGroup);
 
         if (p.isOnline()) {
-            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("_pluginTag", "vipActivated")));
-            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("activeVip").replace("{vip}", group)));
-            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().getLang("activeDays").replace("{days}", String.valueOf(PixelVip.get().getUtil().millisToDay(durf)))));
+            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.vipActivated));
+            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings.activeVip.replace("{vip}", group)));
+            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings.activeDays.replace("{days}", String.valueOf(PixelVip.get().getUtil().millisToDay(durf)))));
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText("&b---------------------------------------------"));
         }
         PixelVip.get().addLog("EnableVip | " + p.getName() + " | " + group + " | Expires on: " + PixelVip.get().getUtil().expiresOn(durMillis));
@@ -435,6 +452,8 @@ public class PVConfig {
     }
 
     public void setActive(String uuid, String group, List<String> pgroup) {
+        if (dataManager.isVipActive(uuid, group)) return;
+
         String newVip = group;
         String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
         for (String glist : getGroupList()) {
@@ -575,18 +594,6 @@ public class PVConfig {
         delay = 0;
     }
 
-    public String getLang(String... nodes) {
-        StringBuilder msg = new StringBuilder();
-        for (String node : nodes) {
-            if (root.strings.containsKey(node)) {
-                msg.append(root.strings.get(node));
-            } else {
-                msg.append("No strings found for node &6").append(node);
-            }
-        }
-        return msg.toString();
-    }
-
     public boolean groupExists(String group) {
         return root.groups.containsKey(group);
     }
@@ -656,9 +663,21 @@ public class PVConfig {
         return dataManager.getVipUUID(string);
     }
 
+    public List<String> getVipTitleList(){
+        List<String> list = new ArrayList<>();
+        for (Map.Entry<String, MainCategory.VipsCategory> groups:root.groups.entrySet()){
+            if (!groups.getValue().title.isEmpty())
+                list.add(PixelVip.get().getUtil().removeColor(groups.getValue().title).replace(" ", "_"));
+            else
+                list.add(groups.getKey());
+        }
+        return list;
+    }
+
     public HashMap<String, String> getCmdChoices() {
-        HashMap<String, String> choices = new HashMap<String, String>();
-        getGroupList().forEach((k) -> choices.put(k, k));
+        HashMap<String, String> choices = new HashMap<>();
+        //getGroupList().forEach((k) -> choices.put(k, k));
+        getVipTitleList().forEach((k) -> choices.put(k, k));
         return choices;
     }
 }

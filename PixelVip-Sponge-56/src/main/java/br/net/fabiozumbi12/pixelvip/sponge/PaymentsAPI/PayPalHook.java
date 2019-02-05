@@ -56,13 +56,13 @@ public class PayPalHook implements PaymentModel {
             }
 
             if (!trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentStatus().getValue().equalsIgnoreCase("Completed")) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-waiting").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_waiting.replace("{payment}", getPayname())));
                 plugin.processTrans.remove(transCode);
                 return true;
             }
 
             if (plugin.getConfig().transExist(getPayname(), transCode)) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-codeused").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_codeused.replace("{payment}", getPayname())));
                 plugin.processTrans.remove(transCode);
                 return true;
             }
@@ -70,7 +70,7 @@ public class PayPalHook implements PaymentModel {
             Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getConfig().root().apis.paypal.ignoreOldest);
             Date payCf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentDate());
             if (payCf.compareTo(oldCf) < 0) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "pay-expired").replace("{payment}", getPayname())));
+                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_expired.replace("{payment}", getPayname())));
                 return true;
             }
 

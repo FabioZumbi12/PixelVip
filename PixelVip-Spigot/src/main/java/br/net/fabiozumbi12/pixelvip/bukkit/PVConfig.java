@@ -5,6 +5,7 @@ import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataMysql;
 import com.earth2me.essentials.User;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
@@ -56,6 +57,7 @@ public class PVConfig {
 
         if (!plugin.getConfig().contains("groups")) {
             plugin.getConfig().set("groups.vip1.essentials-kit", "vip1");
+            plugin.getConfig().set("groups.vip1.title", "&bVip 1");
             plugin.getConfig().set("groups.vip1.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"));
             plugin.getConfig().set("groups.vip1.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
             plugin.getConfig().set("groups.vip1.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
@@ -253,6 +255,20 @@ public class PVConfig {
         /*---------------------------------------------------------*/
 
         plugin.saveConfig();
+    }
+
+    public String getVipTitle(String vipGroup){
+        return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("groups." + vipGroup + ".title", vipGroup));
+    }
+
+    public String getVipByTitle(String vipTitle){
+        vipTitle = vipTitle.replace("_", " ");
+        for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
+            if (!vipTitle.isEmpty() && plugin.getConfig().getString("groups." + group + ".title") != null &&
+                    plugin.getUtil().removeColor(plugin.getConfig().getString("groups." + group + ".title")).equalsIgnoreCase(vipTitle))
+                return plugin.getConfig().getString("groups." + group + ".title");
+        }
+        return vipTitle;
     }
 
     public void changeUUIDs(String oldUUID, String newUUID) {
@@ -591,6 +607,8 @@ public class PVConfig {
     }
 
     public void setActive(String uuid, String group, List<String> pgroup) {
+        if (dataManager.isVipActive(uuid, group)) return;
+
         String newVip = group;
         String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
         for (String glist : getGroupList()) {
@@ -831,10 +849,20 @@ public class PVConfig {
     }
 
     public Set<String> getGroupList() {
-        if (plugin.getConfig().getConfigurationSection("groups") != null) {
+        Set<String> list = new HashSet<>();
+        /*if (plugin.getConfig().getConfigurationSection("groups") != null) {
             return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
+        }*/
+        if (plugin.getConfig().getConfigurationSection("groups") != null) {
+            for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
+                if (plugin.getConfig().getString("groups." + group + ".title") != null &&
+                        !plugin.getConfig().getString("groups." + group + ".title").isEmpty())
+                    list.add(plugin.getConfig().getString("groups." + group + ".title"));
+                else
+                    list.add(group);
+            }
         }
-        return new HashSet<>();
+        return list;
     }
 
     public HashMap<String, List<String[]>> getVipList() {

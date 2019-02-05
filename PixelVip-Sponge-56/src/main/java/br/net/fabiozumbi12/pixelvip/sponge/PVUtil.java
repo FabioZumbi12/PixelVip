@@ -26,7 +26,11 @@ public class PVUtil {
     }
 
     public String toColor(String str) {
-        return str.replaceAll("(&([a-fk-or0-9]))", "\u00A7$2");
+        return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "\u00A7$2");
+    }
+
+    public String removeColor(String str) {
+        return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "");
     }
 
     public long getNowMillis() {
@@ -71,21 +75,21 @@ public class PVUtil {
     public Text sendVipTime(CommandSource src, String UUID, String name) {
         List<String[]> vips = plugin.getConfig().getVipInfo(UUID);
         if (vips.size() > 0) {
-            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "vipInfoFor") + name + ":"));
+            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.vipInfoFor + name + ":"));
             src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             vips.stream().filter(v -> v.length == 5).forEach((vipInfo) -> {
                 String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
                 if (plugin.getConfig().isVipActive(vipInfo[1], UUID)) {
                     time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
-                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeLeft") + time));
-                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeGroup") + vipInfo[1]));
-                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().getLang("timeActive") + vipInfo[3]));
+                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings.timeLeft + time));
+                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings.timeGroup + plugin.getConfig().getVipTitle(vipInfo[1])));
+                src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings.timeActive + (Boolean.parseBoolean(vipInfo[3]) ? plugin.getConfig().root().strings._true : plugin.getConfig().root().strings._false)));
                 src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             });
             return Text.of();
         } else {
-            return plugin.getUtil().toText(plugin.getConfig().getLang("_pluginTag", "playerNotVip"));
+            return plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.playerNotVip);
         }
     }
 
@@ -95,18 +99,18 @@ public class PVUtil {
         long min = TimeUnit.MILLISECONDS.toMinutes((millis - TimeUnit.DAYS.toMillis(days)) - TimeUnit.HOURS.toMillis(hour));
         StringBuilder msg = new StringBuilder();
         if (days > 0) {
-            msg.append("&6" + days + plugin.getConfig().getLang("days") + ", ");
+            msg.append("&6" + days + plugin.getConfig().root().strings.days + ", ");
         }
         if (hour > 0) {
-            msg.append("&6" + hour + plugin.getConfig().getLang("hours") + ", ");
+            msg.append("&6" + hour + plugin.getConfig().root().strings.hours + ", ");
         }
         if (min > 0) {
-            msg.append("&6" + min + plugin.getConfig().getLang("minutes") + ", ");
+            msg.append("&6" + min + plugin.getConfig().root().strings.minutes + ", ");
         }
         try {
-            msg = msg.replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, ".").replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, plugin.getConfig().getLang("and"));
+            msg = msg.replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, ".").replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, plugin.getConfig().root().strings.and);
         } catch (StringIndexOutOfBoundsException ex) {
-            return plugin.getConfig().getLang("lessThan");
+            return plugin.getConfig().root().strings.lessThan;
         }
         return msg.toString();
     }
@@ -119,8 +123,8 @@ public class PVUtil {
 
     public void sendHoverKey(CommandSource src, String key) {
         Text text = Text.builder()
-                .append(Text.of(plugin.getUtil().toColor(plugin.getConfig().getLang("timeKey") + key + " " + plugin.getConfig().getLang("hoverKey"))))
-                .onHover(TextActions.showText(Text.of(plugin.getUtil().toColor(plugin.getConfig().getLang("hoverKey")))))
+                .append(Text.of(plugin.getUtil().toColor(plugin.getConfig().root().strings.timeKey + key + " " + plugin.getConfig().root().strings.hoverKey)))
+                .onHover(TextActions.showText(Text.of(plugin.getUtil().toColor(plugin.getConfig().root().strings.hoverKey))))
                 .onClick(TextActions.suggestCommand(plugin.getConfig().root().configs.clickSuggest.replace("{key}", key))).toText();
         src.sendMessage(text);
     }
@@ -140,7 +144,7 @@ public class PVUtil {
         }
 
         if (log == 0) {
-            player.sendMessage(toText(plugin.getUtil().toColor(plugin.getConfig().getLang("_pluginTag", "pay-noitems")
+            player.sendMessage(toText(plugin.getUtil().toColor(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_noitems
                     .replace("{payment}", payment)
                     .replace("{transaction}", transCode))));
             return false;

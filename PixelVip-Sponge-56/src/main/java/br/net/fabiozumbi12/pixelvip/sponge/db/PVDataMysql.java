@@ -366,11 +366,11 @@ public class PVDataMysql implements PVDataManager {
             st.setString(2, group);
             st.setLong(3, duration);
             st.setInt(4, uses);
-            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getLang("days"));
+            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getConfig().root().strings.days);
             st.setString(6, group);
             st.setLong(7, duration);
             st.setInt(8, uses);
-            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getLang("days"));
+            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getConfig().root().strings.days);
             st.executeUpdate();
             st.close();
         } catch (SQLException e) {
