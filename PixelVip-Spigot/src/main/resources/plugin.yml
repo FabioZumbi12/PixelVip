@@ -89,6 +89,16 @@ commands:
     permission: "pixelvip.cmd.listpackages"
     usage: "/listpackages"
     aliases: [listp]
+  addpackage:
+    description: "Add a package as hand item or commands"
+    permission: "pixelvip.cmd.addpackage"
+    usage: "/addpackage <id> hand|command [command1, command2]"
+    aliases: [addp]
+  delpackage:
+    description: "Remove a package"
+    permission: "pixelvip.cmd.delpackage"
+    usage: "/delpackage <id>"
+    aliases: [delp]
 permissions:
   pixelvip.normal:
     description: "Player commands."

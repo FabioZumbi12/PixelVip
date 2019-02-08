@@ -1,6 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.sponge.cmds;
 
 import br.net.fabiozumbi12.pixelvip.sponge.Packages.PVPackage;
+import br.net.fabiozumbi12.pixelvip.sponge.Packages.PackageManager;
 import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
 import br.net.fabiozumbi12.pixelvip.sponge.config.PackagesCategory;
@@ -9,8 +10,11 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 
@@ -39,6 +43,8 @@ public class PVCommands {
         Sponge.getCommandManager().register(plugin, givePackage(), "givepackage", "gpkg", "gpackage");
         Sponge.getCommandManager().register(plugin, getVariant(), "getvariant", "getv", "getvar");
         Sponge.getCommandManager().register(plugin, listPackages(), "listpackages", "listp");
+        Sponge.getCommandManager().register(plugin, delPackage(), "delpackage", "delp");
+        Sponge.getCommandManager().register(plugin, addPackage(), "addpackage", "addp");
     }
 
     public void reload() {
@@ -61,6 +67,96 @@ public class PVCommands {
             Sponge.getCommandManager().removeMapping(Sponge.getCommandManager().get("changevip").get());
         }
         Sponge.getCommandManager().register(plugin, setActive(), "changevip", "setctive", "trocarvip");
+
+        reloadDelPackage();
+    }
+
+    private void reloadDelPackage(){
+        if (Sponge.getCommandManager().containsAlias("delpackage")) {
+            Sponge.getCommandManager().removeMapping(Sponge.getCommandManager().get("delpackage").get());
+        }
+        Sponge.getCommandManager().register(plugin, delPackage(), "delpackage", "delp");
+    }
+
+    private CommandSpec addPackage(){
+        return CommandSpec.builder()
+                .description(Text.of("Add a package"))
+                .permission("pixelvip.cmd.addpackage")
+                .arguments(
+                        GenericArguments.string(Text.of("id")),
+                        GenericArguments.choices(Text.of("source"), new HashMap<String,String>(){{
+                            put("hand","hand");
+                            put("command","command");
+                        }}),
+                        GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("command1,command2"))))
+                .executor((src, args) -> {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                        String id = args.<String>getOne("id").get();
+                        if (plugin.getPackageManager().getPackage(id) != null){
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag +
+                                    plugin.getPackageManager().getPackages().strings.get("exists").replace("{id}", id)));
+                            return;
+                        }
+
+                        PackageManager packages = plugin.getPackageManager();
+                        if (args.<String>getOne("source").get().equals("command") && args.hasAny("command1,command2")){
+                            String[] cmdLine = args.<String>getOne("command1,command2").get().replace(", ", ",").split(",");
+
+                            packages.getPackages().packages.put(id, new PackagesCategory.Packs(Arrays.asList(cmdLine), new HashMap<>(), ""));
+                            packages.save();
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag +
+                                    packages.getPackages().strings.get("added")));
+                            reloadDelPackage();
+                            return;
+                        }
+
+                        if (src instanceof Player){
+                            Player p = (Player)src;
+                            if (args.<String>getOne("source").get().equals("hand")){
+                                if (!p.getItemInHand(HandTypes.MAIN_HAND).get().getItem().equals(ItemTypes.AIR)){
+                                    String item = p.getItemInHand(HandTypes.MAIN_HAND).get().getItem().getName();
+                                    String amount = String.format("%d", p.getItemInHand(HandTypes.MAIN_HAND).get().getQuantity());
+
+                                    String cmd = packages.getPackages().hand.command
+                                            .replace("{item}", item)
+                                            .replace("{amount}", amount);
+
+                                    packages.getPackages().packages.put(id, new PackagesCategory.Packs(Collections.singletonList(cmd), new HashMap<>(), ""));
+
+                                    packages.save();
+                                    src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag +
+                                            packages.getPackages().strings.get("added")));
+                                    reloadDelPackage();
+                                } else {
+                                    src.sendMessage(plugin.getUtil().toText(
+                                            plugin.getConfig().root().strings._pluginTag + packages.getPackages().strings.get("hand-empty")));
+                                }
+                            }
+                        }
+                    });
+                    return CommandResult.success();
+                }).build();
+    }
+
+    private CommandSpec delPackage() {
+        return CommandSpec.builder()
+                .description(Text.of("Remove a package"))
+                .permission("pixelvip.cmd.delpackage")
+                .arguments(GenericArguments.choices(Text.of("package"), new HashMap<String, String>(){{
+                    for (String pack:plugin.getPackageManager().getPackages().packages.keySet()){
+                        put(pack, pack);
+                    }
+                }}))
+                .executor((src, args) -> {
+                    Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                        plugin.getPackageManager().getPackages().packages.remove(args.<String>getOne("package").get());
+                        plugin.getPackageManager().save();
+                        src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag +
+                                plugin.getPackageManager().getPackages().strings.get("removed")));
+                        reloadDelPackage();
+                    });
+                    return CommandResult.success();
+                }).build();
     }
 
     private CommandSpec listPackages() {
@@ -182,10 +278,10 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Generate keys to give items."))
                 .permission("pixelvip.cmd.newitemkey")
-                .arguments(GenericArguments.remainingJoinedStrings(Text.of("cmds")))
+                .arguments(GenericArguments.remainingJoinedStrings(Text.of("commands")))
                 .executor((src, args) -> {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
-                        String[] cmdLine = args.<String>getOne("cmds").get().replace(", ", ",").split(",");
+                        String[] cmdLine = args.<String>getOne("commands").get().replace(", ", ",").split(",");
                         String key = plugin.getUtil().genKey(plugin.getConfig().root().configs.key_size);
                         plugin.getConfig().addItemKey(key, Arrays.asList(cmdLine));
 
@@ -524,6 +620,11 @@ public class PVCommands {
                         if (args.<User>getOne("player").isPresent() && src.hasPermission("pixelvip.cmd.setactive")) {
                             String pname = args.<User>getOne("player").get().getName();
                             puuid = plugin.getConfig().getVipUUID(pname);
+                        }
+
+                        if (plugin.getConfig().isVipActive(group, puuid)){
+                            src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.activeVipSetTo + plugin.getConfig().getVipTitle(group)));
+                            return;
                         }
 
                         List<String[]> vipInfo = plugin.getConfig().getVipInfo(puuid);

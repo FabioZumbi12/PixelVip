@@ -42,6 +42,13 @@ public class PayPalHook implements PaymentModel {
 
     @Override
     public boolean checkTransaction(Player player, String transCode) {
+
+        if (plugin.getConfig().transExist(getPayname(), transCode)) {
+            player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_codeused.replace("{payment}", getPayname())));
+            plugin.processTrans.remove(transCode);
+            return true;
+        }
+
         boolean success;
         try {
             GetTransactionDetailsReq getTransactionDetailsReq = new GetTransactionDetailsReq();
@@ -57,12 +64,6 @@ public class PayPalHook implements PaymentModel {
 
             if (!trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentStatus().getValue().equalsIgnoreCase("Completed")) {
                 player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_waiting.replace("{payment}", getPayname())));
-                plugin.processTrans.remove(transCode);
-                return true;
-            }
-
-            if (plugin.getConfig().transExist(getPayname(), transCode)) {
-                player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_codeused.replace("{payment}", getPayname())));
                 plugin.processTrans.remove(transCode);
                 return true;
             }

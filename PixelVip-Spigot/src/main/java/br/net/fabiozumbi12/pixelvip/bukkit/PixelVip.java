@@ -203,7 +203,7 @@ public class PixelVip extends JavaPlugin implements Listener {
 
         task = serv.getScheduler().runTaskTimerAsynchronously(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-            getPVConfig().getVipList().get(uuid).forEach((vipInfo) -> {
+            value.forEach((vipInfo) -> {
                 long dur = new Long(vipInfo[0]);
                 if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
                     config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
@@ -239,7 +239,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         serv.getScheduler().runTaskLater(plugin, () -> {
             if (permApi.getGroups(p) != null) {
                 for (String g : permApi.getGroups(p)) {
-                    if (getPVConfig().getGroupList().contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
+                    if (getPVConfig().getGroupList(true).contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
                         permApi.removeGroup(p.getUniqueId().toString(), g);
                     }
                 }

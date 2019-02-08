@@ -34,6 +34,13 @@ public class MercadoPagoHook implements PaymentModel {
 
     @Override
     public boolean checkTransaction(Player player, String transCode) {
+
+        if (plugin.getConfig().transExist(getPayname(), transCode)) {
+            player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_codeused.replace("{payment}", getPayname())));
+            plugin.processTrans.remove(transCode);
+            return true;
+        }
+
         boolean success;
         try {
             JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/" + transCode).getJsonElementResponse();

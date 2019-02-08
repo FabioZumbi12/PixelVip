@@ -266,7 +266,7 @@ public class PVConfig {
         for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
             if (!vipTitle.isEmpty() && plugin.getConfig().getString("groups." + group + ".title") != null &&
                     plugin.getUtil().removeColor(plugin.getConfig().getString("groups." + group + ".title")).equalsIgnoreCase(vipTitle))
-                return plugin.getConfig().getString("groups." + group + ".title");
+                return group;
         }
         return vipTitle;
     }
@@ -292,10 +292,6 @@ public class PVConfig {
 
     public void addTrans(String payment, String trans, String player) {
         dataManager.addTras(payment, trans, player);
-    }
-
-    public void removeTrans(String payment, String trans) {
-        dataManager.removeTrans(payment, trans);
     }
 
     public HashMap<String, Map<String, String>> getAllTrans() {
@@ -607,11 +603,9 @@ public class PVConfig {
     }
 
     public void setActive(String uuid, String group, List<String> pgroup) {
-        if (dataManager.isVipActive(uuid, group)) return;
-
         String newVip = group;
-        String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
-        for (String glist : getGroupList()) {
+        String oldVip = pgroup.stream().anyMatch(str -> getGroupList(true).contains(str)) ? pgroup.stream().filter(str -> getGroupList(true).contains(str)).findFirst().get() : "";
+        for (String glist : getGroupList(true)) {
             if (dataManager.containsVip(uuid, glist)) {
                 if (glist.equals(group)) {
                     if (!dataManager.isVipActive(uuid, glist)) {
@@ -848,18 +842,21 @@ public class PVConfig {
         return dataManager.getItemListKeys();
     }
 
-    public Set<String> getGroupList() {
+    public Set<String> getGroupList(boolean raw) {
         Set<String> list = new HashSet<>();
-        /*if (plugin.getConfig().getConfigurationSection("groups") != null) {
-            return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
-        }*/
-        if (plugin.getConfig().getConfigurationSection("groups") != null) {
-            for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
-                if (plugin.getConfig().getString("groups." + group + ".title") != null &&
-                        !plugin.getConfig().getString("groups." + group + ".title").isEmpty())
-                    list.add(plugin.getConfig().getString("groups." + group + ".title"));
-                else
-                    list.add(group);
+        if (raw){
+            if (plugin.getConfig().getConfigurationSection("groups") != null) {
+                return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
+            }
+        } else {
+            if (plugin.getConfig().getConfigurationSection("groups") != null) {
+                for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
+                    if (plugin.getConfig().getString("groups." + group + ".title") != null &&
+                            !plugin.getConfig().getString("groups." + group + ".title").isEmpty())
+                        list.add(plugin.getConfig().getString("groups." + group + ".title"));
+                    else
+                        list.add(group);
+                }
             }
         }
         return list;

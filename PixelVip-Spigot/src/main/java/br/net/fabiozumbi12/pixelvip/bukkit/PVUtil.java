@@ -18,11 +18,11 @@ public class PVUtil {
     }
 
     public String toColor(String str) {
-        return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "\u00A7$2");
+        return str.replaceAll("(&([Aa-fFkK-oOrR0-9]))", "\u00A7$2");
     }
 
     public String removeColor(String str) {
-        return str.replaceAll("(&([Aa-fkFK-ORor0-9]))", "");
+        return str.replaceAll("(&([Aa-fFkK-oOrR0-9]))", "");
     }
 
     public long getNowMillis() {

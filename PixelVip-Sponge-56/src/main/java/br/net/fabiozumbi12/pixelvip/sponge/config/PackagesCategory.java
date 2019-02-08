@@ -9,6 +9,15 @@ import java.util.*;
 public class PackagesCategory {
 
     @Setting
+    public HandCat hand = new HandCat();
+    @ConfigSerializable
+    public static class HandCat {
+
+        @Setting
+        public String command = "give {p} {item} {amount}";
+    }
+
+    @Setting
     public Map<String, Packs> packages = defPackages();
     @Setting(value = "pending-variants")
     public Map<String, List<String>> pending_variants = new HashMap<>();
@@ -18,10 +27,18 @@ public class PackagesCategory {
     private Map<String, Packs> defPackages() {
         Map<String, Packs> packages = new HashMap<>();
         packages.put("999", new Packs(Arrays.asList("give {p} diamond_block 10", "eco add {p} 1000"),
-                new HashMap<>(), "Select a gender for your VIP: "));
-        packages.put("998", new Packs(new ArrayList<>(), new HashMap<>(), "Select an option: "));
+                new HashMap<>(), ""));
+        packages.put("998", new Packs(new ArrayList<>(), defOpts(), "Select a gender for your VIP: "));
         return packages;
     }
+
+    private Map<String, List<String>> defOpts() {
+        Map<String, List<String>> options = new HashMap<>();
+        options.put("Masculino", Collections.singletonList("addvip {p} vip2m 10"));
+        options.put("Feminino", Collections.singletonList("addvip {p} vip2f 10"));
+        return options;
+    }
+
 
     private Map<String, String> defStrings() {
         Map<String, String> strings = new HashMap<>();
@@ -31,6 +48,10 @@ public class PackagesCategory {
         strings.put("variants", "&bSelect a variant: ");
         strings.put("no-package", "&cThere's no package with id {id}! Use /listpackages to list all available packages.");
         strings.put("no-pendent", "&cYou don''t have any pendent variants to use!");
+        strings.put("added", "&aPackage added with success!");
+        strings.put("removed", "&aPackage removed with success!");
+        strings.put("exists", "&cA package with id {id} already exists!");
+        strings.put("hand-empty", "&cYour hand is empty or an invalid item!");
         return strings;
     }
 
@@ -56,15 +77,7 @@ public class PackagesCategory {
             @Setting
             public String message = "Select an option: ";
             @Setting
-            public Map<String, OptionsCat> options = defOpts();
-
-            private Map<String, OptionsCat> defOpts() {
-                Map<String, OptionsCat> options = new HashMap<>();
-                options.put("Masculino", new OptionsCat(Collections.singletonList("addvip {p} vip2m 10")));
-                options.put("Feminino", new OptionsCat(Collections.singletonList("addvip {p} vip2f 10")));
-                return options;
-            }
-
+            public Map<String, OptionsCat> options = new HashMap<>();
             @ConfigSerializable
             public static class OptionsCat {
                 @Setting

@@ -44,9 +44,9 @@ import static org.spongepowered.api.Sponge.*;
         authors = "FabioZumbi12",
         description = "Plugin to give VIP to your players.",
         dependencies = {
-                @Dependency(id = "PagSeguroAPI", optional = true),
-                @Dependency(id = "MercadoPagoAPI", optional = true),
-                @Dependency(id = "PayPalAPI", optional = true)})
+                @Dependency(id = "pagseguroapi", optional = true),
+                @Dependency(id = "mercadopagoapi", optional = true),
+                @Dependency(id = "paypalapi", optional = true)})
 public class PixelVip {
     private static PixelVip plugin;
     @Inject
@@ -108,7 +108,8 @@ public class PixelVip {
     public void onServerStart(GameStartedServerEvent event) {
         try {
             plugin = this;
-
+            processTrans = new HashMap<>();
+            
             //make backup of old files
             File oldConfig = new File(configDir(), "pixevip.conf");
             if (oldConfig.exists()){
@@ -126,6 +127,15 @@ public class PixelVip {
             logger.info("Init perms module...");
             this.setCompatperms();
 
+            //package manager
+            packageManager = new PackageManager(this, factory);
+
+            logger.info("Init scheduler module...");
+            reloadVipTask();
+
+            //payment apis
+            setupPayments();
+
             logger.info("Init commands module...");
             this.cmds = new PVCommands(this);
             CommandSpec spongevip = CommandSpec.builder()
@@ -138,9 +148,7 @@ public class PixelVip {
                     .executor((src, args) -> {
                         {
                             if (args.hasAny("reload")) {
-                                this.config = new PVConfig(factory);
-                                this.cmds.reload();
-                                reloadVipTask();
+                                reloadCmd();
                                 src.sendMessage(util.toText("&aPixelVip reloaded"));
                             } else {
                                 src.sendMessage(util.toText("&a> PixelVip by &6FabioZumbi12"));
@@ -150,15 +158,6 @@ public class PixelVip {
                     })
                     .build();
             Sponge.getCommandManager().register(this, spongevip, "pixelvip");
-
-            logger.info("Init scheduler module...");
-            reloadVipTask();
-
-            //payment apis
-            setupPayments();
-
-            //package manager
-            packageManager = new PackageManager(this, factory);
 
             logger.info(util.toColor("We have &6" + config.getVipList().size() + " &ractive Vips"));
             logger.info(util.toColor("&aPixelVip enabled!&r"));
@@ -170,19 +169,19 @@ public class PixelVip {
     private void setupPayments() {
         payments = new ArrayList<>();
         //pagseguro
-        if (getConfig().root().apis.pagseguro.use && getPluginManager().getPlugin("PagSeguroAPI").isPresent()) {
+        if (getConfig().root().apis.pagseguro.use && getPluginManager().getPlugin("pagseguroapi").isPresent()) {
             this.payments.add(new PagSeguroHook(this));
             logger.info("-> PagSeguroAPI found and hooked.");
         }
 
         //mercadopago
-        if (getConfig().root().apis.mercadopago.use && getPluginManager().getPlugin("MercadoPagoAPI").isPresent()) {
+        if (getConfig().root().apis.mercadopago.use && getPluginManager().getPlugin("mercadopagoapi").isPresent()) {
             this.payments.add(new MercadoPagoHook(this));
             logger.info("-> MercadoPagoAPI found and hooked.");
         }
 
         //paypal
-        if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("PayPalAPI").isPresent()) {
+        if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("paypalapi").isPresent()) {
             this.payments.add(new PayPalHook(this));
             logger.info("-> PayPalAPI found and hooked.");
         }
@@ -207,12 +206,19 @@ public class PixelVip {
 
     public void reloadCmd() {
         logger.info("Reloading config module...");
-        config.reloadVips();
+        this.config = new PVConfig(factory);
 
         //package manager
         packageManager = new PackageManager(this, factory);
 
+        logger.info("Reloading scheduler module...");
         reloadVipTask();
+
+        //payment apis
+        setupPayments();
+
+        logger.info("Reloading commands module...");
+        this.cmds.reload();
 
         logger.info(util.toColor("We have " + config.getVipList().size() + " active Vips"));
         logger.info(util.toColor("PixelVip reloaded"));
@@ -227,9 +233,7 @@ public class PixelVip {
 
     @Listener
     public void onReloadPlugins(GameReloadEvent event) {
-        this.config = new PVConfig(factory);
-        this.cmds.reload();
-        reloadVipTask();
+        reloadCmd();
         logger.info(util.toColor("&aPixelVip reloaded"));
     }
 

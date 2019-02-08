@@ -1,6 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.cmds;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PVPackage;
+import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PackageManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.SpigotText;
@@ -9,10 +10,12 @@ import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataMysql;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,13 +47,45 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         plugin.getCommand("givepackage").setExecutor(this);
         plugin.getCommand("getvariant").setExecutor(this);
         plugin.getCommand("listpackages").setExecutor(this);
+        plugin.getCommand("addpackage").setExecutor(this);
+        plugin.getCommand("delpackage").setExecutor(this);
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 
-        if (cmd.getName().equalsIgnoreCase("newkey") && args.length == 1) {
-            return new ArrayList<>(plugin.getPVConfig().getGroupList());
+        if (args.length == 1){
+            if (cmd.getName().equalsIgnoreCase("newkey")) {
+                List<String> list = new ArrayList<>(plugin.getPVConfig().getGroupList(false));
+                list.replaceAll(g -> plugin.getUtil().removeColor(g));
+                return list;
+            }
+            if (sender instanceof Player && cmd.getName().equalsIgnoreCase("setactive")) {
+                Player p = (Player)sender;
+                List<String> list = new ArrayList<>();
+                for (String[] vip:plugin.getPVConfig().getVipInfo(p.getUniqueId().toString())){
+                    list.add(ChatColor.stripColor(plugin.getPVConfig().getVipTitle(vip[1])));
+                }
+                return list;
+            }
+            if (cmd.getName().equalsIgnoreCase("delpackage")) {
+                return new ArrayList<>(plugin.getPackageManager().getPackages().getConfigurationSection("packages").getKeys(false));
+            }
+        }
+        if (args.length == 2){
+            if (cmd.getName().equalsIgnoreCase("setvip") ||
+                    cmd.getName().equalsIgnoreCase("addvip") ||
+                    cmd.getName().equalsIgnoreCase("removevip")) {
+                List<String> list = new ArrayList<>(plugin.getPVConfig().getGroupList(false));
+                list.replaceAll(g -> plugin.getUtil().removeColor(g));
+                return list;
+            }
+            if (cmd.getName().equalsIgnoreCase("givepackage")) {
+                return new ArrayList<>(plugin.getPackageManager().getPackages().getConfigurationSection("packages").getKeys(false));
+            }
+            if (cmd.getName().equalsIgnoreCase("addpackage")) {
+                return Arrays.asList("hand","command");
+            }
         }
 
         if (cmd.getName().equalsIgnoreCase("pixelvip") && args.length == 1) {
@@ -66,85 +101,167 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (cmdWait.contains(sender.getName())) {
-            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "wait-cmd")));
-            return true;
-        } else {
-            cmdWait.add(sender.getName());
-            Bukkit.getScheduler().runTaskLater(plugin, () -> cmdWait.remove(sender.getName()), 20);
+        if (sender instanceof Player){
+            if (cmdWait.contains(sender.getName())) {
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "wait-cmd")));
+                return true;
+            } else {
+                cmdWait.add(sender.getName());
+                Bukkit.getScheduler().runTaskLater(plugin, () -> cmdWait.remove(sender.getName()), 20);
+            }
         }
 
-        final boolean[] result = {true};
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = true;
             if (cmd.getName().equalsIgnoreCase("delkey")) {
-                result[0] = delKey(sender, args);
+                success = delKey(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("newkey")) {
-                result[0] = newKey(sender, args, false);
+                success = newKey(sender, args, false);
             }
 
             if (cmd.getName().equalsIgnoreCase("sendkey")) {
-                result[0] = sendKey(args);
+                success = sendKey(args);
             }
 
             if (cmd.getName().equalsIgnoreCase("newitemkey")) {
-                result[0] = newItemKey(sender, args);
+                success = newItemKey(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("additemkey")) {
-                result[0] = addItemKey(sender, args);
+                success = addItemKey(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("listkeys")) {
-                result[0] = listKeys(sender);
+                success = listKeys(sender);
             }
 
             if (cmd.getName().equalsIgnoreCase("usekey")) {
-                result[0] = useKey(sender, args);
+                success = useKey(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("viptime")) {
-                result[0] = vipTime(sender, args);
+                success = vipTime(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("removevip")) {
-                result[0] = removeVip(sender, args);
+                success = removeVip(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("setactive")) {
-                result[0] = setActive(sender, args);
+                success = setActive(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("addvip")) {
-                result[0] = addVip(sender, args);
+                success = addVip(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("setvip")) {
-                result[0] = setVip(sender, args);
+                success = setVip(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("pixelvip")) {
-                result[0] = mainCommand(sender, args);
+                success = mainCommand(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("listvips")) {
-                result[0] = listVips(sender);
+                success = listVips(sender);
             }
 
             if (cmd.getName().equalsIgnoreCase("givepackage")) {
-                result[0] = givePackage(sender, args);
+                success = givePackage(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("getvariant")) {
-                result[0] = getVariant(sender, args);
+                success = getVariant(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("listpackages")) {
-                result[0] = listPackages(sender);
+                success = listPackages(sender);
+            }
+
+            if (cmd.getName().equalsIgnoreCase("addpackage")) {
+                success = addPackage(sender, args);
+            }
+
+            if (cmd.getName().equalsIgnoreCase("delpackage")) {
+                success = delPackage(sender, args);
+            }
+            if (!success) {
+                sender.sendMessage(cmd.getDescription());
+                sender.sendMessage(cmd.getUsage());
             }
         });
-        return result[0];
+        return true;
+    }
+
+    private boolean delPackage(CommandSender sender, String[] args) {
+        if (args.length == 1){
+            PackageManager packages = plugin.getPackageManager();
+            String id = args[0];
+            if (packages.getPackage(id) == null){
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.no-package").replace("{id}", id)));
+                return true;
+            }
+            packages.getPackages().set("packages." + id, null);
+            packages.save();
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                    plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.removed")));
+            return true;
+        }
+        return false;
+    }
+
+    private boolean addPackage(CommandSender sender, String[] args) {
+        PackageManager packages = plugin.getPackageManager();
+        //itemstack: /addpackage <id> hand|command [command1, command2]
+        if (args.length >= 2){
+            String id = args[0];
+            if (packages.getPackage(id) != null){
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.exists").replace("{id}", id)));
+                return true;
+            }
+
+            if (args.length == 2 && args[1].equalsIgnoreCase("hand")){
+                if (!(sender instanceof Player)){
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.only-players")));
+                    return true;
+                }
+                Player p = (Player)sender;
+                if (p.getItemInHand().getType().equals(Material.AIR)){
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.hand-empty")));
+                    return true;
+                }
+                String item = p.getItemInHand().getType().name();
+                int amount = p.getItemInHand().getAmount();
+                String cmd = packages.getPackages().getString("hand.cmd", "give {p} {item} {amount}")
+                        .replace("{item}",item)
+                        .replace("{amount}", amount+"");
+
+                packages.getPackages().set("packages." + id + ".commands", Collections.singletonList(cmd));
+                packages.save();
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.added")));
+                return true;
+            }
+            if (args[1].equalsIgnoreCase("command")){
+                args[0] = "";
+                args[1] = "";
+                List<String> cmds = fixArgs(args);
+                packages.getPackages().set("packages." + id + ".commands", cmds);
+                packages.save();
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.added")));
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean listPackages(CommandSender sender) {
@@ -452,7 +569,6 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 return false;
             }
 
-
             if (days <= 0) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "moreThanZero")));
                 return true;
@@ -582,7 +698,6 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                             return true;
                         }
                     }
-                    plugin.processTrans.remove(key);
                 }
                 plugin.getPVConfig().activateVip(p, key, "", 0, p.getName());
             } else {
@@ -627,7 +742,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 plugin.getPVConfig().removeVip(uuid, Optional.empty());
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "vipsRemoved")));
             } else {
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noPlayersByName")));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotVip")));
             }
             return true;
         }
@@ -643,7 +758,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                 plugin.getPVConfig().removeVip(uuid, group);
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "vipsRemoved")));
             } else {
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noPlayersByName")));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotVip")));
             }
             return true;
         }
@@ -665,6 +780,11 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
+                if (plugin.getPVConfig().isVipActive(group, p.getUniqueId().toString())){
+                    p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(args[0])));
+                    return true;
+                }
+
                 List<String[]> vipInfo = plugin.getPVConfig().getVipInfo(p.getUniqueId().toString());
 
                 if (vipInfo.size() > 0) {
@@ -676,7 +796,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                         }
                     }
                 }
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotVip")));
                 return true;
             } else {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "onlyPlayers")));
@@ -692,6 +812,11 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             String group = plugin.getPVConfig().getVipByTitle(args[0]);
             if (!plugin.getPVConfig().groupExists(group)) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
+                return true;
+            }
+
+            if (plugin.getPVConfig().isVipActive(group, uuid)){
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(args[0])));
                 return true;
             }
 
@@ -725,9 +850,9 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             if (p.getName() != null) {
                 pname = p.getName();
             }
-            String group = plugin.getPVConfig().getVipByTitle(args[0]);
+            String group = plugin.getPVConfig().getVipByTitle(args[1]);
             if (!plugin.getPVConfig().groupExists(group)) {
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[0]));
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + args[1]));
                 return true;
             }
             long days;

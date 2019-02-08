@@ -79,7 +79,7 @@ public class PermsAPI {
     }
 
     public void removeGroup(String uuid, String group) {
-        if (plugin.getPVConfig().getGroupList().contains(group)) {
+        if (plugin.getPVConfig().getGroupList(true).contains(group)) {
             if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group), (1 + delay) * 10);
                 delay++;

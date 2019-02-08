@@ -42,6 +42,10 @@ public class PackageManager {
         }
     }
 
+    public void save(){
+        savePackages(this.packages);
+    }
+
     public void savePackages(PackagesCategory packages) {
         this.packages = packages;
         try {

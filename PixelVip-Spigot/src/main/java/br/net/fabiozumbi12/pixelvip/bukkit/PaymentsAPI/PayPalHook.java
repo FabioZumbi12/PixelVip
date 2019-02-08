@@ -42,6 +42,13 @@ public class PayPalHook implements PaymentModel {
 
     @Override
     public boolean checkTransaction(Player player, String transCode) {
+
+        //check if used
+        if (plugin.getPVConfig().transExist(this.getPayname(), transCode)){
+            player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.codeused").replace("{payment}", getPayname())));
+            return true;
+        }
+
         boolean success;
         try {
             GetTransactionDetailsReq getTransactionDetailsReq = new GetTransactionDetailsReq();
@@ -51,22 +58,19 @@ public class PayPalHook implements PaymentModel {
             getTransactionDetailsReq.setGetTransactionDetailsRequest(requestType);
             GetTransactionDetailsResponseType trans = payPalAPIInterfaceServiceService.getTransactionDetails(getTransactionDetailsReq);
 
+            //check if exists
             if (!trans.getErrors().isEmpty()) {
                 return false;
             }
 
+            //check if approved
             if (!trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentStatus().getValue().equalsIgnoreCase("Completed")) {
                 player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.waiting").replace("{payment}", getPayname())));
                 plugin.processTrans.remove(transCode);
                 return true;
             }
 
-            if (plugin.getPVConfig().transExist(getPayname(), transCode)) {
-                player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.codeused").replace("{payment}", getPayname())));
-                plugin.processTrans.remove(transCode);
-                return true;
-            }
-
+            //check if expired
             Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getConfig().getString("apis.paypal.ignoreOldest"));
             Date payCf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentDate());
             if (payCf.compareTo(oldCf) < 0) {

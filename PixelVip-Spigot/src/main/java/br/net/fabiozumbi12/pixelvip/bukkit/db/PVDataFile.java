@@ -114,7 +114,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public HashMap<String, List<String[]>> getActiveVipList() {
         HashMap<String, List<String[]>> vips = new HashMap<>();
-        plugin.getPVConfig().getGroupList().stream().filter(group -> vipsFile.getConfigurationSection("activeVips." + group) != null).forEach(group -> {
+        plugin.getPVConfig().getGroupList(true).stream().filter(group -> vipsFile.getConfigurationSection("activeVips." + group) != null).forEach(group -> {
             vipsFile.getConfigurationSection("activeVips." + group).getKeys(false).forEach(uuid -> {
                 List<String[]> vipInfo = getVipInfo(uuid);
                 List<String[]> activeVips = new ArrayList<>();
@@ -130,7 +130,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public HashMap<String, List<String[]>> getAllVipList() {
         HashMap<String, List<String[]>> vips = new HashMap<>();
-        plugin.getPVConfig().getGroupList().stream().filter(group -> vipsFile.getConfigurationSection("activeVips." + group) != null).forEach(group -> {
+        plugin.getPVConfig().getGroupList(true).stream().filter(group -> vipsFile.getConfigurationSection("activeVips." + group) != null).forEach(group -> {
             vipsFile.getConfigurationSection("activeVips." + group).getKeys(false).forEach(uuid -> {
                 List<String[]> vipInfo = getVipInfo(uuid);
                 vips.put(uuid, vipInfo);
@@ -142,7 +142,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public List<String[]> getVipInfo(String puuid) {
         List<String[]> vips = new ArrayList<>();
-        plugin.getPVConfig().getGroupList().stream().filter(k -> vipsFile.get("activeVips." + k + "." + puuid + ".active") != null).forEach(key -> {
+        plugin.getPVConfig().getGroupList(true).stream().filter(k -> vipsFile.get("activeVips." + k + "." + puuid + ".active") != null).forEach(key -> {
             StringBuilder builder = new StringBuilder();
             for (String str : vipsFile.getStringList("activeVips." + key + "." + puuid + ".playerGroup")) {
                 builder.append(str).append(",");
@@ -200,7 +200,6 @@ public class PVDataFile implements PVDataManager {
         id = id.toLowerCase();
         vipsFile.set("activeVips." + group + "." + id + ".active", active);
         addRawVip(group, id, pgroup, duration, nick, expires);
-        saveVips();
     }
 
     @Override
@@ -210,6 +209,7 @@ public class PVDataFile implements PVDataManager {
         vipsFile.set("activeVips." + group + "." + id + ".duration", duration);
         vipsFile.set("activeVips." + group + "." + id + ".nick", nick);
         vipsFile.set("activeVips." + group + "." + id + ".expires-on-exact", expires);
+        vipsFile.set("activeVips." + group + "." + id + ".active", true);
         saveVips();
     }
 
@@ -293,7 +293,7 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public void changeUUID(String oldUUID, String newUUID) {
-        plugin.getPVConfig().getGroupList().stream().filter(k -> vipsFile.contains("activeVips." + k + "." + oldUUID)).forEach(key -> {
+        plugin.getPVConfig().getGroupList(true).stream().filter(k -> vipsFile.contains("activeVips." + k + "." + oldUUID)).forEach(key -> {
             ConfigurationSection config = vipsFile.getConfigurationSection("activeVips." + key + "." + oldUUID);
             vipsFile.set("activeVips." + key + "." + oldUUID, null);
             vipsFile.set("activeVips." + key + "." + newUUID, config);

@@ -452,8 +452,6 @@ public class PVConfig {
     }
 
     public void setActive(String uuid, String group, List<String> pgroup) {
-        if (dataManager.isVipActive(uuid, group)) return;
-
         String newVip = group;
         String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
         for (String glist : getGroupList()) {
