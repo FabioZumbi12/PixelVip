@@ -109,7 +109,7 @@ public class PixelVip {
         try {
             plugin = this;
             processTrans = new HashMap<>();
-            
+
             //make backup of old files
             File oldConfig = new File(configDir(), "pixevip.conf");
             if (oldConfig.exists()){
@@ -168,21 +168,35 @@ public class PixelVip {
 
     private void setupPayments() {
         payments = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         //pagseguro
         if (getConfig().root().apis.pagseguro.use && getPluginManager().getPlugin("pagseguroapi").isPresent()) {
             this.payments.add(new PagSeguroHook(this));
+            if (getConfig().root().apis.pagseguro.ignoreOldest.isEmpty()){
+                getConfig().root().apis.pagseguro.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
+                getConfig().saveConfigAll();
+            }
             logger.info("-> PagSeguroAPI found and hooked.");
         }
 
         //mercadopago
         if (getConfig().root().apis.mercadopago.use && getPluginManager().getPlugin("mercadopagoapi").isPresent()) {
             this.payments.add(new MercadoPagoHook(this));
+            if (getConfig().root().apis.mercadopago.ignoreOldest.isEmpty()){
+                getConfig().root().apis.mercadopago.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
+                getConfig().saveConfigAll();
+            }
             logger.info("-> MercadoPagoAPI found and hooked.");
         }
 
         //paypal
         if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("paypalapi").isPresent()) {
             this.payments.add(new PayPalHook(this));
+            if (getConfig().root().apis.paypal.ignoreOldest.isEmpty()){
+                getConfig().root().apis.paypal.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
+                getConfig().saveConfigAll();
+            }
+
             logger.info("-> PayPalAPI found and hooked.");
         }
     }

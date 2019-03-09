@@ -5,6 +5,7 @@ import br.com.uol.pagseguro.api.PagSeguroEnv;
 import br.com.uol.pagseguro.api.common.domain.PaymentItem;
 import br.com.uol.pagseguro.api.common.domain.TransactionStatus;
 import br.com.uol.pagseguro.api.credential.Credential;
+import br.com.uol.pagseguro.api.exception.PagSeguroBadRequestException;
 import br.com.uol.pagseguro.api.transaction.search.TransactionDetail;
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,7 +48,12 @@ public class PagSeguroHook implements PaymentModel {
 
         boolean success;
         try {
-            TransactionDetail trans = pagSeguro.transactions().search().byCode(transCode);
+            TransactionDetail trans;
+            try {
+                trans = pagSeguro.transactions().search().byCode(transCode);
+            } catch (Exception ignored){
+                return false;
+            }
 
             if (trans == null) {
                 return false;
@@ -70,9 +76,13 @@ public class PagSeguroHook implements PaymentModel {
             HashMap<Integer, String> items = new HashMap<>();
             for (PaymentItem item : trans.getItems()) {
                 String[] ids = item.getId().split(" ");
-                for (String id : ids)
-                    if (id.startsWith("#"))
-                        items.put(item.getQuantity(), id.substring(1));
+                if (item.getId() != null && !item.getId().isEmpty()){
+                    items.put(item.getQuantity(), item.getId());
+                } else {
+                    for (String id : ids)
+                        if (id.startsWith("#"))
+                            items.put(item.getQuantity(), id.substring(1));
+                }
             }
 
             success = plugin.getUtil().paymentItems(items, player, this.getPayname(), transCode);
