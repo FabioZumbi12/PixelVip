@@ -48,18 +48,6 @@ public class PVConfig {
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
                 "- {days} = Days of activated Vip");
-        comConfig.setDefault("groups.vipExample", null, "This is an Example of vip group properties.\nCopy or use this as example to setups all your other groups.");
-        comConfig.setDefault("groups.vipExample.essentials-kit", "ExampleKit", "Put the Essentials kit name to freeze the kit time when this vip is not in use.\nThis is anti-exploit.");
-        comConfig.setDefault("groups.vipExample.title", "&bVip Example", "Title to use on commands and to show on chat.");
-        comConfig.setDefault("groups.vipExample.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"),
-                "Add the commands to run when the player use the key for activation \n" +
-                "You can use the variables:\n" +
-                "{p} = Player name, {vip} = Vip group, {days} = Vip days, {playergroup} = Player group before activate vip");
-        comConfig.setDefault("groups.vipExample.cmdChances", null,
-                "Add commands here to give items to players based on chances.\n" +
-                "Use 1 - 100 for add chance commands.");
-        comConfig.setDefault("groups.vipExample.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
-        comConfig.setDefault("groups.vipExample.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
         comConfig.setDefault("groups.vipExample.run-on-vip-finish", Collections.singletonList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"), "Commands to run on this vip ends.");
         if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()){
             comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g->{
@@ -69,6 +57,19 @@ public class PVConfig {
                 comConfig.setDefault("groups." + g + ".run-on-vip-finish", new ArrayList<>());
                 comConfig.setDefault("groups." + g + ".essentials-kit", g);
             });
+        } else {
+            comConfig.setDefault("groups.vipExample", null, "This is an Example of vip group properties.\nCopy or use this as example to setups all your other groups.");
+            comConfig.setDefault("groups.vipExample.essentials-kit", "ExampleKit", "Put the Essentials kit name to freeze the kit time when this vip is not in use.\nThis is anti-exploit.");
+            comConfig.setDefault("groups.vipExample.title", "&bVip Example", "Title to use on commands and to show on chat.");
+            comConfig.setDefault("groups.vipExample.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"),
+                    "Add the commands to run when the player use the key for activation \n" +
+                            "You can use the variables:\n" +
+                            "{p} = Player name, {vip} = Vip group, {days} = Vip days, {playergroup} = Player group before activate vip");
+            comConfig.setDefault("groups.vipExample.cmdChances", null,
+                    "Add commands here to give items to players based on chances.\n" +
+                            "Use 1 - 100 for add chance commands.");
+            comConfig.setDefault("groups.vipExample.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
+            comConfig.setDefault("groups.vipExample.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
         }
 
         //database
@@ -873,7 +874,6 @@ public class PVConfig {
                 }
             }
         }
-        list.removeIf(g->g.equalsIgnoreCase(getVipTitle("vipExample")));
         return list;
     }
 

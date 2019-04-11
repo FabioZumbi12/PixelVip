@@ -10,7 +10,7 @@ public class MainCategory {
     public MainCategory() {}
 
     @Setting(comment = "Put your permissions plugin vip group names here. Case sensitive!")
-    public Map<String, VipsCategory> groups = defaultVips();
+    public Map<String, VipsCategory> groups = new HashMap<>();
     @Setting
     public PaymentCategory apis = new PaymentCategory();
     @Setting
@@ -121,12 +121,6 @@ public class MainCategory {
         public String pay_expired = "&c{payment}: This code has expired!";
         @Setting(value = "pay-noitems")
         public String pay_noitems = "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!";
-    }
-
-    private Map<String, VipsCategory> defaultVips() {
-        Map<String, VipsCategory> map = new HashMap<>();
-        map.put("vipExample", new VipsCategory());
-        return map;
     }
 
     @ConfigSerializable

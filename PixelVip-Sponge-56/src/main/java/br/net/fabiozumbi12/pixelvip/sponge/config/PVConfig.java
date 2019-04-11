@@ -57,6 +57,9 @@ public class PVConfig {
             configRoot = cfgLoader.load(ConfigurationOptions.defaults().setObjectMapperFactory(factory).setShouldCopyDefaults(true).setHeader(header));
             root = configRoot.getValue(TypeToken.of(MainCategory.class), new MainCategory());
 
+            if (root.groups.isEmpty()){
+                root.groups.put("vipExample", new MainCategory.VipsCategory());
+            }
 
             //init database
             reloadVips();
@@ -605,7 +608,6 @@ public class PVConfig {
                     list.add(key);
                 }
             });
-            list.removeIf(g->g.equalsIgnoreCase(getVipTitle("vipExample")));
             return list;
         }
     }
