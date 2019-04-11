@@ -152,7 +152,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public HashMap<String, List<String[]>> getActiveVipList() {
         HashMap<String, List<String[]>> vips = new HashMap<>();
-        plugin.getConfig().getGroupList().stream().filter(group -> vipRoot.activeVips.containsKey(group)).forEach(group ->
+        plugin.getConfig().getGroupList(true).stream().filter(group -> vipRoot.activeVips.containsKey(group)).forEach(group ->
                 vipRoot.activeVips.get(group).players.forEach((uuid, value) -> {
                     List<String[]> vipInfo = getVipInfo(uuid);
                     List<String[]> activeVips = new ArrayList<>();
@@ -167,7 +167,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public HashMap<String, List<String[]>> getAllVipList() {
         HashMap<String, List<String[]>> vips = new HashMap<>();
-        plugin.getConfig().getGroupList().stream().filter(group -> vipRoot.activeVips.containsKey(group)).forEach(group ->
+        plugin.getConfig().getGroupList(true).stream().filter(group -> vipRoot.activeVips.containsKey(group)).forEach(group ->
                 vipRoot.activeVips.get(group).players.forEach((uuid, value) -> {
                     List<String[]> vipInfo = getVipInfo(uuid);
                     vips.put(uuid, vipInfo);
@@ -178,7 +178,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public List<String[]> getVipInfo(String uuid) {
         List<String[]> vips = new ArrayList<>();
-        plugin.getConfig().getGroupList().stream().filter(k -> vipRoot.activeVips.containsKey(k) && vipRoot.activeVips.get(k).players.containsKey(uuid)).forEach(key -> {
+        plugin.getConfig().getGroupList(true).stream().filter(k -> vipRoot.activeVips.containsKey(k) && vipRoot.activeVips.get(k).players.containsKey(uuid)).forEach(key -> {
             StringBuilder builder = new StringBuilder();
             for (String str : vipRoot.activeVips.get(key).players.get(uuid).playerGroup) {
                 builder.append(str).append(",");

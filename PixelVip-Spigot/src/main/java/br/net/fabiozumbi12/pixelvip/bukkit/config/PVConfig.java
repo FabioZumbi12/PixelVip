@@ -873,7 +873,7 @@ public class PVConfig {
                 }
             }
         }
-        list.remove("vipExample");
+        list.remove(getVipTitle("vipExample"));
         return list;
     }
 

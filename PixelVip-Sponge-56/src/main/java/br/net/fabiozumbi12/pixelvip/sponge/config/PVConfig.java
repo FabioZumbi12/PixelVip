@@ -431,8 +431,8 @@ public class PVConfig {
 
     public void setActive(String uuid, String group, List<String> pgroup) {
         String newVip = group;
-        String oldVip = pgroup.stream().anyMatch(str -> getGroupList().contains(str)) ? pgroup.stream().filter(str -> getGroupList().contains(str)).findFirst().get() : "";
-        for (String glist : getGroupList()) {
+        String oldVip = pgroup.stream().anyMatch(str -> getGroupList(true).contains(str)) ? pgroup.stream().filter(str -> getGroupList(true).contains(str)).findFirst().get() : "";
+        for (String glist : getGroupList(true)) {
             if (dataManager.containsVip(uuid, glist)) {
                 if (glist.equals(group)) {
                     if (!dataManager.isVipActive(uuid, glist)) {
@@ -593,8 +593,21 @@ public class PVConfig {
         return dataManager.getItemListKeys();
     }
 
-    public Set<String> getGroupList() {
-        return root.groups.keySet();
+    public Set<String> getGroupList(boolean raw) {
+        Set<String> list = new HashSet<>();
+        if (raw)
+            return root.groups.keySet();
+        else {
+            root.groups.forEach((key, value) -> {
+                if (!value.title.isEmpty()) {
+                    list.add(value.title);
+                } else {
+                    list.add(key);
+                }
+            });
+            list.remove(getVipTitle("vip-demo"));
+            return list;
+        }
     }
 
     public HashMap<String, List<String[]>> getVipList() {
