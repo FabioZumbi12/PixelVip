@@ -38,7 +38,7 @@ public class PVConfig {
                 "The configuration is commented! If you need more help or have issues, use our github:\n" +
                 "https://github.com/FabioZumbi12/PixelVip\n" +
                 "\n" +
-                "Pixelvip by FabioZumbi12\n";
+                "Pixelvip by FabioZumbi12";
 
         comConfig = new CommentedConfig(plugin, new File(plugin.getDataFolder(), "config.yml"), plugin.getConfig(), header);
 
@@ -48,7 +48,6 @@ public class PVConfig {
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
                 "- {days} = Days of activated Vip");
-        comConfig.setDefault("groups.vipExample.run-on-vip-finish", Collections.singletonList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"), "Commands to run on this vip ends.");
         if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()){
             comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g->{
                 comConfig.setDefault("groups." + g + ".title", g);
@@ -70,6 +69,7 @@ public class PVConfig {
                             "Use 1 - 100 for add chance commands.");
             comConfig.setDefault("groups.vipExample.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
             comConfig.setDefault("groups.vipExample.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
+            comConfig.setDefault("groups.vipExample.run-on-vip-finish", Collections.singletonList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"), "Commands to run on this vip ends.");
         }
 
         //database

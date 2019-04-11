@@ -51,7 +51,7 @@ public class PVConfig {
                     "The configuration is commented! If you need more help or have issues, use our github:\n" +
                     "https://github.com/FabioZumbi12/PixelVip\n" +
                     "\n" +
-                    "Pixelvip by FabioZumbi12\n";
+                    "Pixelvip by FabioZumbi12";
 
             cfgLoader = HoconConfigurationLoader.builder().setFile(defConfig).build();
             configRoot = cfgLoader.load(ConfigurationOptions.defaults().setObjectMapperFactory(factory).setShouldCopyDefaults(true).setHeader(header));
