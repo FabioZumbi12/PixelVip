@@ -47,11 +47,10 @@ public class PVConfig {
                 "- {p} = Players Name\n" +
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
-                "- {days} = Days of activated Vip\n" +
-                "");
+                "- {days} = Days of activated Vip");
         comConfig.setDefault("groups.vipExample", null, "This is an Example of vip group properties.\nCopy or use this as example to setups all your other groups.");
-        comConfig.setDefault("groups.vipExample.essentials-kit", "vip1", "Put the Essentials kit name to freeze the kit time when this vip is not in use.\nThis is anti-exploit.");
-        comConfig.setDefault("groups.vipExample.title", "&bVip 1", "Title to use on commands and to show on chat.");
+        comConfig.setDefault("groups.vipExample.essentials-kit", "ExampleKit", "Put the Essentials kit name to freeze the kit time when this vip is not in use.\nThis is anti-exploit.");
+        comConfig.setDefault("groups.vipExample.title", "&bVip Example", "Title to use on commands and to show on chat.");
         comConfig.setDefault("groups.vipExample.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"),
                 "Add the commands to run when the player use the key for activation \n" +
                 "You can use the variables:\n" +
@@ -76,7 +75,7 @@ public class PVConfig {
         comConfig.setDefault("configs.database.type", "file", "Options: \"file\" or \"mysql\"");
         comConfig.setDefault("configs.database.mysql", null, "Database configuration!\n" +
                 "H2 uri: \"jdbc:h2:%s/pixelvip.db;mode=MySQL\" (%s will be replaced by pixelvip path)\n" +
-                "jdbc:mysql://localhost:3306/");
+                "Mysql uri: \"jdbc:mysql://localhost:3306/\"");
         comConfig.setDefault("configs.database.mysql.host","jdbc:mysql://localhost:3306/");
         comConfig.setDefault("configs.database.mysql.db-name", "pixelvip");
         comConfig.setDefault("configs.database.mysql.username", "user");
@@ -128,7 +127,8 @@ public class PVConfig {
         comConfig.setDefault("configs.commandsToRunOnVipFinish", Collections.singletonList("nick {p} off"),
                 "Run this commands when the vip of a player finish.\n" +
                         "Variables: {p} get the player name, {vip} get the actual vip, {playergroup} get the group before the player activate your vip.");
-        comConfig.setDefault("configs.commandsToRunOnChangeVip", new ArrayList<String>(),
+        comConfig.setDefault("configs.commandsToRunOnChangeVip", Arrays.asList("lp user {p} parent set {newvip}",
+                "lp user {p} parent remove {oldvip}"),
                 "Run this commands on player change your vip to other.\n" +
                         "Variables: {p} get the player name, {newvip} get the new vip, {oldvip} get the vip group before change.");
         comConfig.setDefault("configs.queueCmdsForOfflinePlayers", false);
@@ -873,7 +873,7 @@ public class PVConfig {
                 }
             }
         }
-        list.remove(getVipTitle("vipExample"));
+        list.removeIf(g->g.equalsIgnoreCase(getVipTitle("vipExample")));
         return list;
     }
 

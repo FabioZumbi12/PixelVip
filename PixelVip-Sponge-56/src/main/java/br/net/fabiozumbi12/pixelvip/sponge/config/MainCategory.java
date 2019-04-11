@@ -125,7 +125,7 @@ public class MainCategory {
 
     private Map<String, VipsCategory> defaultVips() {
         Map<String, VipsCategory> map = new HashMap<>();
-        map.put("vip-demo", new VipsCategory());
+        map.put("vipExample", new VipsCategory());
         return map;
     }
 
@@ -147,7 +147,7 @@ public class MainCategory {
         public List<String> run_on_vip_end = new ArrayList<>();
 
         @Setting
-        public String title = "&4Vip Demonstration";
+        public String title = "&4Vip Example";
 
         private Map<String, List<String>> cmdChanges() {
             Map<String, List<String>> map = new HashMap<>();

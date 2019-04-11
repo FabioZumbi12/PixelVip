@@ -605,7 +605,7 @@ public class PVConfig {
                     list.add(key);
                 }
             });
-            list.remove(getVipTitle("vip-demo"));
+            list.removeIf(g->g.equalsIgnoreCase(getVipTitle("vipExample")));
             return list;
         }
     }
