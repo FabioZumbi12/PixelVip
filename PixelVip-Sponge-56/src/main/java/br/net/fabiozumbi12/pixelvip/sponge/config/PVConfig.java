@@ -47,33 +47,11 @@ public class PVConfig {
             }
 
             /*-------------------------------- config.conf---------------------------------*/
-            String header = "# =============== PixelVip Configuration Options ================\n" +
+            String header = "=============== PixelVip Configuration Options ================\n" +
+                    "The configuration is commented! If you need more help or have issues, use our github:\n" +
+                    "https://github.com/FabioZumbi12/PixelVip\n" +
                     "\n" +
-                    "This is the default configuration and some information about some configurations.\n" +
-                    "\n" +
-                    "In \"groups\" on \"commands\" and \"cmdChances\"(Lists) you can use this placeholders:\n" +
-                    "- {p} = Players Name\n" +
-                    "- {vip} = Vip Group\n" +
-                    "- {playergroup} = Player Group before Vip activation\n" +
-                    "- {days} = Days of activated Vip\n" +
-                    "\n" +
-                    "In \"groups\" > \"cmdChances\"(List) you can add commands to run based on a % chance. \n" +
-                    "Use numbers below 0-100 like the example on \"vip1\".\n" +
-                    "\n" +
-                    "In \"configs\" > \"cmdOnRemoveVip\"(String) you can use this placeholders:\n" +
-                    "- {p} = Player Name\n" +
-                    "- {vip} = Name of Vip Removed\n" +
-                    "\n" +
-                    "In \"configs\" > \"commandsToRunOnChangeVip\"(List) you can use this placeholders:\n" +
-                    "- {p} = Player Name\n" +
-                    "- {newvip} = Name of Vip the player is changing to\n" +
-                    "- {oldvip} = Name of Vip the player is changing from\n" +
-                    "\n" +
-                    "In \"configs\" > \"commandsToRunOnVipFinish\" and \"run-on-vip-finish\" (Lists) you can use this placeholders:\n" +
-                    "- {p} = Player Name\n" +
-                    "- {vip} = Name of Vip\n" +
-                    "- {playergroup} = Player Group before Vip activation\n" +
-                    "\n";
+                    "Pixelvip by FabioZumbi12\n";
 
             cfgLoader = HoconConfigurationLoader.builder().setFile(defConfig).build();
             configRoot = cfgLoader.load(ConfigurationOptions.defaults().setObjectMapperFactory(factory).setShouldCopyDefaults(true).setHeader(header));

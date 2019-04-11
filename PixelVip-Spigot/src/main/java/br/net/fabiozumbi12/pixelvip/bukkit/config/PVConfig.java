@@ -1,5 +1,6 @@
-package br.net.fabiozumbi12.pixelvip.bukkit;
+package br.net.fabiozumbi12.pixelvip.bukkit.config;
 
+import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataFile;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.db.PVDataMysql;
@@ -8,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -18,188 +21,203 @@ public class PVConfig {
     private int delay = 0;
     private PVDataManager dataManager;
     private HashMap<String, String> comandAlert = new HashMap<>();
+    private CommentedConfig comConfig;
+    public FileConfiguration getRoot(){
+        return this.comConfig.configurations;
+    }
+    public CommentedConfig getCommConfig(){
+        return this.comConfig;
+    }
 
     public PVConfig(PixelVip plugin) {
         this.plugin = plugin;
 
         /*----------------------------------------------------------------------------------*/
+        
+        String header = "=============== PixelVip Configuration Options ================\n" +
+                "The configuration is commented! If you need more help or have issues, use our github:\n" +
+                "https://github.com/FabioZumbi12/PixelVip\n" +
+                "\n" +
+                "Pixelvip by FabioZumbi12\n";
 
-        plugin.getConfig().options().header("=============== PixelVip Configuration Options ================\n"
-                + "\n"
-                + "This is the default configuration and some information about some configurations.\n"
-                + "\n"
-                + "In \"groups\" on \"commands\" and \"cmdChances\"(Lists) you can use this placeholders:\n"
-                + "- {p} = Players Name\n"
-                + "- {vip} = Vip Group\n"
-                + "- {playergroup} = Player Group before Vip activation\n"
-                + "- {days} = Days of activated Vip\n"
-                + "\n"
-                + "In \"groups\" > \"cmdChances\"(List) you can add commands to run based on a % chance. \n"
-                + "Use numbers below 0-100 like the example on \"vip1\".\n"
-                + "\n"
-                + "In \"configs\" > \"cmdOnRemoveVip\"(String) you can use this placeholders:\n"
-                + "- {p} = Player Name\n"
-                + "- {vip} = Name of Vip Removed\n"
-                + "\n"
-                + "In \"configs\" > \"commandsToRunOnChangeVip\"(List) you can use this placeholders:\n"
-                + "- {p} = Player Name\n"
-                + "- {newvip} = Name of Vip the player is changing to\n"
-                + "- {oldvip} = Name of Vip the player is changing from\n"
-                + "\n"
-                + "In \"configs\" > \"commandsToRunOnVipFinish\" and \"run-on-vip-finish\" (Lists) you can use this placeholders:\n"
-                + "- {p} = Player Name\n"
-                + "- {vip} = Name of Vip\n"
-                + "- {playergroup} = Player Group before Vip activation\n"
-                + "\n"
-                + "On Vault options, you can use \"set\" to set the VIP group or \"add\" to add VIP group to player.\n"
-                + "*Using Vault you don't need to set any permission plugin command to set groups, Vault will do all this jobs.\n"
-                + "\n");
+        comConfig = new CommentedConfig(plugin, new File(plugin.getDataFolder(), "config.yml"), plugin.getConfig(), header);
 
-        if (!plugin.getConfig().contains("groups")) {
-            plugin.getConfig().set("groups.vip1.essentials-kit", "vip1");
-            plugin.getConfig().set("groups.vip1.title", "&bVip 1");
-            plugin.getConfig().set("groups.vip1.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"));
-            plugin.getConfig().set("groups.vip1.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
-            plugin.getConfig().set("groups.vip1.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
-            plugin.getConfig().set("groups.vip1.run-on-vip-finish", Collections.singletonList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"));
+        comConfig.setDefault("groups", null, "Group names like is in your permissions plugin (case sensitive)!\n" +
+                "Available placeholders: \n" +
+                "- {p} = Players Name\n" +
+                "- {vip} = Vip Group\n" +
+                "- {playergroup} = Player Group before Vip activation\n" +
+                "- {days} = Days of activated Vip\n" +
+                "");
+        comConfig.setDefault("groups.vipExample", null, "This is an Example of vip group properties.\nCopy or use this as example to setups all your other groups.");
+        comConfig.setDefault("groups.vipExample.essentials-kit", "vip1", "Put the Essentials kit name to freeze the kit time when this vip is not in use.\nThis is anti-exploit.");
+        comConfig.setDefault("groups.vipExample.title", "&bVip 1", "Title to use on commands and to show on chat.");
+        comConfig.setDefault("groups.vipExample.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"),
+                "Add the commands to run when the player use the key for activation \n" +
+                "You can use the variables:\n" +
+                "{p} = Player name, {vip} = Vip group, {days} = Vip days, {playergroup} = Player group before activate vip");
+        comConfig.setDefault("groups.vipExample.cmdChances", null,
+                "Add commands here to give items to players based on chances.\n" +
+                "Use 1 - 100 for add chance commands.");
+        comConfig.setDefault("groups.vipExample.cmdChances.50", Collections.singletonList("give {p} minecraft:diamond_block 5"));
+        comConfig.setDefault("groups.vipExample.cmdChances.30", Collections.singletonList("give {p} minecraft:mob_spawner 1"));
+        comConfig.setDefault("groups.vipExample.run-on-vip-finish", Collections.singletonList("broadcast [Example message from PixelVip on run-on-vip-finish] The vip of {p} (Vip {vip}) has ended and now is back to {playergroup}!"), "Commands to run on this vip ends.");
+        if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()){
+            comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g->{
+                comConfig.setDefault("groups." + g + ".title", g);
+                comConfig.setDefault("groups." + g + ".commands", new ArrayList<>());
+                comConfig.setDefault("groups." + g + ".cmdChances.0", new ArrayList<>());
+                comConfig.setDefault("groups." + g + ".run-on-vip-finish", new ArrayList<>());
+                comConfig.setDefault("groups." + g + ".essentials-kit", g);
+            });
         }
 
         //database
-        plugin.getConfig().set("configs.database.type", getObj("file", "configs.database.type"));
-        plugin.getConfig().set("configs.database.mysql.host", getObj("jdbc:mysql://localhost:3306/", "configs.database.mysql.host"));
-        plugin.getConfig().set("configs.database.mysql.db-name", getObj("pixelvip", "configs.database.mysql.db-name"));
-        plugin.getConfig().set("configs.database.mysql.username", getObj("user", "configs.database.mysql.username"));
-        plugin.getConfig().set("configs.database.mysql.password", getObj("pass", "configs.database.mysql.password"));
+        comConfig.setDefault("configs.database.type", "file", "Options: \"file\" or \"mysql\"");
+        comConfig.setDefault("configs.database.mysql", null, "Database configuration!\n" +
+                "H2 uri: \"jdbc:h2:%s/pixelvip.db;mode=MySQL\" (%s will be replaced by pixelvip path)\n" +
+                "jdbc:mysql://localhost:3306/");
+        comConfig.setDefault("configs.database.mysql.host","jdbc:mysql://localhost:3306/");
+        comConfig.setDefault("configs.database.mysql.db-name", "pixelvip");
+        comConfig.setDefault("configs.database.mysql.username", "user");
+        comConfig.setDefault("configs.database.mysql.password", "pass");
 
-        plugin.getConfig().set("configs.database.mysql.keys.table-name", getObj("pixelvip_keys", "configs.database.mysql.keys.table-name"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.key", getObj("col_key", "configs.database.mysql.keys.columns.key"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.group", getObj("col_group", "configs.database.mysql.keys.columns.group"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.duration", getObj("col_duration", "configs.database.mysql.keys.columns.duration"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.uses", getObj("col_uses", "configs.database.mysql.keys.columns.uses"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.cmds", getObj("col_cmds", "configs.database.mysql.keys.columns.cmds"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.info", getObj("col_info", "configs.database.mysql.keys.columns.info"));
-        plugin.getConfig().set("configs.database.mysql.keys.columns.comments", getObj("col_comments", "configs.database.mysql.keys.columns.comments"));
+        comConfig.setDefault("configs.database.mysql.keys.table-name", "pixelvip_keys");
+        comConfig.setDefault("configs.database.mysql.keys.columns.key", "col_key");
+        comConfig.setDefault("configs.database.mysql.keys.columns.group", "col_group");
+        comConfig.setDefault("configs.database.mysql.keys.columns.duration", "col_duration");
+        comConfig.setDefault("configs.database.mysql.keys.columns.uses", "col_uses");
+        comConfig.setDefault("configs.database.mysql.keys.columns.cmds", "col_cmds");
+        comConfig.setDefault("configs.database.mysql.keys.columns.info", "col_info");
+        comConfig.setDefault("configs.database.mysql.keys.columns.comments", "col_comments");
 
-        plugin.getConfig().set("configs.database.mysql.vips.table-name", getObj("pixelvip_vips", "configs.database.mysql.vips.table-name"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.uuid", getObj("col_uuid", "configs.database.mysql.vips.columns.uuid"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.vip", getObj("col_vip", "configs.database.mysql.vips.columns.vip"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.playerGroup", getObj("col_playerGroup", "configs.database.mysql.vips.columns.playerGroup"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.duration", getObj("col_duration", "configs.database.mysql.vips.columns.duration"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.nick", getObj("col_nick", "configs.database.mysql.vips.columns.nick"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.expires-on-exact", getObj("col_expires", "configs.database.mysql.vips.columns.expires-on-exact"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.active", getObj("col_active", "configs.database.mysql.vips.columns.active"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.kits", getObj("col_kits", "configs.database.mysql.vips.columns.kits"));
-        plugin.getConfig().set("configs.database.mysql.vips.columns.comments", getObj("col_comments", "configs.database.mysql.vips.columns.comments"));
+        comConfig.setDefault("configs.database.mysql.vips.table-name", "pixelvip_vips");
+        comConfig.setDefault("configs.database.mysql.vips.columns.uuid", "col_uuid");
+        comConfig.setDefault("configs.database.mysql.vips.columns.vip", "col_vip");
+        comConfig.setDefault("configs.database.mysql.vips.columns.playerGroup", "col_playerGroup");
+        comConfig.setDefault("configs.database.mysql.vips.columns.duration", "col_duration");
+        comConfig.setDefault("configs.database.mysql.vips.columns.nick", "col_nick");
+        comConfig.setDefault("configs.database.mysql.vips.columns.expires-on-exact", "col_expires");
+        comConfig.setDefault("configs.database.mysql.vips.columns.active", "col_active");
+        comConfig.setDefault("configs.database.mysql.vips.columns.kits", "col_kits");
+        comConfig.setDefault("configs.database.mysql.vips.columns.comments", "col_comments");
 
-        plugin.getConfig().set("configs.database.mysql.transactions.table-name", getObj("pixelvip_transactions", "configs.database.mysql.transactions.table-name"));
-        plugin.getConfig().set("configs.database.mysql.transactions.columns.idt", getObj("col_idt", "configs.database.mysql.transactions.columns.idt"));
-        plugin.getConfig().set("configs.database.mysql.transactions.columns.payment", getObj("col_payment", "configs.database.mysql.transactions.columns.payment"));
-        plugin.getConfig().set("configs.database.mysql.transactions.columns.nick", getObj("col_nick", "configs.database.mysql.transactions.columns.nick"));
+        comConfig.setDefault("configs.database.mysql.transactions.table-name", "pixelvip_transactions");
+        comConfig.setDefault("configs.database.mysql.transactions.columns.idt", "col_idt");
+        comConfig.setDefault("configs.database.mysql.transactions.columns.payment", "col_payment");
+        comConfig.setDefault("configs.database.mysql.transactions.columns.nick", "col_nick");
         //end database
 
         try {
             plugin.serv.spigot();
-            plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(true, "configs.spigot.clickKeySuggest"));
+            comConfig.setDefault("configs.spigot.clickKeySuggest", true);
         } catch (NoSuchMethodError e) {
-            plugin.getConfig().set("configs.spigot.clickKeySuggest", getObj(false, "configs.spigot.clickKeySuggest"));
+            comConfig.setDefault("configs.spigot.clickKeySuggest", false);
         }
-        plugin.getConfig().set("configs.spigot.clickSuggest", getObj("/usekey {key}", "configs.spigot.clickSuggest"));
+        comConfig.setDefault("configs.spigot.clickSuggest", "/usekey {key}");
 
-        plugin.getConfig().set("configs.key-size", getObj(10, "configs.key-size"));
+        comConfig.setDefault("configs.key-size", 10, "Sets the length of your vip keys.");
 
-        plugin.getConfig().set("configs.useKeyWarning", getObj(true, "configs.useKeyWarning"));
+        comConfig.setDefault("configs.useKeyWarning", true, "Should we alert the player about free inventory space before use the key?");
 
-        plugin.getConfig().set("configs.Vault.use", getObj(true, "configs.Vault.use"));
-        plugin.getConfig().set("configs.Vault.mode", getObj("set", "configs.Vault.mode"));
+        comConfig.setDefault("configs.Vault.use", true);
+        comConfig.setDefault("configs.Vault.mode", "set");
 
-        plugin.getConfig().set("configs.cmdToReloadPermPlugin", getObj("pex reload", "configs.cmdToReloadPermPlugin"));
-        plugin.getConfig().set("configs.cmdOnRemoveVip", getObj("", "configs.cmdOnRemoveVip"));
-        plugin.getConfig().set("configs.commandsToRunOnVipFinish", getObj(Collections.singletonList("nick {p} off"), "configs.commandsToRunOnVipFinish"));
-        plugin.getConfig().set("configs.commandsToRunOnChangeVip", getObj(new ArrayList<String>(), "configs.commandsToRunOnChangeVip"));
-        plugin.getConfig().set("configs.queueCmdsForOfflinePlayers", getObj(false, "configs.queueCmdsForOfflinePlayers"));
-        List<String> worlds = new ArrayList<>();
+        comConfig.setDefault("configs.cmdToReloadPermPlugin", "", "Command to reload the permissions plugin after some action.");
+        comConfig.setDefault("configs.cmdOnRemoveVip", "lp user {p} parent remove {vip}", "Command to run when a vip is removed by command.");
+        comConfig.setDefault("configs.commandsToRunOnVipFinish", Collections.singletonList("nick {p} off"),
+                "Run this commands when the vip of a player finish.\n" +
+                        "Variables: {p} get the player name, {vip} get the actual vip, {playergroup} get the group before the player activate your vip.");
+        comConfig.setDefault("configs.commandsToRunOnChangeVip", new ArrayList<String>(),
+                "Run this commands on player change your vip to other.\n" +
+                        "Variables: {p} get the player name, {newvip} get the new vip, {oldvip} get the vip group before change.");
+        comConfig.setDefault("configs.queueCmdsForOfflinePlayers", false);
+        Set<String> worlds = new HashSet<>(comConfig.configurations.getStringList("configs.worldCmdsAllowed"));
         for (World w : Bukkit.getWorlds()) {
             worlds.add(w.getName());
         }
-        plugin.getConfig().set("configs.worldCmdsAllowed", getObj(worlds, "configs.worldCmdsAllowed"));
-        plugin.getConfig().set("bungee.enableSync", getObj(false, "bungee.enableSync"));
-        plugin.getConfig().set("bungee.serverID", getObj("server1", "bungee.serverID"));
+        comConfig.setDefault("configs.worldCmdsAllowed", new ArrayList<>(worlds));
+        comConfig.setDefault("bungee.enableSync", false);
+        comConfig.setDefault("bungee.serverID", "server1");
 
 
-        plugin.getConfig().set("apis.pagseguro.use", getObj(false, "apis.pagseguro.use"));
-        plugin.getConfig().set("apis.pagseguro.debug", getObj(false, "apis.pagseguro.debug"));
-        plugin.getConfig().set("apis.pagseguro.email", getObj("your@email.com", "apis.pagseguro.email"));
-        plugin.getConfig().set("apis.pagseguro.token", getObj("yourtoken", "apis.pagseguro.token"));
+        comConfig.setDefault("apis.pagseguro", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil");
+        comConfig.setDefault("apis.pagseguro.use", false);
+        comConfig.setDefault("apis.pagseguro.debug", false);
+        comConfig.setDefault("apis.pagseguro.email", "your@email.com");
+        comConfig.setDefault("apis.pagseguro.token", "yourtoken");
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        plugin.getConfig().set("apis.pagseguro.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.pagseguro.ignoreOldest"));
+        comConfig.setDefault("apis.pagseguro.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
 
 
-        plugin.getConfig().set("apis.mercadopago.use", getObj(false, "apis.mercadopago.use"));
-        plugin.getConfig().set("apis.mercadopago.sandbox", getObj(false, "apis.mercadopago.sandbox"));
-        plugin.getConfig().set("apis.mercadopago.access-token", getObj("ACCESS-TOKEN", "apis.mercadopago.access-token"));
-        plugin.getConfig().set("apis.mercadopago.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.mercadopago.ignoreOldest"));
+        comConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
+        comConfig.setDefault("apis.mercadopago.use", false);
+        comConfig.setDefault("apis.mercadopago.sandbox", false);
+        comConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
+        comConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
 
 
-        plugin.getConfig().set("apis.paypal.use", getObj(false, "apis.paypal.use"));
-        plugin.getConfig().set("apis.paypal.sandbox", getObj(false, "apis.paypal.sandbox"));
-        plugin.getConfig().set("apis.paypal.username", getObj("username", "apis.paypal.username"));
-        plugin.getConfig().set("apis.paypal.password", getObj("password", "apis.paypal.password"));
-        plugin.getConfig().set("apis.paypal.signature", getObj("signature", "apis.paypal.signature"));
-        plugin.getConfig().set("apis.paypal.ignoreOldest", getObj(sdf.format(Calendar.getInstance().getTime()), "apis.paypal.ignoreOldest"));
+        comConfig.setDefault("apis.paypal", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal");
+        comConfig.setDefault("apis.paypal.use", false);
+        comConfig.setDefault("apis.paypal.sandbox", false);
+        comConfig.setDefault("apis.paypal.username", "username");
+        comConfig.setDefault("apis.paypal.password", "password");
+        comConfig.setDefault("apis.paypal.signature", "signature");
+        comConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
 
         //strings
-        plugin.getConfig().set("strings._pluginTag", getObj("&7[&6PixelVip&7] ", "strings._pluginTag"));
-        plugin.getConfig().set("strings.noPlayersByName", getObj("&cTheres no players with this name!", "strings.noPlayersByName"));
-        plugin.getConfig().set("strings.onlyPlayers", getObj("&cOnly players ca use this command!", "strings.onlyPlayers"));
-        plugin.getConfig().set("strings.noKeys", getObj("&aTheres no available keys! Use &6/newkey &aor &6/newikey &ato generate one.", "strings.noKeys"));
-        plugin.getConfig().set("strings.listKeys", getObj("&aList of Keys:", "strings.listKeys"));
-        plugin.getConfig().set("strings.listItemKeys", getObj("&aList of Item Keys:", "strings.listItemKeys"));
-        plugin.getConfig().set("strings.vipInfoFor", getObj("&aVip info for ", "strings.vipInfoFor"));
-        plugin.getConfig().set("strings.playerNotVip", getObj("&cThis player(or you) is not VIP!", "strings.playerNotVip"));
-        plugin.getConfig().set("strings.moreThanZero", getObj("&cThis number need to be more than 0", "strings.moreThanZero"));
-        plugin.getConfig().set("strings.keyGenerated", getObj("&aGenerated a key with the following:", "strings.keyGenerated"));
-        plugin.getConfig().set("strings.keySendTo", getObj("&aYou received a key with the following:", "strings.keySendTo"));
-        plugin.getConfig().set("strings.invalidKey", getObj("&cThis key is invalid or not exists!", "strings.invalidKey"));
-        plugin.getConfig().set("strings.vipActivated", getObj("&aVip activated with success:", "strings.vipActivated"));
-        plugin.getConfig().set("strings.usesLeftActivation", getObj("&bThis key can be used for more: &6{uses} &btimes.", "strings.usesLeftActivation"));
-        plugin.getConfig().set("strings.activeVip", getObj("&b- Vip: &6{vip}", "strings.activeVip"));
-        plugin.getConfig().set("strings.activeDays", getObj("&b- Days: &6{days} &bdays", "strings.activeDays"));
-        plugin.getConfig().set("strings.timeLeft", getObj("&b- Time left: &6", "strings.timeLeft"));
-        plugin.getConfig().set("strings.totalTime", getObj("&b- Days: &6", "strings.totalTime"));
-        plugin.getConfig().set("strings.timeKey", getObj("&b- Key: &6", "strings.timeKey"));
-        plugin.getConfig().set("strings.hoverKey", getObj("&7&o(Click to get the Key)&r", "strings.hoverKey"));
-        plugin.getConfig().set("strings.timeGroup", getObj("&b- Vip: &6", "strings.timeGroup"));
-        plugin.getConfig().set("strings.timeActive", getObj("&b- In Use: &6", "strings.timeActive"));
-        plugin.getConfig().set("strings.infoUses", getObj("&b- Uses left: &6", "strings.infoUses"));
-        plugin.getConfig().set("strings.activeVipSetTo", getObj("&aYour active VIP is ", "strings.activeVipSetTo"));
-        plugin.getConfig().set("strings.noGroups", getObj("&cNo groups with name &6", "strings.noGroups"));
-        plugin.getConfig().set("strings.days", getObj(" &bdays", "strings.days"));
-        plugin.getConfig().set("strings.hours", getObj(" &bhours", "strings.hours"));
-        plugin.getConfig().set("strings.minutes", getObj(" &bminutes", "strings.minutes"));
-        plugin.getConfig().set("strings.and", getObj(" &band", "strings.and"));
-        plugin.getConfig().set("strings.vipEnded", getObj(" &bYour vip &6{vip} &bhas ended. &eWe hope you enjoyed your Vip time &a:D", "strings.vipEnded"));
-        plugin.getConfig().set("strings.lessThan", getObj("&6Less than one minute to end your vip...", "strings.lessThan"));
-        plugin.getConfig().set("strings.vipsRemoved", getObj("&aVip(s) of player removed with success!", "strings.vipsRemoved"));
-        plugin.getConfig().set("strings.vipSet", getObj("&aVip set with success for this player!", "strings.vipSet"));
-        plugin.getConfig().set("strings.sync-groups", getObj("&aGroup configs send to all servers!", "strings.sync-groups"));
-        plugin.getConfig().set("strings.list-of-vips", getObj("&aList of active VIPs: ", "strings.list-of-vips"));
-        plugin.getConfig().set("strings.vipAdded", getObj("&aVip added with success for this player!", "strings.vipAdded"));
-        plugin.getConfig().set("strings.item", getObj("&a-- Item: &b", "strings.item"));
-        plugin.getConfig().set("strings.itemsGiven", getObj("&aGiven {items} item(s) using a key.", "strings.itemsGiven"));
-        plugin.getConfig().set("strings.itemsAdded", getObj("&aItem(s) added to key:", "strings.itemsAdded"));
-        plugin.getConfig().set("strings.keyRemoved", getObj("&aKey removed with success: &b", "strings.keyRemoved"));
-        plugin.getConfig().set("strings.noKeyRemoved", getObj("&cTheres no keys to remove!", "strings.noKeyRemoved"));
-        plugin.getConfig().set("strings.cmdNotAllowedWorld", getObj("&cThis command is not allowed in this world!", "strings.cmdNotAllowedWorld"));
-        plugin.getConfig().set("strings.true", getObj("&atrue", "strings.true"));
-        plugin.getConfig().set("strings.false", getObj("&cfalse", "strings.false"));
-        plugin.getConfig().set("strings.reload", getObj("&aPixelvip reloaded with success!", "strings.reload"));
-        plugin.getConfig().set("strings.wait-cmd", getObj("&cWait before use a pixelvip command again!", "strings.wait-cmd"));
-        plugin.getConfig().set("strings.confirmUsekey", getObj("&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!", "strings.confirmUsekey"));
+        comConfig.setDefault("strings._pluginTag", "&7[&6PixelVip&7] ");
+        comConfig.setDefault("strings.noPlayersByName", "&cTheres no players with this name!");
+        comConfig.setDefault("strings.onlyPlayers", "&cOnly players ca use this command!");
+        comConfig.setDefault("strings.noKeys", "&aTheres no available keys! Use &6/newkey &aor &6/newikey &ato generate one.");
+        comConfig.setDefault("strings.listKeys", "&aList of Keys:");
+        comConfig.setDefault("strings.listItemKeys", "&aList of Item Keys:");
+        comConfig.setDefault("strings.vipInfoFor", "&aVip info for ");
+        comConfig.setDefault("strings.playerNotVip", "&cThis player(or you) is not VIP!");
+        comConfig.setDefault("strings.moreThanZero", "&cThis number need to be more than 0");
+        comConfig.setDefault("strings.keyGenerated", "&aGenerated a key with the following:");
+        comConfig.setDefault("strings.keySendTo", "&aYou received a key with the following:");
+        comConfig.setDefault("strings.invalidKey", "&cThis key is invalid or not exists!");
+        comConfig.setDefault("strings.vipActivated", "&aVip activated with success:");
+        comConfig.setDefault("strings.usesLeftActivation", "&bThis key can be used for more: &6{uses} &btimes.");
+        comConfig.setDefault("strings.activeVip", "&b- Vip: &6{vip}");
+        comConfig.setDefault("strings.activeDays", "&b- Days: &6{days} &bdays");
+        comConfig.setDefault("strings.timeLeft", "&b- Time left: &6");
+        comConfig.setDefault("strings.totalTime", "&b- Days: &6");
+        comConfig.setDefault("strings.timeKey", "&b- Key: &6");
+        comConfig.setDefault("strings.hoverKey", "&7&o(Click to get the Key)&r");
+        comConfig.setDefault("strings.timeGroup", "&b- Vip: &6");
+        comConfig.setDefault("strings.timeActive", "&b- In Use: &6");
+        comConfig.setDefault("strings.infoUses", "&b- Uses left: &6");
+        comConfig.setDefault("strings.activeVipSetTo", "&aYour active VIP is ");
+        comConfig.setDefault("strings.noGroups", "&cNo groups with name &6");
+        comConfig.setDefault("strings.days", " &bdays");
+        comConfig.setDefault("strings.hours", " &bhours");
+        comConfig.setDefault("strings.minutes", " &bminutes");
+        comConfig.setDefault("strings.and", " &band");
+        comConfig.setDefault("strings.vipEnded", " &bYour vip &6{vip} &bhas ended. &eWe hope you enjoyed your Vip time &a:D");
+        comConfig.setDefault("strings.lessThan", "&6Less than one minute to end your vip...");
+        comConfig.setDefault("strings.vipsRemoved", "&aVip(s) of player removed with success!");
+        comConfig.setDefault("strings.vipSet", "&aVip set with success for this player!");
+        comConfig.setDefault("strings.sync-groups", "&aGroup configs send to all servers!");
+        comConfig.setDefault("strings.list-of-vips", "&aList of active VIPs: ");
+        comConfig.setDefault("strings.vipAdded", "&aVip added with success for this player!");
+        comConfig.setDefault("strings.item", "&a-- Item: &b");
+        comConfig.setDefault("strings.itemsGiven", "&aGiven {items} item(s) using a key.");
+        comConfig.setDefault("strings.itemsAdded", "&aItem(s) added to key:");
+        comConfig.setDefault("strings.keyRemoved", "&aKey removed with success: &b");
+        comConfig.setDefault("strings.noKeyRemoved", "&cTheres no keys to remove!");
+        comConfig.setDefault("strings.cmdNotAllowedWorld", "&cThis command is not allowed in this world!");
+        comConfig.setDefault("strings.true", "&atrue");
+        comConfig.setDefault("strings.false", "&cfalse");
+        comConfig.setDefault("strings.reload", "&aPixelvip reloaded with success!");
+        comConfig.setDefault("strings.wait-cmd", "&cWait before use a pixelvip command again!");
+        comConfig.setDefault("strings.confirmUsekey", "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!");
 
-        plugin.getConfig().set("strings.payment.waiting", getObj("&c{payment}: Your purchase has not yet been approved!", "strings.payment.waiting"));
-        plugin.getConfig().set("strings.payment.codeused", getObj("&c{payment}: This code has already been used!", "strings.payment.codeused"));
-        plugin.getConfig().set("strings.payment.expired", getObj("&c{payment}: This code has expired!", "strings.payment.expired"));
-        plugin.getConfig().set("strings.payment.noitems", getObj("&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!", "strings.payment.noitems"));
+        comConfig.setDefault("strings.payment.waiting", "&c{payment}: Your purchase has not yet been approved!");
+        comConfig.setDefault("strings.payment.codeused", "&c{payment}: This code has already been used!");
+        comConfig.setDefault("strings.payment.expired", "&c{payment}: This code has expired!");
+        comConfig.setDefault("strings.payment.noitems", "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!");
 
         //init database
         reloadVips();
@@ -207,20 +225,20 @@ public class PVConfig {
         /*---------------------------------------------------------*/
         //move vips to new file if is in config.yml
 
-        if (plugin.getConfig().getConfigurationSection("activeVips") != null) {
+        if (comConfig.configurations.getConfigurationSection("activeVips") != null) {
             plugin.getPVLogger().warning("Active Vips moved to file 'vips.yml'");
-            plugin.getConfig().getConfigurationSection("activeVips").getKeys(false).forEach((group -> {
-                plugin.getConfig().getConfigurationSection("activeVips." + group).getKeys(false).forEach((id) -> {
+            comConfig.configurations.getConfigurationSection("activeVips").getKeys(false).forEach((group -> {
+                comConfig.configurations.getConfigurationSection("activeVips." + group).getKeys(false).forEach((id) -> {
                     dataManager.addRawVip(group, id,
-                            Arrays.asList(plugin.getConfig().getString("activeVips." + group + "." + id + ".playerGroup").split(",")),
-                            plugin.getConfig().getLong("activeVips." + group + "." + id + ".duration"),
-                            plugin.getConfig().getString("activeVips." + group + "." + id + ".nick"),
-                            plugin.getConfig().getString("activeVips." + group + "." + id + ".expires-on-exact"));
-                    dataManager.setVipActive(id, group, plugin.getConfig().getBoolean("activeVips." + group + "." + id + ".active"));
+                            Arrays.asList(comConfig.configurations.getString("activeVips." + group + "." + id + ".playerGroup").split(",")),
+                            comConfig.configurations.getLong("activeVips." + group + "." + id + ".duration"),
+                            comConfig.configurations.getString("activeVips." + group + "." + id + ".nick"),
+                            comConfig.configurations.getString("activeVips." + group + "." + id + ".expires-on-exact"));
+                    dataManager.setVipActive(id, group, comConfig.configurations.getBoolean("activeVips." + group + "." + id + ".active"));
                 });
             }));
 
-            plugin.getConfig().set("activeVips", null);
+            comConfig.setDefault("activeVips", null);
             saveVips();
         }
 
@@ -229,43 +247,43 @@ public class PVConfig {
         /*---------------------------------------------------------*/
         //move keys to new file if is in config.yml
 
-        if (plugin.getConfig().getConfigurationSection("keys") != null) {
+        if (comConfig.configurations.getConfigurationSection("keys") != null) {
             plugin.getPVLogger().warning("keys moved to file 'keys.yml'");
-            plugin.getConfig().getConfigurationSection("keys").getKeys(false).forEach((key) -> {
+            comConfig.configurations.getConfigurationSection("keys").getKeys(false).forEach((key) -> {
                 dataManager.addRawKey(key,
-                        plugin.getConfig().getString("keys." + key + ".group"),
-                        plugin.getConfig().getLong("keys." + key + ".duration"),
-                        plugin.getConfig().getInt("keys." + key + ".uses"));
+                        comConfig.configurations.getString("keys." + key + ".group"),
+                        comConfig.configurations.getLong("keys." + key + ".duration"),
+                        comConfig.configurations.getInt("keys." + key + ".uses"));
             });
 
-            plugin.getConfig().set("keys", null);
+            comConfig.setDefault("keys", null);
             saveKeys();
         }
 
-        if (plugin.getConfig().getConfigurationSection("itemKeys") != null) {
+        if (comConfig.configurations.getConfigurationSection("itemKeys") != null) {
             plugin.getPVLogger().warning("itemKeys moved to file 'keys.yml'");
-            plugin.getConfig().getConfigurationSection("itemKeys").getKeys(false).forEach((key) -> {
-                dataManager.addRawItemKey(key, plugin.getConfig().getStringList("itemKeys." + key + ".cmds"));
+            comConfig.configurations.getConfigurationSection("itemKeys").getKeys(false).forEach((key) -> {
+                dataManager.addRawItemKey(key, comConfig.configurations.getStringList("itemKeys." + key + ".cmds"));
             });
 
-            plugin.getConfig().set("itemKeys", null);
+            comConfig.setDefault("itemKeys", null);
             saveKeys();
         }
 
         /*---------------------------------------------------------*/
 
-        plugin.saveConfig();
+        comConfig.saveConfig();
     }
 
     public String getVipTitle(String vipGroup){
-        return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("groups." + vipGroup + ".title", vipGroup));
+        return ChatColor.translateAlternateColorCodes('&', comConfig.configurations.getString("groups." + vipGroup + ".title", vipGroup));
     }
 
     public String getVipByTitle(String vipTitle){
         vipTitle = vipTitle.replace("_", " ");
-        for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
-            if (!vipTitle.isEmpty() && plugin.getConfig().getString("groups." + group + ".title") != null &&
-                    plugin.getUtil().removeColor(plugin.getConfig().getString("groups." + group + ".title")).equalsIgnoreCase(vipTitle))
+        for (String group:comConfig.configurations.getConfigurationSection("groups").getKeys(false)){
+            if (!vipTitle.isEmpty() && comConfig.configurations.getString("groups." + group + ".title") != null &&
+                    plugin.getUtil().removeColor(comConfig.configurations.getString("groups." + group + ".title")).equalsIgnoreCase(vipTitle))
                 return group;
         }
         return vipTitle;
@@ -279,7 +297,7 @@ public class PVConfig {
         if (dataManager != null) {
             dataManager.closeCon();
         }
-        if (plugin.getConfig().getString("configs.database.type").equalsIgnoreCase("mysql")) {
+        if (comConfig.configurations.getString("configs.database.type").equalsIgnoreCase("mysql")) {
             dataManager = new PVDataMysql(plugin);
         } else {
             dataManager = new PVDataFile(plugin);
@@ -299,7 +317,7 @@ public class PVConfig {
     }
 
     public boolean worldAllowed(World w) {
-        return plugin.getConfig().getStringList("configs.worldCmdsAllowed").contains(w.getName());
+        return comConfig.configurations.getStringList("configs.worldCmdsAllowed").contains(w.getName());
     }
 
     public List<String> getItemKeyCmds(String key) {
@@ -341,20 +359,20 @@ public class PVConfig {
 
     public List<String> getQueueCmds(String uuid) {
         List<String> cmds = new ArrayList<>();
-        if (plugin.getConfig().contains("joinCmds." + uuid + ".cmds")) {
-            cmds.addAll(plugin.getConfig().getStringList("joinCmds." + uuid + ".cmds"));
+        if (comConfig.configurations.contains("joinCmds." + uuid + ".cmds")) {
+            cmds.addAll(comConfig.configurations.getStringList("joinCmds." + uuid + ".cmds"));
         }
-        if (plugin.getConfig().contains("joinCmds." + uuid + ".chanceCmds")) {
-            cmds.addAll(plugin.getConfig().getStringList("joinCmds." + uuid + ".chanceCmds"));
+        if (comConfig.configurations.contains("joinCmds." + uuid + ".chanceCmds")) {
+            cmds.addAll(comConfig.configurations.getStringList("joinCmds." + uuid + ".chanceCmds"));
         }
-        plugin.getConfig().set("joinCmds." + uuid, null);
+        comConfig.setDefault("joinCmds." + uuid, null);
         plugin.saveConfig();
         return cmds;
     }
 
     private void setJoinCmds(String uuid, List<String> cmds, List<String> chanceCmds) {
-        plugin.getConfig().set("joinCmds." + uuid + ".cmds", cmds);
-        plugin.getConfig().set("joinCmds." + uuid + ".chanceCmds", chanceCmds);
+        comConfig.setDefault("joinCmds." + uuid + ".cmds", cmds);
+        comConfig.setDefault("joinCmds." + uuid + ".chanceCmds", chanceCmds);
         plugin.saveConfig();
     }
 
@@ -502,7 +520,7 @@ public class PVConfig {
         List<String> chanceCmds = new ArrayList<>();
 
         //run command from vip
-        plugin.getConfig().getStringList("groups." + group + ".commands").forEach((cmd) -> {
+        comConfig.configurations.getStringList("groups." + group + ".commands").forEach((cmd) -> {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 String cmdf = cmd.replace("{p}", p.getName())
                         .replace("{vip}", group)
@@ -525,7 +543,7 @@ public class PVConfig {
 
             //test chance
             if (rand <= chance) {
-                plugin.getConfig().getStringList("groups." + group + ".cmdChances." + chanceString).forEach((cmd) -> {
+                comConfig.configurations.getStringList("groups." + group + ".cmdChances." + chanceString).forEach((cmd) -> {
                     plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                         String cmdf = cmd.replace("{p}", p.getName())
                                 .replace("{vip}", group)
@@ -635,7 +653,7 @@ public class PVConfig {
     }
 
     public void runChangeVipCmds(OfflinePlayer p, String newVip, String oldVip) {
-        for (String cmd : plugin.getConfig().getStringList("configs.commandsToRunOnChangeVip")) {
+        for (String cmd : comConfig.configurations.getStringList("configs.commandsToRunOnChangeVip")) {
             if (p.getName() == null) {
                 break;
             }
@@ -652,15 +670,15 @@ public class PVConfig {
                 delay++;
             }
         }
-        if (plugin.getConfig().getBoolean("configs.Vault.use")) {
+        if (comConfig.configurations.getBoolean("configs.Vault.use")) {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 if (oldVip != null && !oldVip.isEmpty() && !oldVip.equals(newVip)) {
                     plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
                 }
-                if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("set")) {
+                if (comConfig.configurations.getString("configs.Vault.mode").equalsIgnoreCase("set")) {
                     plugin.getPerms().setGroup(p.getUniqueId().toString(), newVip);
                 }
-                if (plugin.getConfig().getString("configs.Vault.mode").equalsIgnoreCase("add")) {
+                if (comConfig.configurations.getString("configs.Vault.mode").equalsIgnoreCase("add")) {
                     plugin.getPerms().addGroup(p.getUniqueId().toString(), newVip);
                 }
             }, delay * 2);
@@ -701,7 +719,7 @@ public class PVConfig {
         plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group), null), delay * 5);
         delay++;
 
-        if (plugin.getConfig().getBoolean("configs.Vault.use")) {
+        if (comConfig.configurations.getBoolean("configs.Vault.use")) {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().removeGroup(uuid, group), delay * 2);
             delay++;
         }
@@ -737,7 +755,7 @@ public class PVConfig {
 
         //commands to run on vip finish
         if (getVipInfo(uuid).size() == 0) {
-            for (String cmd : plugin.getConfig().getStringList("configs.commandsToRunOnVipFinish")) {
+            for (String cmd : comConfig.configurations.getStringList("configs.commandsToRunOnVipFinish")) {
                 if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")) {
                     continue;
                 }
@@ -772,7 +790,7 @@ public class PVConfig {
         }
 
         //use vault to add back oldgroup
-        if (plugin.getConfig().getBoolean("configs.Vault.use")) {
+        if (comConfig.configurations.getBoolean("configs.Vault.use")) {
             for (String group : oldGroup) {
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().addGroup(uuid, group), 1 + delay * 5);
                 delay++;
@@ -789,23 +807,19 @@ public class PVConfig {
     }
 
     public long getLong(int def, String node) {
-        return plugin.getConfig().getLong(node, def);
+        return comConfig.configurations.getLong(node, def);
     }
 
     public int getInt(int def, String node) {
-        return plugin.getConfig().getInt(node, def);
+        return comConfig.configurations.getInt(node, def);
     }
 
     public String getString(String def, String node) {
-        return plugin.getConfig().getString(node, def);
+        return comConfig.configurations.getString(node, def);
     }
 
     public boolean getBoolean(boolean def, String node) {
-        return plugin.getConfig().getBoolean(node, def);
-    }
-
-    public Object getObj(Object def, String node) {
-        return plugin.getConfig().get(node, def);
+        return comConfig.configurations.getBoolean(node, def);
     }
 
     public String getLang(String... nodes) {
@@ -817,19 +831,19 @@ public class PVConfig {
     }
 
     public boolean groupExists(String group) {
-        return plugin.getConfig().contains("groups." + group);
+        return comConfig.configurations.contains("groups." + group);
     }
 
     public Set<String> getCmdChances(String vip) {
-        if (plugin.getConfig().getConfigurationSection("groups." + vip + ".cmdChances") != null) {
-            return plugin.getConfig().getConfigurationSection("groups." + vip + ".cmdChances").getKeys(false);
+        if (comConfig.configurations.getConfigurationSection("groups." + vip + ".cmdChances") != null) {
+            return comConfig.configurations.getConfigurationSection("groups." + vip + ".cmdChances").getKeys(false);
         }
         return new HashSet<>();
     }
 
     public Set<String> getCmdsToRunOnFinish(String vip) {
-        if (plugin.getConfig().getConfigurationSection("groups." + vip + ".run-on-vip-end") != null) {
-            return plugin.getConfig().getConfigurationSection("groups." + vip + ".run-on-vip-end").getKeys(false);
+        if (comConfig.configurations.getConfigurationSection("groups." + vip + ".run-on-vip-end") != null) {
+            return comConfig.configurations.getConfigurationSection("groups." + vip + ".run-on-vip-end").getKeys(false);
         }
         return new HashSet<>();
     }
@@ -845,20 +859,21 @@ public class PVConfig {
     public Set<String> getGroupList(boolean raw) {
         Set<String> list = new HashSet<>();
         if (raw){
-            if (plugin.getConfig().getConfigurationSection("groups") != null) {
-                return plugin.getConfig().getConfigurationSection("groups").getKeys(false);
+            if (comConfig.configurations.getConfigurationSection("groups") != null) {
+                return comConfig.configurations.getConfigurationSection("groups").getKeys(false);
             }
         } else {
-            if (plugin.getConfig().getConfigurationSection("groups") != null) {
-                for (String group:plugin.getConfig().getConfigurationSection("groups").getKeys(false)){
-                    if (plugin.getConfig().getString("groups." + group + ".title") != null &&
-                            !plugin.getConfig().getString("groups." + group + ".title").isEmpty())
-                        list.add(plugin.getConfig().getString("groups." + group + ".title"));
+            if (comConfig.configurations.getConfigurationSection("groups") != null) {
+                for (String group:comConfig.configurations.getConfigurationSection("groups").getKeys(false)){
+                    if (comConfig.configurations.getString("groups." + group + ".title") != null &&
+                            !comConfig.configurations.getString("groups." + group + ".title").isEmpty())
+                        list.add(comConfig.configurations.getString("groups." + group + ".title"));
                     else
                         list.add(group);
                 }
             }
         }
+        list.remove("vipExample");
         return list;
     }
 

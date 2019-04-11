@@ -45,35 +45,35 @@ public class PVDataMysql implements PVDataManager {
     public PVDataMysql(PixelVip plugin) {
         this.plugin = plugin;
 
-        this.host = plugin.getConfig().getString("configs.database.mysql.host");
-        this.dbname = plugin.getConfig().getString("configs.database.mysql.db-name");
-        this.username = plugin.getConfig().getString("configs.database.mysql.username");
-        this.password = plugin.getConfig().getString("configs.database.mysql.password");
+        this.host = plugin.getPVConfig().getRoot().getString("configs.database.mysql.host");
+        this.dbname = plugin.getPVConfig().getRoot().getString("configs.database.mysql.db-name");
+        this.username = plugin.getPVConfig().getRoot().getString("configs.database.mysql.username");
+        this.password = plugin.getPVConfig().getRoot().getString("configs.database.mysql.password");
 
-        this.keyTable = plugin.getConfig().getString("configs.database.mysql.keys.table-name");
-        this.colKey = plugin.getConfig().getString("configs.database.mysql.keys.columns.key");
-        this.colKGroup = plugin.getConfig().getString("configs.database.mysql.keys.columns.group");
-        this.colKDuration = plugin.getConfig().getString("configs.database.mysql.keys.columns.duration");
-        this.colKUses = plugin.getConfig().getString("configs.database.mysql.keys.columns.uses");
-        this.colKInfo = plugin.getConfig().getString("configs.database.mysql.keys.columns.info");
-        this.colKCmds = plugin.getConfig().getString("configs.database.mysql.keys.columns.cmds");
-        this.colKComment = plugin.getConfig().getString("configs.database.mysql.keys.columns.comments");
+        this.keyTable = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.table-name");
+        this.colKey = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.key");
+        this.colKGroup = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.group");
+        this.colKDuration = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.duration");
+        this.colKUses = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.uses");
+        this.colKInfo = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.info");
+        this.colKCmds = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.cmds");
+        this.colKComment = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.comments");
 
-        this.vipTable = plugin.getConfig().getString("configs.database.mysql.vips.table-name");
-        this.colVUUID = plugin.getConfig().getString("configs.database.mysql.vips.columns.uuid");
-        this.colVVip = plugin.getConfig().getString("configs.database.mysql.vips.columns.vip");
-        this.colVPGroup = plugin.getConfig().getString("configs.database.mysql.vips.columns.playerGroup");
-        this.colVDuration = plugin.getConfig().getString("configs.database.mysql.vips.columns.duration");
-        this.colVNick = plugin.getConfig().getString("configs.database.mysql.vips.columns.nick");
-        this.colVExpires = plugin.getConfig().getString("configs.database.mysql.vips.columns.expires-on-exact");
-        this.colVActive = plugin.getConfig().getString("configs.database.mysql.vips.columns.active");
-        this.colVKits = plugin.getConfig().getString("configs.database.mysql.vips.columns.kits");
-        this.colVComment = plugin.getConfig().getString("configs.database.mysql.vips.columns.comments");
+        this.vipTable = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.table-name");
+        this.colVUUID = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.uuid");
+        this.colVVip = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.vip");
+        this.colVPGroup = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.playerGroup");
+        this.colVDuration = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.duration");
+        this.colVNick = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.nick");
+        this.colVExpires = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.expires-on-exact");
+        this.colVActive = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.active");
+        this.colVKits = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.kits");
+        this.colVComment = plugin.getPVConfig().getRoot().getString("configs.database.mysql.vips.columns.comments");
 
-        this.transTable = plugin.getConfig().getString("configs.database.mysql.transactions.table-name");
-        this.colTPay = plugin.getConfig().getString("configs.database.mysql.transactions.columns.payment");
-        this.colTID = plugin.getConfig().getString("configs.database.mysql.transactions.columns.idt");
-        this.colTNick = plugin.getConfig().getString("configs.database.mysql.transactions.columns.nick");
+        this.transTable = plugin.getPVConfig().getRoot().getString("configs.database.mysql.transactions.table-name");
+        this.colTPay = plugin.getPVConfig().getRoot().getString("configs.database.mysql.transactions.columns.payment");
+        this.colTID = plugin.getPVConfig().getRoot().getString("configs.database.mysql.transactions.columns.idt");
+        this.colTNick = plugin.getPVConfig().getRoot().getString("configs.database.mysql.transactions.columns.nick");
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -158,7 +158,7 @@ public class PVDataMysql implements PVDataManager {
     }
 
     private void setError() {
-        plugin.getConfig().set("configs.database.type", "file");
+        plugin.getPVConfig().getRoot().set("configs.database.type", "file");
         plugin.getPVLogger().severe("Database set back to file!");
         plugin.saveConfig();
         plugin.reloadCmd(Bukkit.getConsoleSender());
@@ -368,11 +368,11 @@ public class PVDataMysql implements PVDataManager {
             st.setString(2, group);
             st.setLong(3, duration);
             st.setInt(4, uses);
-            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getString("strings.days"));
+            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
             st.setString(6, group);
             st.setLong(7, duration);
             st.setInt(8, uses);
-            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getConfig().getString("strings.days"));
+            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
             st.executeUpdate();
             st.close();
         } catch (SQLException e) {

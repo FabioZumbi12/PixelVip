@@ -7,6 +7,7 @@ import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PayPalHook;
 import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
+import br.net.fabiozumbi12.pixelvip.bukkit.config.PVConfig;
 import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -67,7 +68,6 @@ public class PixelVip extends JavaPlugin implements Listener {
 
     public void reloadCmd(CommandSender sender) {
         logger.info("Reloading config module...");
-        reloadConfig();
         if (config != null) {
             config.closeCon();
         }
@@ -77,7 +77,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         }
         this.config = new PVConfig(this);
         reloadVipTask();
-        saveConfig();
+        this.config.getCommConfig().saveConfig();
 
         //payment apis
         setupPayments();
@@ -85,8 +85,8 @@ public class PixelVip extends JavaPlugin implements Listener {
         //package manager
         packageManager = new PackageManager(this);
 
-        sender.sendMessage(plugin.getUtil().toColor(getConfig().getString("strings.reload")));
-        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
+        sender.sendMessage(plugin.getUtil().toColor(getPVConfig().getRoot().getString("strings.reload")));
+        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getPVConfig().getRoot().getString("configs.database.type")));
     }
 
     public PermsAPI getPerms() {
@@ -163,26 +163,26 @@ public class PixelVip extends JavaPlugin implements Listener {
             logger.info("-> PlaceHolderAPI found. Hooked.");
         }
 
-        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getConfig().getString("configs.database.type")));
+        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getPVConfig().getRoot().getString("configs.database.type")));
         logger.sucess(util.toColor("PixelVip enabled!"));
     }
 
     private void setupPayments() {
         payments = new ArrayList<>();
         //pagseguro
-        if (getConfig().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
+        if (getPVConfig().getRoot().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
             this.payments.add(new PagSeguroHook(this));
             logger.info("-> PagSeguroAPI found and hooked.");
         }
 
         //mercadopago
-        if (getConfig().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
+        if (getPVConfig().getRoot().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
             this.payments.add(new MercadoPagoHook(this));
             logger.info("-> MercadoPagoAPI found and hooked.");
         }
 
         //paypal
-        if (getConfig().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
+        if (getPVConfig().getRoot().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
             this.payments.add(new PayPalHook(this));
             logger.info("-> PayPalAPI found and hooked.");
         }

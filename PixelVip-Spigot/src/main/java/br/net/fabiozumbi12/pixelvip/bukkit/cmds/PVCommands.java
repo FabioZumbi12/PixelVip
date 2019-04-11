@@ -1,5 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.cmds;
 
+import br.net.fabiozumbi12.pixelvip.bukkit.PVUtil;
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PVPackage;
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PackageManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
@@ -320,7 +321,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                             e.printStackTrace();
                         }
 
-                        if (plugin.getConfig().getBoolean("configs.spigot.clickKeySuggest")) {
+                        if (plugin.getPVConfig().getRoot().getBoolean("configs.spigot.clickKeySuggest")) {
                             SpigotText text = new SpigotText(ChatColor.translateAlternateColorCodes('&',
                                     plugin.getPVConfig().getLang("_pluginTag") + packages.getString("packages." + pkg.getID() + ".variants.message")), null, null, null);
                             String start = "";
@@ -382,20 +383,20 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         if (sender instanceof ConsoleCommandSender) {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("fileToMysql")) {
-                    if (plugin.getConfig().getString("configs.database.type").equalsIgnoreCase("mysql")) {
+                    if (plugin.getPVConfig().getRoot().getString("configs.database.type").equalsIgnoreCase("mysql")) {
                         sender.sendMessage(plugin.getUtil().toColor("&cYour database type is already Mysql. Use &4/pixelvip mysqlToFile &cif you want to convert to file."));
                         return true;
                     }
-                    plugin.getConfig().set("configs.database.type", "mysql");
+                    plugin.getPVConfig().getRoot().set("configs.database.type", "mysql");
                     convertDB(new PVDataMysql(plugin));
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("mysqlToFile")) {
-                    if (plugin.getConfig().getString("configs.database.type").equalsIgnoreCase("file")) {
+                    if (plugin.getPVConfig().getRoot().getString("configs.database.type").equalsIgnoreCase("file")) {
                         sender.sendMessage(plugin.getUtil().toColor("&cYour database type is already File. Use &4/pixelvip fileToMysql &cif you want to convert to mysql."));
                         return true;
                     }
-                    plugin.getConfig().set("configs.database.type", "file");
+                    plugin.getPVConfig().getRoot().set("configs.database.type", "file");
                     convertDB(new PVDataFile(plugin));
                     return true;
                 }

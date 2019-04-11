@@ -22,7 +22,7 @@ public class PagSeguroHook implements PaymentModel {
         this.plugin = plugin;
         sandbox = plugin.getPVConfig().getBoolean(true, "apis.pagseguro.sandbox");
         try {
-            Credential accCred = Credential.sellerCredential(plugin.getConfig().getString("apis.pagseguro.email"), plugin.getConfig().getString("apis.pagseguro.token"));
+            Credential accCred = Credential.sellerCredential(plugin.getPVConfig().getRoot().getString("apis.pagseguro.email"), plugin.getPVConfig().getRoot().getString("apis.pagseguro.token"));
             PagSeguroEnv environment;
             environment = sandbox ? PagSeguroEnv.SANDBOX : PagSeguroEnv.PRODUCTION;
             pagSeguro = PagSeguro.instance(accCred, environment);
@@ -61,7 +61,7 @@ public class PagSeguroHook implements PaymentModel {
 
             //check if expired
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            Date oldCf = sdf.parse(plugin.getConfig().getString("apis.pagseguro.ignoreOldest"));
+            Date oldCf = sdf.parse(plugin.getPVConfig().getRoot().getString("apis.pagseguro.ignoreOldest"));
             if (trans.getDate().compareTo(oldCf) < 0) {
                 player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.expired").replace("{payment}", getPayname())));
                 return true;
