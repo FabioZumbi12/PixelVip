@@ -198,7 +198,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         logger.info("Reloading tasks...");
         if (task != 0) {
             Bukkit.getScheduler().cancelTask(task);
-            logger.info("-> Task stoped");
+            logger.info("-> Task stopped");
         }
 
         task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {

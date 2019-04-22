@@ -15,6 +15,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.World;
 
@@ -414,14 +415,17 @@ public class PVConfig {
         }
 
         List<String> pGroups = new ArrayList<>();
-        Optional<Player> optPlayer = Sponge.getServer().getPlayer(uuid);
-        if (optPlayer.isPresent())
-            pGroups = PixelVip.get().getPerms().getPlayerGroups(optPlayer.get());
+
+        UserStorageService userStorage = Sponge.getServiceManager().provide(UserStorageService.class).get();
+        Optional<User> optUser = userStorage.get(UUID.fromString(uuid));
+        if (optUser.isPresent())
+            pGroups = PixelVip.get().getPerms().getPlayerGroups(optUser.get());
 
         List<String[]> vips = PixelVip.get().getConfig().getVipInfo(uuid);
         if (!vips.isEmpty()) {
             pGroups = new ArrayList<>(Collections.singletonList(vips.get(0)[2]));
         }
+
         dataManager.addRawVip(group, uuid,
                 pGroups,
                 durMillis,

@@ -1,6 +1,9 @@
 package br.net.fabiozumbi12.pixelvip.sponge.db;
 
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.service.user.UserStorageService;
 
 import java.sql.*;
 import java.util.*;
@@ -518,7 +521,7 @@ public class PVDataMysql implements PVDataManager {
     @Override
     public void removeItemKey(String key) {
         try {
-            String query = "";
+            String query;
             if (getKeyInfo(key).length == 3) {
                 query = "UPDATE `" + keyTable + "` SET " + colKCmds + "=NULL WHERE " + colKey + "=?";
             } else {
@@ -828,7 +831,7 @@ public class PVDataMysql implements PVDataManager {
     @Override
     public void changeUUID(String oldUUID, String newUUID) {
         try {
-            PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVUUID + "=? WHERE " + colVUUID + "=?");
+            PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVUUID + "=? AND WHERE " + colVUUID + "=?");
             st.setString(1, newUUID);
             st.setString(2, oldUUID);
             st.executeUpdate();

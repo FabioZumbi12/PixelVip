@@ -256,15 +256,14 @@ public class PixelVip {
         User p = e.getTargetUser();
 
         //check player uuid async
-        Sponge.getScheduler().createAsyncExecutor(this).schedule(() ->
-                getConfig().getVipList().forEach((key, value) -> {
-                    for (String[] vipInfo : value) {
-                        String oldUUid = getConfig().getVipUUID(p.getName());
-                        if (vipInfo[4].equals(p.getName()) && !p.getUniqueId().toString().equals(oldUUid)) {
-                            getConfig().changeUUIDs(oldUUid, p.getUniqueId().toString());
-                        }
-                    }
-                }), 0, TimeUnit.SECONDS);
+        getConfig().getVipList().forEach((key, value) -> {
+            for (String[] vipInfo : value) {
+                String oldUUid = getConfig().getVipUUID(p.getName());
+                if (vipInfo[4].equals(p.getName()) && !p.getUniqueId().toString().equals(oldUUid)) {
+                    getConfig().changeUUIDs(oldUUid, p.getUniqueId().toString());
+                }
+            }
+        });
 
         if (getConfig().queueCmds()) {
             getScheduler().createSyncExecutor(this).schedule(new Runnable() {
@@ -283,7 +282,7 @@ public class PixelVip {
         logger.info("Reloading tasks...");
         if (task != null) {
             task.cancel();
-            logger.info("-> Task stoped");
+            logger.info("-> Task stopped");
         }
 
         task = getScheduler().createTaskBuilder().interval(60, TimeUnit.SECONDS).execute(t -> {

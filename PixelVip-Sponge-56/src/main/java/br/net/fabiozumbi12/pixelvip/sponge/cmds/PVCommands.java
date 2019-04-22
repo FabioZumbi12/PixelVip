@@ -521,7 +521,7 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Use to check the vip time."))
                 .permission("pixelvip.cmd.player")
-                .arguments(GenericArguments.optional(GenericArguments.user(Text.of("player"))))
+                .arguments(GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.user(Text.of("player")))))
                 .executor((src, args) -> {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (!(src instanceof Player) && !args.hasAny("player")) {
@@ -563,7 +563,8 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Use to remove a vip of player."))
                 .permission("pixelvip.cmd.removevip")
-                .arguments(GenericArguments.user(Text.of("player")),
+                .arguments(
+                        GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.user(Text.of("player"))),
                         GenericArguments.optional(GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices())))
                 .executor((src, args) -> {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
@@ -604,7 +605,7 @@ public class PVCommands {
                 .description(Text.of("Use to change your active VIP, if more keys activated."))
                 .permission("pixelvip.cmd.player")
                 .arguments(GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()),
-                        GenericArguments.optional(GenericArguments.user(Text.of("player"))))
+                        GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.user(Text.of("player")))))
                 .executor((src, args) -> {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         String group = plugin.getConfig().getVipByTitle(args.<String>getOne("vip").get());
@@ -655,7 +656,7 @@ public class PVCommands {
                 .description(Text.of("Use to add a vip for a player without key."))
                 .permission("pixelvip.cmd.addvip")
                 .arguments(
-                        GenericArguments.user(Text.of("player")),
+                        GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.user(Text.of("player"))),
                         GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()),
                         GenericArguments.longNum(Text.of("days")))
                 .executor((src, args) -> {
@@ -684,12 +685,12 @@ public class PVCommands {
         return CommandSpec.builder()
                 .description(Text.of("Use to set a vip without activation and without key."))
                 .permission("pixelvip.cmd.setvip")
-                .arguments(GenericArguments.user(Text.of("player")),
+                .arguments(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.user(Text.of("player"))),
                         GenericArguments.choices(Text.of("vip"), plugin.getConfig().getCmdChoices()),
                         GenericArguments.longNum(Text.of("days")))
                 .executor((src, args) -> {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
-                        User p = args.<User>getOne("player").get();
+                        User p = args.<Player>getOne("player").get();
                         String group = plugin.getConfig().getVipByTitle(args.<String>getOne("vip").get());
                         long days = args.<Long>getOne(Text.of("days")).get();
 
