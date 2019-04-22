@@ -465,19 +465,20 @@ public class PVConfig {
 
     public void runChangeVipCmds(String puuid, String newVip, String oldVip) {
         for (String cmd : root.configs.commandsToRunOnChangeVip) {
-
             String cmdf = cmd.replace("{p}", PixelVip.get().getUtil().getUser(UUID.fromString(puuid)).get().getName());
-            if (!oldVip.equals("") && cmdf.contains("{oldvip}")) {
+            if (cmdf.isEmpty() || cmdf.equals("/")) continue;
+
+            if (!oldVip.isEmpty() && cmdf.contains("{oldvip}")) {
                 Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf.replace("{oldvip}", oldVip));
                 }).submit(PixelVip.get());
                 delay++;
-            } else if (!newVip.equals("") && cmdf.contains("{newvip}")) {
+            } else if (!newVip.isEmpty() && cmdf.contains("{newvip}")) {
                 Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf.replace("{newvip}", newVip));
                 }).submit(PixelVip.get());
                 delay++;
-            } else if (!cmdf.isEmpty() && !cmdf.equals("/")) {
+            } else {
                 Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                     Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), cmdf);
                 }).submit(PixelVip.get());
@@ -491,9 +492,12 @@ public class PVConfig {
         PixelVip.get().addLog("RemoveVip | " + pname + " | " + group);
 
         dataManager.removeVip(uuid, group);
-        Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
-            Sponge.getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdOnRemoveVip.replace("{p}", pname).replace("{vip}", group));
-        }).submit(PixelVip.get());
+
+        if (!root.configs.cmdOnRemoveVip.isEmpty()){
+            Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
+                Sponge.getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdOnRemoveVip.replace("{p}", pname).replace("{vip}", group));
+            }).submit(PixelVip.get());
+        }
         delay++;
     }
 
@@ -529,9 +533,8 @@ public class PVConfig {
         //commands to run on vip finish
         if (getVipInfo(uuid).size() == 0) {
             for (String cmd : root.configs.commandsToRunOnVipFinish) {
-                if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")) {
-                    continue;
-                }
+                if (cmd == null || cmd.isEmpty() || cmd.equals("/") || cmd.contains("{vip}")) continue;
+
                 if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                     for (String group : oldGroup) {
                         String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
@@ -550,7 +553,8 @@ public class PVConfig {
 
         //command to run from vip GROUP on finish
         for (String cmd : getCmdsToRunOnFinish(vipGroup)) {
-            if (cmd == null || cmd.isEmpty()) continue;
+            if (cmd == null || cmd.isEmpty() || cmd.equals("/")) continue;
+
             if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                 for (String group : oldGroup) {
                     String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
@@ -571,9 +575,11 @@ public class PVConfig {
     }
 
     public void reloadPerms() {
-        Sponge.getGame().getScheduler().createTaskBuilder().delay(1 + delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
-            Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdToReloadPermPlugin);
-        }).submit(PixelVip.get());
+        if (!root.configs.cmdToReloadPermPlugin.isEmpty()){
+            Sponge.getGame().getScheduler().createTaskBuilder().delay(1 + delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
+                Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdToReloadPermPlugin);
+            }).submit(PixelVip.get());
+        }
         delay = 0;
     }
 
