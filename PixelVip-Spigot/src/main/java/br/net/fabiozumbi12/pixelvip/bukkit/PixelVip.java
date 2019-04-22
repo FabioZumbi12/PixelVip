@@ -201,7 +201,7 @@ public class PixelVip extends JavaPlugin implements Listener {
             logger.info("-> Task stoped");
         }
 
-        task = serv.getScheduler().runTaskTimerAsynchronously(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
+        task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             value.forEach((vipInfo) -> {
                 long dur = new Long(vipInfo[0]);

@@ -101,10 +101,10 @@ public class PVConfig {
         if (dataManager != null) {
             dataManager.closeCon();
         }
-        if (root.configs.database.type.equalsIgnoreCase("mysql")) {
-            dataManager = new PVDataMysql(PixelVip.get());
-        } else {
+        if (!root.configs.database.type.equalsIgnoreCase("mysql")) {
             dataManager = new PVDataFile(PixelVip.get(), factory);
+        } else {
+            dataManager = new PVDataMysql(PixelVip.get());
         }
     }
 
