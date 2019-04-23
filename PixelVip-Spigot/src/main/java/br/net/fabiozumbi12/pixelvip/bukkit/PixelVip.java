@@ -236,16 +236,30 @@ public class PixelVip extends JavaPlugin implements Listener {
                 }));
 
         //check player groups if is on vip group without vip info
-        serv.getScheduler().runTaskLater(plugin, () -> {
-            if (permApi.getGroups(p) != null) {
-                for (String g : permApi.getGroups(p)) {
-                    if (getPVConfig().getGroupList(true).contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
-                        permApi.removeGroup(p.getUniqueId().toString(), g);
+        if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")){
+            serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+                if (permApi.getGroups(p) != null) {
+                    for (String g : permApi.getGroups(p)) {
+                        if (getPVConfig().getGroupList(true).contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
+                            permApi.removeGroup(p.getUniqueId().toString(), g);
+                        }
                     }
                 }
-            }
-        }, 40);
+            }, 40);
+        }
+        else {
+            serv.getScheduler().runTaskLater(plugin, () -> {
+                if (permApi.getGroups(p) != null) {
+                    for (String g : permApi.getGroups(p)) {
+                        if (getPVConfig().getGroupList(true).contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
+                            permApi.removeGroup(p.getUniqueId().toString(), g);
+                        }
+                    }
+                }
+            }, 40);
+        }
 
+        //Não alterar por acessar a api do bukkit!
         if (getPVConfig().queueCmds()) {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());

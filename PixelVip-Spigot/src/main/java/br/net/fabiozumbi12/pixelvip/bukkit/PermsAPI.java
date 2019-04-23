@@ -42,12 +42,14 @@ public class PermsAPI {
         delay = 10;
         if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
             Player p = Bukkit.getPlayer(UUID.fromString(uuid));
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+            if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+            else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
             delay++;
         } else {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             if (p.getName() != null) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+                if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+                else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
                 delay++;
             }
         }
@@ -59,20 +61,24 @@ public class PermsAPI {
             Player p = Bukkit.getPlayer(UUID.fromString(uuid));
             String[] groups = getGroups(p);
             for (String pGroup : groups) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
+                if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
+                else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
                 delay++;
             }
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+            if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+            else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
             delay++;
         } else {
             OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
             if (p.getName() != null) {
                 String[] groups = getGroups(p);
                 for (String pGroup : groups) {
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
+                    if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
+                    else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, pGroup), (1 + delay) * 10);
                     delay++;
                 }
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+                if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
+                else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerAddGroup(null, p, group), (1 + delay) * 10);
                 delay++;
             }
         }
@@ -81,12 +87,14 @@ public class PermsAPI {
     public void removeGroup(String uuid, String group) {
         if (plugin.getPVConfig().getGroupList(true).contains(group)) {
             if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group), (1 + delay) * 10);
+                if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group), (1 + delay) * 10);
+                else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group), (1 + delay) * 10);
                 delay++;
             } else {
                 OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
                 if (p.getName() != null) {
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, group), (1 + delay) * 10);
+                    if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> perms.playerRemoveGroup(null, p, group), (1 + delay) * 10);
+                    else plugin.serv.getScheduler().runTaskLater(plugin, () -> perms.playerRemoveGroup(null, p, group), (1 + delay) * 10);
                     delay++;
                 }
             }
