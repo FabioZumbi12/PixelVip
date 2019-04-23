@@ -139,7 +139,7 @@ public class PVConfig {
         }
         comConfig.setDefault("configs.worldCmdsAllowed", new ArrayList<>(worlds));
 
-        //Fiz for luckperms
+        //Fix for luckperms
         comConfig.setDefault("configs.luckpermsfix",false,"Set this to true if you are having problems with luckperms");
         comConfig.setDefault("bungee.enableSync", false);
         comConfig.setDefault("bungee.serverID", "server1");
