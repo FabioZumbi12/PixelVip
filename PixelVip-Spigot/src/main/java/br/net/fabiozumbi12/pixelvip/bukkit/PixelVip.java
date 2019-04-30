@@ -200,23 +200,46 @@ public class PixelVip extends JavaPlugin implements Listener {
             Bukkit.getScheduler().cancelTask(task);
             logger.info("-> Task stopped");
         }
-
-        task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
-            OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-            value.forEach((vipInfo) -> {
-                long dur = new Long(vipInfo[0]);
-                if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
-                    config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
-                }
-                if (dur <= util.getNowMillis()) {
-                    getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
-                    if (p.isOnline()) {
-                        p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+        if (plugin.getPVConfig().getRoot().getBoolean("configs.luckpermsfix")) {
+            task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
+                OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+                value.forEach((vipInfo) -> {
+                    long dur = new Long(vipInfo[0]);
+                    serv.getScheduler().runTaskAsynchronously(plugin, () -> {
+                        if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
+                            serv.getScheduler().runTask(plugin, ()->config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p)));
+                        }
+                        if (dur <= util.getNowMillis()) {
+                            serv.getScheduler().runTask(plugin, () -> {
+                                getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
+                                if (p.isOnline()) {
+                                    p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+                                }
+                                Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
+                            });
+                        }
+                    });
+                });
+            }), 0, 20 * 60).getTaskId();
+        }
+        else {
+            task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
+                OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+                value.forEach((vipInfo) -> {
+                    long dur = new Long(vipInfo[0]);
+                    if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
+                        config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
                     }
-                    Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
-                }
-            });
-        }), 0, 20 * 60).getTaskId();
+                    if (dur <= util.getNowMillis()) {
+                        getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
+                        if (p.isOnline()) {
+                            p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+                        }
+                        Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
+                    }
+                });
+            }), 0, 20 * 60).getTaskId();
+        }
         logger.info("-> Task started");
     }
 
