@@ -205,7 +205,7 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public List<String> getItemKeyCmds(String key) {
-        return keysRoot.itemKeys.get(key).cmds;
+        return keysRoot.itemKeys.containsKey(key) ? keysRoot.itemKeys.get(key).cmds : new ArrayList<>();
     }
 
     @Override
