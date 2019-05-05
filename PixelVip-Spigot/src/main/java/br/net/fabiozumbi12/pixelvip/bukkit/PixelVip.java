@@ -159,7 +159,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         reloadVipTask();
 
         if (checkPHAPI()) {
-            new PixelPHAPI(this).hook();
+            new PixelPHAPI(this).register();
             logger.info("-> PlaceHolderAPI found. Hooked.");
         }
 
