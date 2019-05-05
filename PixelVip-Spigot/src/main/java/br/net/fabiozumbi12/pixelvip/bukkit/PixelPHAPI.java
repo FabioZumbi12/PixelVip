@@ -1,19 +1,18 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
-import me.clip.placeholderapi.external.EZPlaceholderHook;
-import org.bukkit.entity.Player;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
 
-public class PixelPHAPI extends EZPlaceholderHook {
+public class PixelPHAPI extends PlaceholderExpansion {
 
     private PixelVip plugin;
 
-    public PixelPHAPI(PixelVip plugin) {
-        super(plugin, "pixelvip");
+    PixelPHAPI(PixelVip plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public String onPlaceholderRequest(Player p, String arg) {
+    public String onRequest(OfflinePlayer p, String arg) {
         String text = "--";
         String[] vipInfo = plugin.getPVConfig().getActiveVipInfo(p.getName());
         if (vipInfo[0] != null) {
@@ -34,4 +33,18 @@ public class PixelPHAPI extends EZPlaceholderHook {
         return text;
     }
 
+    @Override
+    public String getIdentifier() {
+        return "pixelvip";
+    }
+
+    @Override
+    public String getAuthor() {
+        return "FabioZumbi12";
+    }
+
+    @Override
+    public String getVersion() {
+        return plugin.pdf.getVersion();
+    }
 }
