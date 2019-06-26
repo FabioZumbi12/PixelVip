@@ -14,9 +14,3 @@ The source is available on GitHub: https://github.com/FabioZumbi12/PixelVip
 
 ## Dev Builds:
 Dev builds on Jenkins: [![Build Status](http://host.areaz12server.net.br:8080/buildStatus/icon?job=PixelVip)](http://host.areaz12server.net.br:8080/job/PixelVip/)
-
-## Jenkins Builds:
-
-The jar buils are diferent of jenkins builds.  
-Jar builds represents internal test builds and test builds, and jenkins builds numbers represents public dev builds.
-This mean jenkins can have new builds, but not new versions.
