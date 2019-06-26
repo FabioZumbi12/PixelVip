@@ -150,7 +150,7 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public void addRawItemKey(String key, List<String> cmds) {
-        keysRoot.itemKeys.putIfAbsent(key, new KeysCategory.ItemKeysCat(cmds));
+        keysRoot.itemKeys.put(key, cmds);
         saveKeys();
     }
 
@@ -205,7 +205,7 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public List<String> getItemKeyCmds(String key) {
-        return keysRoot.itemKeys.containsKey(key) ? keysRoot.itemKeys.get(key).cmds : new ArrayList<>();
+        return keysRoot.itemKeys.getOrDefault(key, new ArrayList<>());
     }
 
     @Override

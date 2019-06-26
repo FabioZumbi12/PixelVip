@@ -11,22 +11,9 @@ import java.util.Map;
 public class KeysCategory {
 
     @Setting(comment = "All available item keys will be here.")
-    public Map<String, ItemKeysCat> itemKeys = new HashMap<>();
+    public Map<String, List<String>> itemKeys = new HashMap<>();
     @Setting(comment = "All available keys will be here.")
     public Map<String, KeysCat> keys = new HashMap<>();
-
-    @ConfigSerializable
-    public static class ItemKeysCat {
-        @Setting
-        public List<String> cmds;
-
-        public ItemKeysCat() {
-        }
-
-        public ItemKeysCat(List<String> cmds) {
-            this.cmds = cmds;
-        }
-    }
 
     @ConfigSerializable
     public static class KeysCat {
