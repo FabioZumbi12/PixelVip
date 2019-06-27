@@ -11,9 +11,6 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorageService;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,7 +132,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active) {
         uuid = uuid.toLowerCase();
-        if (!vipRoot.activeVips.containsKey(group)){
+        if (!vipRoot.activeVips.containsKey(group)) {
             vipRoot.activeVips.put(group, new HashMap<>());
         }
         vipRoot.activeVips.get(group).put(uuid, new ActiveVipsCategory.VipInfo(active, duration, expires, nick, pgroup));
@@ -325,7 +322,9 @@ public class PVDataFile implements PVDataManager {
         vipRoot.activeVips.forEach((key, value) -> {
             if (value.containsKey(oldUUID)) {
                 ActiveVipsCategory.VipInfo vipInfo = value.get(oldUUID);
-                vipRoot.activeVips.put(key, new HashMap<String, ActiveVipsCategory.VipInfo>(){{put(newUUID, vipInfo);}});
+                vipRoot.activeVips.put(key, new HashMap<String, ActiveVipsCategory.VipInfo>() {{
+                    put(newUUID, vipInfo);
+                }});
                 value.remove(oldUUID);
             }
         });

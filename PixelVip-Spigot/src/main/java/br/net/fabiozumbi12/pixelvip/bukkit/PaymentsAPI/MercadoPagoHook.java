@@ -3,7 +3,6 @@ package br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPConfException;
 import org.bukkit.entity.Player;
@@ -40,7 +39,7 @@ public class MercadoPagoHook implements PaymentModel {
     public boolean checkTransaction(Player player, String transCode) {
 
         //check if used
-        if (plugin.getPVConfig().transExist(this.getPayname(), transCode)){
+        if (plugin.getPVConfig().transExist(this.getPayname(), transCode)) {
             player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.codeused").replace("{payment}", getPayname())));
             return true;
         }
@@ -76,9 +75,9 @@ public class MercadoPagoHook implements PaymentModel {
             JsonArray jItems = payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().get("items").getAsJsonArray();
 
             // Debug
-            if (test){
+            if (test) {
                 plugin.getPVLogger().severe("Items: " + jItems);
-                for (JsonElement item : jItems){
+                for (JsonElement item : jItems) {
                     plugin.getPVLogger().severe("ID: " + item.getAsJsonObject().get("id").getAsString());
                     plugin.getPVLogger().severe("Quantity: " + item.getAsJsonObject().get("quantity").getAsString());
                     plugin.getPVLogger().severe("Title: " + item.getAsJsonObject().get("title").getAsString());
@@ -88,10 +87,10 @@ public class MercadoPagoHook implements PaymentModel {
             }
 
             HashMap<String, Integer> items = new HashMap<>();
-            for (JsonElement item : jItems){
+            for (JsonElement item : jItems) {
                 String id = null;
-                if (plugin.getPVConfig().getRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("DESCRICAO")){
-                    Optional<String> optId = Arrays.stream(item.getAsJsonObject().get("title").getAsString().split(" ")).filter(i->i.startsWith("#")).findFirst();
+                if (plugin.getPVConfig().getRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("DESCRICAO")) {
+                    Optional<String> optId = Arrays.stream(item.getAsJsonObject().get("title").getAsString().split(" ")).filter(i -> i.startsWith("#")).findFirst();
                     if (optId.isPresent())
                         id = optId.get();
                 } else {

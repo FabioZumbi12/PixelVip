@@ -1,6 +1,5 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.cmds;
 
-import br.net.fabiozumbi12.pixelvip.bukkit.PVUtil;
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PVPackage;
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PackageManager;
 import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
@@ -58,16 +57,16 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 
-        if (args.length == 1){
+        if (args.length == 1) {
             if (cmd.getName().equalsIgnoreCase("newkey")) {
                 List<String> list = new ArrayList<>(plugin.getPVConfig().getGroupList(false));
                 list.replaceAll(g -> plugin.getUtil().removeColor(g));
                 return list;
             }
             if (sender instanceof Player && cmd.getName().equalsIgnoreCase("setactive")) {
-                Player p = (Player)sender;
+                Player p = (Player) sender;
                 List<String> list = new ArrayList<>();
-                for (String[] vip:plugin.getPVConfig().getVipInfo(p.getUniqueId().toString())){
+                for (String[] vip : plugin.getPVConfig().getVipInfo(p.getUniqueId().toString())) {
                     list.add(ChatColor.stripColor(plugin.getPVConfig().getVipTitle(vip[1])));
                 }
                 return list;
@@ -76,7 +75,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 return new ArrayList<>(plugin.getPackageManager().getPackages().getConfigurationSection("packages").getKeys(false));
             }
         }
-        if (args.length == 2){
+        if (args.length == 2) {
             if (cmd.getName().equalsIgnoreCase("setvip") ||
                     cmd.getName().equalsIgnoreCase("addvip") ||
                     cmd.getName().equalsIgnoreCase("removevip")) {
@@ -88,7 +87,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 return new ArrayList<>(plugin.getPackageManager().getPackages().getConfigurationSection("packages").getKeys(false));
             }
             if (cmd.getName().equalsIgnoreCase("addpackage")) {
-                return Arrays.asList("hand","command");
+                return Arrays.asList("hand", "command");
             }
         }
 
@@ -99,11 +98,11 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
     }
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent e){
+    public void onChat(AsyncPlayerChatEvent e) {
         Player sender = e.getPlayer();
         if (plugin.getPackageManager().hasPendingPlayer(sender)) {
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pendent")));
-            for (String pend : plugin.getPackageManager().getPendingVariant(sender)){
+            for (String pend : plugin.getPackageManager().getPendingVariant(sender)) {
                 givePackage(sender, new String[]{sender.getName(), pend}, false);
             }
             e.setCancelled(true);
@@ -117,10 +116,10 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
             return true;
         }
 
-        if (sender instanceof Player){
-            if (plugin.getPackageManager().hasPendingPlayer((Player)sender) && !cmd.getName().equalsIgnoreCase("getvariant")) {
+        if (sender instanceof Player) {
+            if (plugin.getPackageManager().hasPendingPlayer((Player) sender) && !cmd.getName().equalsIgnoreCase("getvariant")) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pendent")));
-                for (String pend : plugin.getPackageManager().getPendingVariant((Player)sender)){
+                for (String pend : plugin.getPackageManager().getPendingVariant((Player) sender)) {
                     givePackage(sender, new String[]{sender.getName(), pend}, false);
                 }
                 return true;
@@ -222,10 +221,10 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
     }
 
     private boolean delPackage(CommandSender sender, String[] args) {
-        if (args.length == 1){
+        if (args.length == 1) {
             PackageManager packages = plugin.getPackageManager();
             String id = args[0];
-            if (packages.getPackage(id) == null){
+            if (packages.getPackage(id) == null) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.no-package").replace("{id}", id)));
                 return true;
@@ -242,22 +241,22 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
     private boolean addPackage(CommandSender sender, String[] args) {
         PackageManager packages = plugin.getPackageManager();
         //itemstack: /addpackage <id> hand|command [command1, command2]
-        if (args.length >= 2){
+        if (args.length >= 2) {
             String id = args[0];
-            if (packages.getPackage(id) != null){
+            if (packages.getPackage(id) != null) {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.exists").replace("{id}", id)));
                 return true;
             }
 
-            if (args.length == 2 && args[1].equalsIgnoreCase("hand")){
-                if (!(sender instanceof Player)){
+            if (args.length == 2 && args[1].equalsIgnoreCase("hand")) {
+                if (!(sender instanceof Player)) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.only-players")));
                     return true;
                 }
-                Player p = (Player)sender;
-                if (p.getItemInHand().getType().equals(Material.AIR)){
+                Player p = (Player) sender;
+                if (p.getItemInHand().getType().equals(Material.AIR)) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.hand-empty")));
                     return true;
@@ -265,8 +264,8 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 String item = p.getItemInHand().getType().name();
                 int amount = p.getItemInHand().getAmount();
                 String cmd = packages.getPackages().getString("hand.cmd", "give {p} {item} {amount}")
-                        .replace("{item}",item)
-                        .replace("{amount}", amount+"");
+                        .replace("{item}", item)
+                        .replace("{amount}", amount + "");
 
                 packages.getPackages().set("packages." + id + ".commands", Collections.singletonList(cmd));
                 packages.save();
@@ -274,7 +273,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                         plugin.getPVConfig().getLang("_pluginTag") + packages.getPackages().getString("strings.added")));
                 return true;
             }
-            if (args[1].equalsIgnoreCase("command")){
+            if (args[1].equalsIgnoreCase("command")) {
                 args[0] = "";
                 args[1] = "";
                 List<String> cmds = fixArgs(args);
@@ -334,7 +333,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                     if (pkg.getVariants() != null) {
 
                         //add for usage
-                        if (add){
+                        if (add) {
                             List<String> pending = packages.getStringList("pending-variants." + p.getName());
                             pending.add(pkg.getID());
                             packages.set("pending-variants." + p.getName(), pending);
@@ -816,7 +815,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                     return true;
                 }
 
-                if (plugin.getPVConfig().isVipActive(group, p.getUniqueId().toString())){
+                if (plugin.getPVConfig().isVipActive(group, p.getUniqueId().toString())) {
                     p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(args[0])));
                     return true;
                 }
@@ -851,7 +850,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 return true;
             }
 
-            if (plugin.getPVConfig().isVipActive(group, uuid)){
+            if (plugin.getPVConfig().isVipActive(group, uuid)) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "activeVipSetTo") + plugin.getPVConfig().getVipTitle(args[0])));
                 return true;
             }

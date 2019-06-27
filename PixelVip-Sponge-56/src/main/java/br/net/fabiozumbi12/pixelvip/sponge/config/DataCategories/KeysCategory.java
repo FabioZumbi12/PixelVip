@@ -23,8 +23,10 @@ public class KeysCategory {
         public String group;
         @Setting
         public int uses;
+
         public KeysCat() {
         }
+
         public KeysCat(long duration, String group, int uses) {
             this.duration = duration;
             this.group = group;

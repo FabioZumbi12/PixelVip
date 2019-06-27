@@ -13,7 +13,6 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -58,7 +57,7 @@ public class PVConfig {
             configRoot = cfgLoader.load(ConfigurationOptions.defaults().setObjectMapperFactory(factory).setShouldCopyDefaults(true).setHeader(header));
             root = configRoot.getValue(TypeToken.of(MainCategory.class), new MainCategory());
 
-            if (root.groups.isEmpty()){
+            if (root.groups.isEmpty()) {
                 root.groups.put("vipExample", new MainCategory.VipsCategory());
             }
 
@@ -77,17 +76,17 @@ public class PVConfig {
         return this.root;
     }
 
-    public String getVipTitle(String vipGroup){
-        if (root.groups.containsKey(vipGroup)){
+    public String getVipTitle(String vipGroup) {
+        if (root.groups.containsKey(vipGroup)) {
             String title = PixelVip.get().getUtil().toColor(root.groups.get(vipGroup).title);
             return title.isEmpty() ? vipGroup : title;
         }
         return vipGroup;
     }
 
-    public String getVipByTitle(String vipTitle){
+    public String getVipByTitle(String vipTitle) {
         vipTitle = vipTitle.replace("_", " ");
-        for (Map.Entry<String, MainCategory.VipsCategory> groups:root.groups.entrySet()){
+        for (Map.Entry<String, MainCategory.VipsCategory> groups : root.groups.entrySet()) {
             if (!vipTitle.isEmpty() && PixelVip.get().getUtil().removeColor(groups.getValue().title).equalsIgnoreCase(vipTitle))
                 return groups.getKey();
         }
@@ -493,7 +492,7 @@ public class PVConfig {
 
         dataManager.removeVip(uuid, group);
 
-        if (!root.configs.cmdOnRemoveVip.isEmpty()){
+        if (!root.configs.cmdOnRemoveVip.isEmpty()) {
             Sponge.getGame().getScheduler().createTaskBuilder().delay(delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                 Sponge.getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdOnRemoveVip.replace("{p}", pname).replace("{vip}", group));
             }).submit(PixelVip.get());
@@ -575,7 +574,7 @@ public class PVConfig {
     }
 
     public void reloadPerms() {
-        if (!root.configs.cmdToReloadPermPlugin.isEmpty()){
+        if (!root.configs.cmdToReloadPermPlugin.isEmpty()) {
             Sponge.getGame().getScheduler().createTaskBuilder().delay(1 + delay * 100, TimeUnit.MILLISECONDS).execute(t -> {
                 Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), root.configs.cmdToReloadPermPlugin);
             }).submit(PixelVip.get());
@@ -664,9 +663,9 @@ public class PVConfig {
         return dataManager.getVipUUID(string);
     }
 
-    public List<String> getVipTitleList(){
+    public List<String> getVipTitleList() {
         List<String> list = new ArrayList<>();
-        for (Map.Entry<String, MainCategory.VipsCategory> groups:root.groups.entrySet()){
+        for (Map.Entry<String, MainCategory.VipsCategory> groups : root.groups.entrySet()) {
             if (!groups.getValue().title.isEmpty())
                 list.add(PixelVip.get().getUtil().removeColor(groups.getValue().title).replace(" ", "_"));
             else

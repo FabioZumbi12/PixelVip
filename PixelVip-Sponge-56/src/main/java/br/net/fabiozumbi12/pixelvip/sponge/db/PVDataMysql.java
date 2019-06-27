@@ -1,9 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.sponge.db;
 
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.user.UserStorageService;
 
 import java.sql.*;
 import java.util.*;

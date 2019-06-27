@@ -42,7 +42,7 @@ public class PackageManager {
         }
     }
 
-    public void save(){
+    public void save() {
         savePackages(this.packages);
     }
 

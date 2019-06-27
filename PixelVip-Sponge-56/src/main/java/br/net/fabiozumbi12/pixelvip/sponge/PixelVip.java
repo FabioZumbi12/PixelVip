@@ -112,7 +112,7 @@ public class PixelVip {
 
             //make backup of old files
             File oldConfig = new File(configDir(), "pixevip.conf");
-            if (oldConfig.exists()){
+            if (oldConfig.exists()) {
                 oldConfig.renameTo(new File(configDir(), "pixevip_old.conf"));
                 new File(configDir(), "vips.conf").renameTo(new File(configDir(), "vips_old.conf"));
                 logger.warn("Old config found! Created a backup. You need to migrate your vips from \"vips_old.conf\" to new file!");
@@ -142,9 +142,9 @@ public class PixelVip {
                     .description(Text.of("Use to see the plugin info and reload."))
                     .permission("pixelvip.cmd.reload")
                     .arguments(GenericArguments.optional(GenericArguments.choices(Text.of("reload"),
-                            new HashMap<String, String>(){{
-                                put("reload","reload");
-                    }})))
+                            new HashMap<String, String>() {{
+                                put("reload", "reload");
+                            }})))
                     .executor((src, args) -> {
                         {
                             if (args.hasAny("reload")) {
@@ -172,7 +172,7 @@ public class PixelVip {
         //pagseguro
         if (getConfig().root().apis.pagseguro.use && getPluginManager().getPlugin("pagseguroapi").isPresent()) {
             this.payments.add(new PagSeguroHook(this));
-            if (getConfig().root().apis.pagseguro.ignoreOldest.isEmpty()){
+            if (getConfig().root().apis.pagseguro.ignoreOldest.isEmpty()) {
                 getConfig().root().apis.pagseguro.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
                 getConfig().saveConfigAll();
             }
@@ -182,7 +182,7 @@ public class PixelVip {
         //mercadopago
         if (getConfig().root().apis.mercadopago.use && getPluginManager().getPlugin("mercadopagoapi").isPresent()) {
             this.payments.add(new MercadoPagoHook(this));
-            if (getConfig().root().apis.mercadopago.ignoreOldest.isEmpty()){
+            if (getConfig().root().apis.mercadopago.ignoreOldest.isEmpty()) {
                 getConfig().root().apis.mercadopago.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
                 getConfig().saveConfigAll();
             }
@@ -192,7 +192,7 @@ public class PixelVip {
         //paypal
         if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("paypalapi").isPresent()) {
             this.payments.add(new PayPalHook(this));
-            if (getConfig().root().apis.paypal.ignoreOldest.isEmpty()){
+            if (getConfig().root().apis.paypal.ignoreOldest.isEmpty()) {
                 getConfig().root().apis.paypal.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
                 getConfig().saveConfigAll();
             }

@@ -7,8 +7,6 @@ import java.util.*;
 
 @ConfigSerializable
 public class MainCategory {
-    public MainCategory() {}
-
     @Setting(comment = "Put your permissions plugin vip group names here. Case sensitive!")
     public Map<String, VipsCategory> groups = new HashMap<>();
     @Setting
@@ -17,9 +15,12 @@ public class MainCategory {
     public ConfigsCat configs = new ConfigsCat();
     @Setting
     public Map<String, JoinCmdsCat> joinCmds;
-
     @Setting
     public StringsCat strings = new StringsCat();
+
+    public MainCategory() {
+    }
+
     @ConfigSerializable
     public static class StringsCat {
         @Setting
@@ -198,6 +199,7 @@ public class MainCategory {
 
         public JoinCmdsCat() {
         }
+
         public JoinCmdsCat(List<String> cmds, List<String> chanceCmds) {
             this.cmds = cmds;
             this.chanceCmds = chanceCmds;

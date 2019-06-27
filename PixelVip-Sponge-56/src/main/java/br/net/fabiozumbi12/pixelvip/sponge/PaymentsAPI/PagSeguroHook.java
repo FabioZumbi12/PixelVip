@@ -5,7 +5,6 @@ import br.com.uol.pagseguro.api.PagSeguroEnv;
 import br.com.uol.pagseguro.api.common.domain.PaymentItem;
 import br.com.uol.pagseguro.api.common.domain.TransactionStatus;
 import br.com.uol.pagseguro.api.credential.Credential;
-import br.com.uol.pagseguro.api.exception.PagSeguroBadRequestException;
 import br.com.uol.pagseguro.api.transaction.search.TransactionDetail;
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
 import org.spongepowered.api.entity.living.player.Player;
@@ -51,7 +50,7 @@ public class PagSeguroHook implements PaymentModel {
             TransactionDetail trans;
             try {
                 trans = pagSeguro.transactions().search().byCode(transCode);
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
                 return false;
             }
 
@@ -76,7 +75,7 @@ public class PagSeguroHook implements PaymentModel {
             HashMap<Integer, String> items = new HashMap<>();
             for (PaymentItem item : trans.getItems()) {
                 String[] ids = item.getId().split(" ");
-                if (item.getId() != null && !item.getId().isEmpty()){
+                if (item.getId() != null && !item.getId().isEmpty()) {
                     items.put(item.getQuantity(), item.getId());
                 } else {
                     for (String id : ids)

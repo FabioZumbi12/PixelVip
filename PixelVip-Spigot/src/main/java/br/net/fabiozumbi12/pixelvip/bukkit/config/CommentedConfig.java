@@ -5,7 +5,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,18 +14,18 @@ import java.util.List;
 public class CommentedConfig {
 
     private final HashMap<String, String> comments;
+    public FileConfiguration configurations;
     private String header;
     private PixelVip plugin;
     private File config;
-    public FileConfiguration configurations;
-    
-    CommentedConfig(PixelVip plugin, File config, FileConfiguration configurations, String header){
+
+    CommentedConfig(PixelVip plugin, File config, FileConfiguration configurations, String header) {
         this.config = config;
         this.plugin = plugin;
         this.comments = new HashMap<>();
         this.configurations = configurations;
-        this.header = "# " + header.replace("\n","\n# ");
-        
+        this.header = "# " + header.replace("\n", "\n# ");
+
         if (config.exists()) {
             try {
                 configurations.load(config);
@@ -36,7 +35,7 @@ public class CommentedConfig {
         }
     }
 
-    public void setDefault(String key, Object value){
+    public void setDefault(String key, Object value) {
         setDefault(key, value, null);
     }
 

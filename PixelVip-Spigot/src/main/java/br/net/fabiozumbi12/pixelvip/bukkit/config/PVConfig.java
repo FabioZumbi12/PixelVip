@@ -17,23 +17,17 @@ import java.util.*;
 
 public class PVConfig {
 
+    public HashMap<String, String> comandAlert = new HashMap<>();
     private PixelVip plugin;
     private int delay = 0;
     private PVDataManager dataManager;
-    public HashMap<String, String> comandAlert = new HashMap<>();
     private CommentedConfig comConfig;
-    public FileConfiguration getRoot(){
-        return this.comConfig.configurations;
-    }
-    public CommentedConfig getCommConfig(){
-        return this.comConfig;
-    }
 
     public PVConfig(PixelVip plugin) {
         this.plugin = plugin;
 
         /*----------------------------------------------------------------------------------*/
-        
+
         String header = "=============== PixelVip Configuration Options ================\n" +
                 "The configuration is commented! If you need more help or have issues, use our github:\n" +
                 "https://github.com/FabioZumbi12/PixelVip\n" +
@@ -48,8 +42,8 @@ public class PVConfig {
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
                 "- {days} = Days of activated Vip");
-        if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()){
-            comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g->{
+        if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()) {
+            comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g -> {
                 comConfig.setDefault("groups." + g + ".title", g);
                 comConfig.setDefault("groups." + g + ".commands", new ArrayList<>());
                 comConfig.setDefault("groups." + g + ".cmdChances.0", new ArrayList<>());
@@ -77,7 +71,7 @@ public class PVConfig {
         comConfig.setDefault("configs.database.mysql", null, "Database configuration!\n" +
                 "H2 uri: \"jdbc:h2:%s/pixelvip.db;mode=MySQL\" (%s will be replaced by pixelvip path)\n" +
                 "Mysql uri: \"jdbc:mysql://localhost:3306/\"");
-        comConfig.setDefault("configs.database.mysql.host","jdbc:mysql://localhost:3306/");
+        comConfig.setDefault("configs.database.mysql.host", "jdbc:mysql://localhost:3306/");
         comConfig.setDefault("configs.database.mysql.db-name", "pixelvip");
         comConfig.setDefault("configs.database.mysql.username", "user");
         comConfig.setDefault("configs.database.mysql.password", "pass");
@@ -283,13 +277,21 @@ public class PVConfig {
         comConfig.saveConfig();
     }
 
-    public String getVipTitle(String vipGroup){
+    public FileConfiguration getRoot() {
+        return this.comConfig.configurations;
+    }
+
+    public CommentedConfig getCommConfig() {
+        return this.comConfig;
+    }
+
+    public String getVipTitle(String vipGroup) {
         return ChatColor.translateAlternateColorCodes('&', comConfig.configurations.getString("groups." + vipGroup + ".title", vipGroup));
     }
 
-    public String getVipByTitle(String vipTitle){
+    public String getVipByTitle(String vipTitle) {
         vipTitle = vipTitle.replace("_", " ");
-        for (String group:comConfig.configurations.getConfigurationSection("groups").getKeys(false)){
+        for (String group : comConfig.configurations.getConfigurationSection("groups").getKeys(false)) {
             if (!vipTitle.isEmpty() && comConfig.configurations.getString("groups." + group + ".title") != null &&
                     plugin.getUtil().removeColor(comConfig.configurations.getString("groups." + group + ".title")).equalsIgnoreCase(vipTitle))
                 return group;
@@ -859,13 +861,13 @@ public class PVConfig {
 
     public Set<String> getGroupList(boolean raw) {
         Set<String> list = new HashSet<>();
-        if (raw){
+        if (raw) {
             if (comConfig.configurations.getConfigurationSection("groups") != null) {
                 return comConfig.configurations.getConfigurationSection("groups").getKeys(false);
             }
         } else {
             if (comConfig.configurations.getConfigurationSection("groups") != null) {
-                for (String group:comConfig.configurations.getConfigurationSection("groups").getKeys(false)){
+                for (String group : comConfig.configurations.getConfigurationSection("groups").getKeys(false)) {
                     if (comConfig.configurations.getString("groups." + group + ".title") != null &&
                             !comConfig.configurations.getString("groups." + group + ".title").isEmpty())
                         list.add(comConfig.configurations.getString("groups." + group + ".title"));

@@ -10,13 +10,6 @@ public class PackagesCategory {
 
     @Setting
     public HandCat hand = new HandCat();
-    @ConfigSerializable
-    public static class HandCat {
-
-        @Setting
-        public String command = "give {p} {item} {amount}";
-    }
-
     @Setting
     public Map<String, Packs> packages = defPackages();
     @Setting(value = "pending-variants")
@@ -39,7 +32,6 @@ public class PackagesCategory {
         return options;
     }
 
-
     private Map<String, String> defStrings() {
         Map<String, String> strings = new HashMap<>();
         strings.put("choose", "&bClick in one of the available variants to choose one: ");
@@ -56,8 +48,21 @@ public class PackagesCategory {
     }
 
     @ConfigSerializable
+    public static class HandCat {
+
+        @Setting
+        public String command = "give {p} {item} {amount}";
+    }
+
+    @ConfigSerializable
     public static class Packs {
-        public Packs() {}
+        @Setting
+        public List<String> commands = new ArrayList<>();
+        @Setting
+        public VariantsCat variants = new VariantsCat();
+
+        public Packs() {
+        }
 
         public Packs(List<String> commands, Map<String, List<String>> options, String message) {
             this.commands = commands;
@@ -67,23 +72,21 @@ public class PackagesCategory {
             this.variants.message = message;
         }
 
-        @Setting
-        public List<String> commands = new ArrayList<>();
-
-        @Setting
-        public VariantsCat variants = new VariantsCat();
         @ConfigSerializable
         public static class VariantsCat {
             @Setting
             public String message = "Select an option: ";
             @Setting
             public Map<String, OptionsCat> options = new HashMap<>();
+
             @ConfigSerializable
             public static class OptionsCat {
                 @Setting
                 public List<String> commands = new ArrayList<>();
 
-                public OptionsCat() {}
+                public OptionsCat() {
+                }
+
                 public OptionsCat(List<String> commands) {
                     this.commands = commands;
                 }

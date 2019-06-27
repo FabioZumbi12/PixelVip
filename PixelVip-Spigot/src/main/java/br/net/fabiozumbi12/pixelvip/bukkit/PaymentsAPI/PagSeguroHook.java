@@ -40,7 +40,7 @@ public class PagSeguroHook implements PaymentModel {
     public boolean checkTransaction(Player player, String transCode) {
 
         //check if used
-        if (plugin.getPVConfig().transExist(this.getPayname(), transCode)){
+        if (plugin.getPVConfig().transExist(this.getPayname(), transCode)) {
             player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.codeused").replace("{payment}", getPayname())));
             return true;
         }
