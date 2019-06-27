@@ -16,13 +16,15 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class PVCommands implements CommandExecutor, TabCompleter {
+public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
     private PixelVip plugin;
     private List<String> cmdWait;
@@ -30,6 +32,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
     public PVCommands(PixelVip plugin) {
         this.plugin = plugin;
         this.cmdWait = new ArrayList<>();
+        plugin.serv.getPluginManager().registerEvents(this, plugin);
 
         plugin.getCommand("delkey").setExecutor(this);
         plugin.getCommand("newkey").setExecutor(this);
@@ -95,6 +98,18 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e){
+        Player sender = e.getPlayer();
+        if (plugin.getPackageManager().hasPendingPlayer(sender)) {
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pendent")));
+            for (String pend : plugin.getPackageManager().getPendingVariant(sender)){
+                givePackage(sender, new String[]{sender.getName(), pend}, false);
+            }
+            e.setCancelled(true);
+        }
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player && !plugin.getPVConfig().worldAllowed(((Player) sender).getWorld())) {
@@ -103,6 +118,14 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         }
 
         if (sender instanceof Player){
+            if (plugin.getPackageManager().hasPendingPlayer((Player)sender) && !cmd.getName().equalsIgnoreCase("getvariant")) {
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "pendent")));
+                for (String pend : plugin.getPackageManager().getPendingVariant((Player)sender)){
+                    givePackage(sender, new String[]{sender.getName(), pend}, false);
+                }
+                return true;
+            }
+
             if (cmdWait.contains(sender.getName())) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "wait-cmd")));
                 return true;
@@ -172,7 +195,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             }
 
             if (cmd.getName().equalsIgnoreCase("givepackage")) {
-                success = givePackage(sender, args);
+                success = givePackage(sender, args, true);
             }
 
             if (cmd.getName().equalsIgnoreCase("getvariant")) {
@@ -300,7 +323,7 @@ public class PVCommands implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    private boolean givePackage(CommandSender sender, String[] args) {
+    private boolean givePackage(CommandSender sender, String[] args, boolean add) {
         if (args.length == 2) {
             if (plugin.serv.getPlayer(args[0]) != null) {
                 YamlConfiguration packages = plugin.getPackageManager().getPackages();
@@ -310,15 +333,16 @@ public class PVCommands implements CommandExecutor, TabCompleter {
                     pkg.runCommands(p);
                     if (pkg.getVariants() != null) {
 
-
                         //add for usage
-                        List<String> pending = packages.getStringList("pending-variants." + p.getName());
-                        pending.add(pkg.getID());
-                        packages.set("pending-variants." + p.getName(), pending);
-                        try {
-                            packages.save(new File(plugin.getDataFolder(), "packages.yml"));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (add){
+                            List<String> pending = packages.getStringList("pending-variants." + p.getName());
+                            pending.add(pkg.getID());
+                            packages.set("pending-variants." + p.getName(), pending);
+                            try {
+                                packages.save(new File(plugin.getDataFolder(), "packages.yml"));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         if (plugin.getPVConfig().getRoot().getBoolean("configs.spigot.clickKeySuggest")) {
@@ -692,6 +716,17 @@ public class PVCommands implements CommandExecutor, TabCompleter {
             if (sender instanceof Player) {
                 Player p = (Player) sender;
                 String key = args[0].toUpperCase();
+
+                // Command alert
+                if (plugin.getPVConfig().getRoot().getBoolean("configs.useKeyWarning") && p.isOnline() && !key.isEmpty()) {
+                    if (!plugin.getPVConfig().comandAlert.containsKey(p.getName()) || !plugin.getPVConfig().comandAlert.get(p.getName()).equalsIgnoreCase(key)) {
+                        plugin.getPVConfig().comandAlert.put(p.getName(), key);
+                        p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "confirmUsekey")));
+                        return true;
+                    }
+                    plugin.getPVConfig().comandAlert.remove(p.getName());
+                }
+
                 if (!plugin.getPayments().isEmpty()) {
                     for (PaymentModel pay : plugin.getPayments()) {
                         plugin.processTrans.put(pay.getPayname(), key);

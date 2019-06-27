@@ -20,7 +20,7 @@ public class PVConfig {
     private PixelVip plugin;
     private int delay = 0;
     private PVDataManager dataManager;
-    private HashMap<String, String> comandAlert = new HashMap<>();
+    public HashMap<String, String> comandAlert = new HashMap<>();
     private CommentedConfig comConfig;
     public FileConfiguration getRoot(){
         return this.comConfig.configurations;
@@ -141,6 +141,9 @@ public class PVConfig {
         comConfig.setDefault("bungee.enableSync", false);
         comConfig.setDefault("bungee.serverID", "server1");
 
+        comConfig.setDefault("apis.in-test", false, "Set this to true until you is testing the APIs.\n" +
+                "In test, we will not save the transaction codes.\n" +
+                "DONT FORGET TO SET THIS TO FALSE WHEN DONE YOUR TESTS!!");
 
         comConfig.setDefault("apis.pagseguro", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil");
         comConfig.setDefault("apis.pagseguro.use", false);
@@ -153,6 +156,9 @@ public class PVConfig {
 
         comConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
         comConfig.setDefault("apis.mercadopago.use", false);
+        comConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
+                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
+                "Se for usar a DESCRICAO, deve iniciar a identificação com #, exemplo: \"Vip Elite 4 - 30 dias #999\" - A identificação do produto sera 999");
         comConfig.setDefault("apis.mercadopago.sandbox", false);
         comConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
         comConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
@@ -214,6 +220,7 @@ public class PVConfig {
         comConfig.setDefault("strings.reload", "&aPixelvip reloaded with success!");
         comConfig.setDefault("strings.wait-cmd", "&cWait before use a pixelvip command again!");
         comConfig.setDefault("strings.confirmUsekey", "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!");
+        comConfig.setDefault("strings.pendent", "&cYou have some pendent activation(s) to use. Please select one before continue!");
 
         comConfig.setDefault("strings.payment.waiting", "&c{payment}: Your purchase has not yet been approved!");
         comConfig.setDefault("strings.payment.codeused", "&c{payment}: This code has already been used!");
@@ -310,6 +317,8 @@ public class PVConfig {
     }
 
     public void addTrans(String payment, String trans, String player) {
+        if (comConfig.configurations.getBoolean("apis.in-test"))
+            return;
         dataManager.addTras(payment, trans, player);
     }
 
@@ -421,15 +430,6 @@ public class PVConfig {
 
     public boolean activateVip(OfflinePlayer p, String key, String group, long days, String pname) {
 
-        if (getBoolean(true, "configs.useKeyWarning") && p.isOnline() && (key != null && !key.isEmpty())) {
-            if (!comandAlert.containsKey(p.getName()) || !comandAlert.get(p.getName()).equalsIgnoreCase(key)) {
-                comandAlert.put(p.getName(), key);
-                p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag", "confirmUsekey")));
-                return true;
-            }
-            comandAlert.remove(p.getName());
-        }
-
         boolean hasItemkey = dataManager.getItemListKeys().contains(key);
         if (hasItemkey) {
             StringBuilder cmdsBuilder = new StringBuilder();
@@ -532,7 +532,7 @@ public class PVConfig {
                 } else {
                     normCmds.add(cmdf);
                 }
-            }, delay * 2);
+            }, delay);
             delay++;
         });
 
@@ -555,7 +555,7 @@ public class PVConfig {
                         } else {
                             chanceCmds.add(cmdf);
                         }
-                    }, delay * 2);
+                    }, delay);
                     delay++;
                 });
             }
@@ -565,7 +565,7 @@ public class PVConfig {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 plugin.getLogger().info("Queued cmds for player " + p.getName() + " to run on join.");
                 setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
-            }, delay * 2);
+            }, delay);
         }
 
         delay = 0;
@@ -661,13 +661,13 @@ public class PVConfig {
 
             String cmdf = cmd.replace("{p}", p.getName());
             if (oldVip != null && !oldVip.equals("") && cmdf.contains("{oldvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay);
                 delay++;
             } else if (!newVip.equals("") && cmdf.contains("{newvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip), null), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip), null), delay);
                 delay++;
             } else {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                 delay++;
             }
         }
@@ -682,7 +682,7 @@ public class PVConfig {
                 if (comConfig.configurations.getString("configs.Vault.mode").equalsIgnoreCase("add")) {
                     plugin.getPerms().addGroup(p.getUniqueId().toString(), newVip);
                 }
-            }, delay * 2);
+            }, delay);
             delay++;
         } else {
             reloadPerms();
@@ -717,11 +717,11 @@ public class PVConfig {
         plugin.addLog("RemoveVip | " + pname + " | " + group);
 
         dataManager.removeVip(uuid, group);
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group), null), delay * 5);
+        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group), null), delay);
         delay++;
 
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().removeGroup(uuid, group), delay * 2);
+            plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().removeGroup(uuid, group), delay);
             delay++;
         }
     }
@@ -763,12 +763,12 @@ public class PVConfig {
                 if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                     for (String group : oldGroup) {
                         String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
-                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
+                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                         delay++;
                     }
                 } else {
                     String cmdf = cmd.replace("{p}", nick);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                     delay++;
                 }
             }
@@ -780,12 +780,12 @@ public class PVConfig {
             if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                 for (String group : oldGroup) {
                     String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                     delay++;
                 }
             } else {
                 String cmdf = cmd.replace("{p}", nick);
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), 1 + delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                 delay++;
             }
         }
@@ -793,7 +793,7 @@ public class PVConfig {
         //use vault to add back oldgroup
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
             for (String group : oldGroup) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().addGroup(uuid, group), 1 + delay * 5);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().addGroup(uuid, group), delay);
                 delay++;
             }
         } else {
@@ -803,7 +803,7 @@ public class PVConfig {
     }
 
     public void reloadPerms() {
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin"), null), (1 + delay) * 10);
+        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin"), null), delay);
         delay = 0;
     }
 

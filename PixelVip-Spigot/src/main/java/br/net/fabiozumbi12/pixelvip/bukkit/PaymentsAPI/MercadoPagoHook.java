@@ -1,15 +1,19 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPConfException;
 import org.bukkit.entity.Player;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class MercadoPagoHook implements PaymentModel {
     private PixelVip plugin;
@@ -41,6 +45,7 @@ public class MercadoPagoHook implements PaymentModel {
             return true;
         }
 
+        boolean test = plugin.getPVConfig().getRoot().getBoolean("apis.in-test");
         boolean success;
         try {
             JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/" + transCode).getJsonElementResponse();
@@ -68,15 +73,36 @@ public class MercadoPagoHook implements PaymentModel {
                 e.printStackTrace();
             }
 
-            HashMap<Integer, String> items = new HashMap<>();
-            String[] itemArr = payment_info.getAsJsonObject().getAsJsonPrimitive("description").getAsString().split(",");
-            for (String item : itemArr) {
-                String[] qtdArr = item.split("x");
-                int qtd = Integer.parseInt(qtdArr[qtdArr.length - 1].replace(" ", ""));
-                String[] ids = item.split(" ");
-                for (String id : ids)
-                    if (id.startsWith("#"))
-                        items.put(qtd, id.substring(1));
+            JsonArray jItems = payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().get("items").getAsJsonArray();
+
+            // Debug
+            if (test){
+                plugin.getPVLogger().severe("Items: " + jItems);
+                for (JsonElement item : jItems){
+                    plugin.getPVLogger().severe("ID: " + item.getAsJsonObject().get("id").getAsString());
+                    plugin.getPVLogger().severe("Quantity: " + item.getAsJsonObject().get("quantity").getAsString());
+                    plugin.getPVLogger().severe("Title: " + item.getAsJsonObject().get("title").getAsString());
+                    plugin.getPVLogger().severe("Price: " + item.getAsJsonObject().get("unit_price").getAsString());
+                }
+                // Debug
+            }
+
+            HashMap<String, Integer> items = new HashMap<>();
+            for (JsonElement item : jItems){
+                String id = null;
+                if (plugin.getPVConfig().getRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("DESCRICAO")){
+                    Optional<String> optId = Arrays.stream(item.getAsJsonObject().get("title").getAsString().split(" ")).filter(i->i.startsWith("#")).findFirst();
+                    if (optId.isPresent())
+                        id = optId.get();
+                } else {
+                    id = item.getAsJsonObject().get("id").getAsString();
+                }
+                items.put(id, item.getAsJsonObject().get("quantity").getAsInt());
+
+                // Debug
+                if (test) {
+                    plugin.getPVLogger().severe("Added Item: " + item.getAsJsonObject().get("title").getAsString() + " | ID: " + item.getAsJsonObject().get("id").getAsString());
+                }
             }
 
             success = plugin.getUtil().paymentItems(items, player, this.getPayname(), transCode);

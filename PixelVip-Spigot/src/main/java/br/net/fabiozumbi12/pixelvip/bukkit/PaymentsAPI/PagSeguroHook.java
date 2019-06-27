@@ -67,12 +67,12 @@ public class PagSeguroHook implements PaymentModel {
                 return true;
             }
 
-            HashMap<Integer, String> items = new HashMap<>();
+            HashMap<String, Integer> items = new HashMap<>();
             for (PaymentItem item : trans.getItems()) {
                 String[] ids = item.getId().split(" ");
                 for (String id : ids)
                     if (id.startsWith("#"))
-                        items.put(item.getQuantity(), id.substring(1));
+                        items.put(id.substring(1), item.getQuantity());
             }
 
             success = plugin.getUtil().paymentItems(items, player, this.getPayname(), transCode);

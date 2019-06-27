@@ -78,12 +78,12 @@ public class PayPalHook implements PaymentModel {
                 return true;
             }
 
-            HashMap<Integer, String> items = new HashMap<>();
+            HashMap<String, Integer> items = new HashMap<>();
             for (PaymentItemType pay : trans.getPaymentTransactionDetails().getPaymentItemInfo().getPaymentItem()) {
                 String[] ids = pay.getName().split(" ");
                 for (String id : ids)
                     if (id.startsWith("#"))
-                        items.put(Integer.parseInt(pay.getQuantity()), id.substring(1));
+                        items.put(id.substring(1), Integer.parseInt(pay.getQuantity()));
             }
 
             success = plugin.getUtil().paymentItems(items, player, this.getPayname(), transCode);

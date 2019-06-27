@@ -128,11 +128,13 @@ public class PVUtil {
         Bukkit.getScheduler().runTask(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), finalCmd));
     }
 
-    public boolean paymentItems(HashMap<Integer, String> items, Player player, String payment, String transCode) {
+    public boolean paymentItems(HashMap<String, Integer> items, Player player, String payment, String transCode) {
         int log = 0;
-        for (Map.Entry<Integer, String> item : items.entrySet()) {
-            int multipl = item.getKey();
-            String key = item.getValue();
+        for (Map.Entry<String, Integer> item : items.entrySet()) {
+            int multipl = item.getValue();
+            String key = item.getKey();
+
+            plugin.getPVLogger().severe("Value: " + item.getValue() + " | " + item.getKey());
 
             for (int i = 0; i < multipl; i++) {
                 String cmd = "givepackage " + player.getName() + " " + key;
