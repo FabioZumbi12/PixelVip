@@ -134,8 +134,6 @@ public class PVUtil {
             int multipl = item.getValue();
             String key = item.getKey();
 
-            plugin.getPVLogger().severe("Value: " + item.getValue() + " | " + item.getKey());
-
             for (int i = 0; i < multipl; i++) {
                 String cmd = "givepackage " + player.getName() + " " + key;
                 ExecuteCmd(cmd, null);
@@ -143,13 +141,6 @@ public class PVUtil {
                 log++;
             }
         }
-
-        if (log == 0) {
-            player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.noitems")
-                    .replace("{payment}", payment)
-                    .replace("{transaction}", transCode)));
-            return false;
-        }
-        return true;
+        return log != 0;
     }
 }

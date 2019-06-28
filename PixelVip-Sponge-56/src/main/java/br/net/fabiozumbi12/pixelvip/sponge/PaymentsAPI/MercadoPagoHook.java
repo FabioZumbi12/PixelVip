@@ -1,15 +1,19 @@
 package br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI;
 
 import br.net.fabiozumbi12.pixelvip.sponge.PixelVip;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPConfException;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class MercadoPagoHook implements PaymentModel {
     private PixelVip plugin;
@@ -37,7 +41,6 @@ public class MercadoPagoHook implements PaymentModel {
 
         if (plugin.getConfig().transExist(getPayname(), transCode)) {
             player.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.pay_codeused.replace("{payment}", getPayname())));
-            plugin.processTrans.remove(transCode);
             return true;
         }
 
@@ -45,7 +48,6 @@ public class MercadoPagoHook implements PaymentModel {
         try {
             JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/" + transCode).getJsonElementResponse();
 
-            //plugin.getPVLogger().severe("All: " + payment_info);
             if (payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equals("404")) {
                 return false;
             }
@@ -66,6 +68,33 @@ public class MercadoPagoHook implements PaymentModel {
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
+            }
+
+
+            JsonArray jItems;
+            if (payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().has("items")){
+                jItems = payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().get("items").getAsJsonArray();
+            } else {
+                String[] description = payment_info.getAsJsonObject().get("description").getAsString().split(" ");
+                String desc = payment_info.getAsJsonObject().get("description").getAsString();
+
+                // Id handling
+                String id;
+                Optional<String> optId = Arrays.stream(description).filter(i -> i.startsWith("#")).findFirst();
+                if (plugin.getPackageManager().getPackage(description[0]) != null){
+                    id = description[0];
+                } else if (optId.isPresent()){
+                    id = optId.get().substring(optId.get().indexOf("#"));
+                } else {
+                    plugin.getLogger().info("ID of Item not found, setting to 0: " + desc);
+                    id = String.valueOf(0);
+                }
+
+                String quantity = description[description.length-1];
+
+                jItems = new JsonArray();
+                jItems.add(new JsonParser().parse(
+                        "{\"id\":\""+id+"\",\"quantity\":\""+quantity+"\",\"title\":\""+desc+"\",\"unit_price\":\""+payment_info.getAsJsonObject().get("transaction_details").getAsJsonObject().get("net_received_amount").getAsString()+"\"}"));
             }
 
             HashMap<Integer, String> items = new HashMap<>();

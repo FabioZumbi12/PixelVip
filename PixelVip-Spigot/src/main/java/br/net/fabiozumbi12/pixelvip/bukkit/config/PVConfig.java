@@ -197,11 +197,12 @@ public class PVConfig {
         // Apis configs
         String apiHeader = "=============== PixelVip Payment APIs Options ================\n" +
                 "The configuration is commented! If you need more help or have issues, use our github:\n" +
-                "https://github.com/FabioZumbi12/PixelVip\n" +
+                "https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs\n" +
                 "\n" +
                 "Pixelvip by FabioZumbi12";
         apisConfig = new CommentedConfig(new File(plugin.getDataFolder(), "apis.yml"), new YamlConfiguration(), apiHeader);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         apisConfig.setDefault("apis.in-test", false, "Set this to true until you is testing the APIs.\n" +
                 "In test, we will not save the transaction codes.\n" +
                 "DONT FORGET TO SET THIS TO FALSE WHEN DONE YOUR TESTS!!");
@@ -211,21 +212,28 @@ public class PVConfig {
         apisConfig.setDefault("apis.pagseguro.sandbox", false);
         apisConfig.setDefault("apis.pagseguro.email", "your@email.com");
         apisConfig.setDefault("apis.pagseguro.token", "yourtoken");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         apisConfig.setDefault("apis.pagseguro.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
         apisConfig.setDefault("apis.pagseguro.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
                 "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "Se for usar a DESCRICAO, deve iniciar a identificação com o numero da variação, exemplo: \"999 - Vip Elite 4 - 30 dias\" - A identificação do produto sera 999");
+                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
+                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
+                "Exemplo com código de pacote do PixelVip 999: \n" +
+                " - \"999 - Vip4 Elite\"\n" +
+                " - \"Vip4 Elite #999\"");
 
 
         apisConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
         apisConfig.setDefault("apis.mercadopago.use", false);
-        apisConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
-                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "Se for usar a DESCRICAO, deve iniciar a identificação com #, exemplo: \"Vip Elite 4 - 30 dias #999\" - A identificação do produto sera 999");
         apisConfig.setDefault("apis.mercadopago.sandbox", false);
         apisConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
         apisConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
+        apisConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
+                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
+                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
+                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
+                "Exemplo com código de pacote do PixelVip 999: \n" +
+                " - \"999 - Vip4 Elite\"\n" +
+                " - \"Vip4 Elite #999\"");
 
 
         apisConfig.setDefault("apis.paypal", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal");
@@ -235,6 +243,13 @@ public class PVConfig {
         apisConfig.setDefault("apis.paypal.password", "password");
         apisConfig.setDefault("apis.paypal.signature", "signature");
         apisConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
+        apisConfig.setDefault("apis.paypal.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
+                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
+                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
+                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
+                "Exemplo com código de pacote do PixelVip 999: \n" +
+                " - \"999 - Vip4 Elite\"\n" +
+                " - \"Vip4 Elite #999\"");
 
         if (comConfig.configurations.getConfigurationSection("apis") != null) {
             plugin.getPVLogger().warning("APIs configurations moved to 'apis.yml'");

@@ -3,7 +3,6 @@ package br.net.fabiozumbi12.pixelvip.sponge;
 import br.net.fabiozumbi12.pixelvip.sponge.Packages.PackageManager;
 import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.MercadoPagoHook;
 import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PagSeguroHook;
-import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PayPalHook;
 import br.net.fabiozumbi12.pixelvip.sponge.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.sponge.cmds.PVCommands;
 import br.net.fabiozumbi12.pixelvip.sponge.config.PVConfig;
@@ -190,7 +189,7 @@ public class PixelVip {
         }
 
         //paypal
-        if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("paypalapi").isPresent()) {
+        /*if (getConfig().root().apis.paypal.use && getPluginManager().getPlugin("paypalapi").isPresent()) {
             this.payments.add(new PayPalHook(this));
             if (getConfig().root().apis.paypal.ignoreOldest.isEmpty()) {
                 getConfig().root().apis.paypal.ignoreOldest = sdf.format(Calendar.getInstance().getTime());
@@ -198,7 +197,7 @@ public class PixelVip {
             }
 
             logger.info("-> PayPalAPI found and hooked.");
-        }
+        }*/
     }
 
     private void setCompatperms() {

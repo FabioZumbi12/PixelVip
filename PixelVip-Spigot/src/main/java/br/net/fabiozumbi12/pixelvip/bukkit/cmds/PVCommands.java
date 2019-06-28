@@ -373,6 +373,8 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 } else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             plugin.getPVConfig().getLang("_pluginTag") + packages.getString("strings.no-package").replace("{id}", args[1])));
+                    p.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            plugin.getPVConfig().getLang("_pluginTag") + plugin.getPVConfig().getLang("payment.noitems").replace("{payment}","Alert")));
                 }
             }
         }
@@ -453,7 +455,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         });
 
         dm.closeCon();
-        plugin.saveConfig();
+        plugin.getPVConfig().getCommConfig().saveConfig();
         plugin.reloadCmd(Bukkit.getConsoleSender());
     }
 

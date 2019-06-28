@@ -189,7 +189,6 @@ public class PixelVip extends JavaPlugin implements Listener {
     }
 
     public void onDisable() {
-        saveConfig();
         Bukkit.getScheduler().cancelTasks(plugin);
         logger.severe(util.toColor("PixelVip disabled!"));
     }

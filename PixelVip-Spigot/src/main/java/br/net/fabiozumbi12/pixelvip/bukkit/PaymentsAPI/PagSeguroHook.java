@@ -1,5 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI;
 
+
 import br.com.uol.pagseguro.api.PagSeguro;
 import br.com.uol.pagseguro.api.PagSeguroEnv;
 import br.com.uol.pagseguro.api.common.domain.PaymentItem;
@@ -7,6 +8,7 @@ import br.com.uol.pagseguro.api.common.domain.TransactionStatus;
 import br.com.uol.pagseguro.api.credential.Credential;
 import br.com.uol.pagseguro.api.transaction.search.TransactionDetail;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
@@ -74,10 +76,12 @@ public class PagSeguroHook implements PaymentModel {
             // Debug
             if (test) {
                 plugin.getPVLogger().severe("Items: " + trans);
+                plugin.getPVLogger().severe("---------");
                 for (PaymentItem item : trans.getItems()) {
                     plugin.getPVLogger().severe("ID: " + item.getId());
                     plugin.getPVLogger().severe("Quantity: " + item.getQuantity());
                     plugin.getPVLogger().severe("Title: " + item.getDescription());
+                    plugin.getPVLogger().severe("---------");
                 }
             }
             // Debug
@@ -88,14 +92,21 @@ public class PagSeguroHook implements PaymentModel {
                 if (plugin.getPVConfig().getApiRoot().getString("apis.pagseguro.product-id-location").equalsIgnoreCase("ID")) {
                     id = item.getId();
                 } else {
-                    try {
-                        String descId = item.getDescription().split(" ")[0];
-                        Integer.parseInt(descId);
-                        id = descId;
-                    } catch (Exception ignored){
-                        continue;
-                    }
+                    String[] idStr = item.getDescription().split(" ");
+                    Optional<String> optId = Arrays.stream(idStr).filter(i -> i.startsWith("#")).findFirst();
+                    if (plugin.getPackageManager().getPackage(idStr[0]) != null){
+                        id = idStr[0];
+                    } else id = optId.map(s -> s.substring(s.indexOf("#"))).orElseGet(() -> String.valueOf(0));
                 }
+
+                if (plugin.getPackageManager().getPackage(id) == null) {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            plugin.getPVConfig().getLang("_pluginTag") +
+                                    plugin.getPVConfig().getLang("payment.noitems").replace("{payment}",getPayname()) + "\n" +
+                                    " - Error: " + item.getDescription()));
+                    continue;
+                }
+
                 items.put(id, item.getQuantity());
 
                 // Debug

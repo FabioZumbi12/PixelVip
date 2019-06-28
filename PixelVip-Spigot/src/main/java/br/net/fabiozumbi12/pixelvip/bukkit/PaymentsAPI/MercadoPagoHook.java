@@ -3,8 +3,10 @@ package br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPConfException;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.text.ParseException;
@@ -71,30 +73,68 @@ public class MercadoPagoHook implements PaymentModel {
                 e.printStackTrace();
             }
 
-            JsonArray jItems = payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().get("items").getAsJsonArray();
+            JsonArray jItems;
+            if (payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().has("items")){
+                jItems = payment_info.getAsJsonObject().get("additional_info").getAsJsonObject().get("items").getAsJsonArray();
+            } else {
+                String[] description = payment_info.getAsJsonObject().get("description").getAsString().split(" ");
+                String desc = payment_info.getAsJsonObject().get("description").getAsString();
+
+                // Id handling
+                String id;
+                Optional<String> optId = Arrays.stream(description).filter(i -> i.startsWith("#")).findFirst();
+                if (plugin.getPackageManager().getPackage(description[0]) != null){
+                    id = description[0];
+                } else if (optId.isPresent()){
+                    id = optId.get().substring(optId.get().indexOf("#"));
+                } else {
+                    plugin.getPVLogger().warning("ID of Item not found, setting to 0: " + desc);
+                    id = String.valueOf(0);
+                }
+
+                String quantity = description[description.length-1];
+
+                jItems = new JsonArray();
+                jItems.add(new JsonParser().parse(
+                        "{\"id\":\""+id+"\",\"quantity\":\""+quantity+"\",\"title\":\""+desc+"\",\"unit_price\":\""+payment_info.getAsJsonObject().get("transaction_details").getAsJsonObject().get("net_received_amount").getAsString()+"\"}"));
+            }
 
             // Debug
             if (test) {
                 plugin.getPVLogger().severe("Items: " + jItems);
+                plugin.getPVLogger().severe("---------");
                 for (JsonElement item : jItems) {
                     plugin.getPVLogger().severe("ID: " + item.getAsJsonObject().get("id").getAsString());
                     plugin.getPVLogger().severe("Quantity: " + item.getAsJsonObject().get("quantity").getAsString());
                     plugin.getPVLogger().severe("Title: " + item.getAsJsonObject().get("title").getAsString());
                     plugin.getPVLogger().severe("Price: " + item.getAsJsonObject().get("unit_price").getAsString());
+                    plugin.getPVLogger().severe("---------");
                 }
                 // Debug
             }
 
             HashMap<String, Integer> items = new HashMap<>();
             for (JsonElement item : jItems) {
-                String id = null;
+                String id;
                 if (plugin.getPVConfig().getApiRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("ID")) {
                     id = item.getAsJsonObject().get("id").getAsString();
                 } else {
-                    Optional<String> optId = Arrays.stream(item.getAsJsonObject().get("title").getAsString().split(" ")).filter(i -> i.startsWith("#")).findFirst();
-                    if (optId.isPresent())
-                        id = optId.get().substring(1);
+                    String[] idStr = item.getAsJsonObject().get("title").getAsString().split(" ");
+                    Optional<String> optId = Arrays.stream(idStr).filter(i -> i.startsWith("#")).findFirst();
+                    if (plugin.getPackageManager().getPackage(idStr[0]) != null){
+                        id = idStr[0];
+                    } else id = optId.map(s -> s.substring(s.indexOf("#"))).orElseGet(() -> String.valueOf(0));
                 }
+
+                if (plugin.getPackageManager().getPackage(id) == null) {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                            plugin.getPVConfig().getLang("_pluginTag") +
+                                    plugin.getPVConfig().getLang("payment.noitems")
+                                            .replace("{payment}",getPayname()) + "\n" +
+                                    " - Error: " + item.getAsJsonObject().get("title").getAsString()));
+                    continue;
+                }
+
                 items.put(id, item.getAsJsonObject().get("quantity").getAsInt());
 
                 // Debug

@@ -41,6 +41,30 @@
             <version>2.16.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>PagSeguro</groupId>
+            <artifactId>PagSeguro</artifactId>
+            <version>v1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../apis/PagSeguro-4.3.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>PayPal</groupId>
+            <artifactId>PayPal</artifactId>
+            <version>v1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../apis/PayPal-0.0.1.4.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>MercadoPago</groupId>
+            <artifactId>MercadoPago</artifactId>
+            <version>v1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../apis/MercadoPago-1.0.36.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <properties>
