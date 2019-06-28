@@ -10,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -22,6 +23,7 @@ public class PVConfig {
     private int delay = 0;
     private PVDataManager dataManager;
     private CommentedConfig comConfig;
+    private CommentedConfig apisConfig;
 
     public PVConfig(PixelVip plugin) {
         this.plugin = plugin;
@@ -34,7 +36,7 @@ public class PVConfig {
                 "\n" +
                 "Pixelvip by FabioZumbi12";
 
-        comConfig = new CommentedConfig(plugin, new File(plugin.getDataFolder(), "config.yml"), plugin.getConfig(), header);
+        comConfig = new CommentedConfig(new File(plugin.getDataFolder(), "config.yml"), plugin.getConfig(), header);
 
         comConfig.setDefault("groups", null, "Group names like is in your permissions plugin (case sensitive)!\n" +
                 "Available placeholders: \n" +
@@ -135,36 +137,6 @@ public class PVConfig {
         comConfig.setDefault("bungee.enableSync", false);
         comConfig.setDefault("bungee.serverID", "server1");
 
-        comConfig.setDefault("apis.in-test", false, "Set this to true until you is testing the APIs.\n" +
-                "In test, we will not save the transaction codes.\n" +
-                "DONT FORGET TO SET THIS TO FALSE WHEN DONE YOUR TESTS!!");
-
-        comConfig.setDefault("apis.pagseguro", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil");
-        comConfig.setDefault("apis.pagseguro.use", false);
-        comConfig.setDefault("apis.pagseguro.debug", false);
-        comConfig.setDefault("apis.pagseguro.email", "your@email.com");
-        comConfig.setDefault("apis.pagseguro.token", "yourtoken");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        comConfig.setDefault("apis.pagseguro.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
-
-
-        comConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
-        comConfig.setDefault("apis.mercadopago.use", false);
-        comConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
-                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "Se for usar a DESCRICAO, deve iniciar a identificação com #, exemplo: \"Vip Elite 4 - 30 dias #999\" - A identificação do produto sera 999");
-        comConfig.setDefault("apis.mercadopago.sandbox", false);
-        comConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
-        comConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
-
-
-        comConfig.setDefault("apis.paypal", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal");
-        comConfig.setDefault("apis.paypal.use", false);
-        comConfig.setDefault("apis.paypal.sandbox", false);
-        comConfig.setDefault("apis.paypal.username", "username");
-        comConfig.setDefault("apis.paypal.password", "password");
-        comConfig.setDefault("apis.paypal.signature", "signature");
-        comConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
 
         //strings
         comConfig.setDefault("strings._pluginTag", "&7[&6PixelVip&7] ");
@@ -220,6 +192,59 @@ public class PVConfig {
         comConfig.setDefault("strings.payment.codeused", "&c{payment}: This code has already been used!");
         comConfig.setDefault("strings.payment.expired", "&c{payment}: This code has expired!");
         comConfig.setDefault("strings.payment.noitems", "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!");
+        /*---------------------------------------------------------*/
+
+        // Apis configs
+        String apiHeader = "=============== PixelVip Payment APIs Options ================\n" +
+                "The configuration is commented! If you need more help or have issues, use our github:\n" +
+                "https://github.com/FabioZumbi12/PixelVip\n" +
+                "\n" +
+                "Pixelvip by FabioZumbi12";
+        apisConfig = new CommentedConfig(new File(plugin.getDataFolder(), "apis.yml"), new YamlConfiguration(), apiHeader);
+
+        apisConfig.setDefault("apis.in-test", false, "Set this to true until you is testing the APIs.\n" +
+                "In test, we will not save the transaction codes.\n" +
+                "DONT FORGET TO SET THIS TO FALSE WHEN DONE YOUR TESTS!!");
+
+        apisConfig.setDefault("apis.pagseguro", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil");
+        apisConfig.setDefault("apis.pagseguro.use", false);
+        apisConfig.setDefault("apis.pagseguro.sandbox", false);
+        apisConfig.setDefault("apis.pagseguro.email", "your@email.com");
+        apisConfig.setDefault("apis.pagseguro.token", "yourtoken");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        apisConfig.setDefault("apis.pagseguro.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
+        apisConfig.setDefault("apis.pagseguro.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
+                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
+                "Se for usar a DESCRICAO, deve iniciar a identificação com o numero da variação, exemplo: \"999 - Vip Elite 4 - 30 dias\" - A identificação do produto sera 999");
+
+
+        apisConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
+        apisConfig.setDefault("apis.mercadopago.use", false);
+        apisConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
+                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
+                "Se for usar a DESCRICAO, deve iniciar a identificação com #, exemplo: \"Vip Elite 4 - 30 dias #999\" - A identificação do produto sera 999");
+        apisConfig.setDefault("apis.mercadopago.sandbox", false);
+        apisConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
+        apisConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
+
+
+        apisConfig.setDefault("apis.paypal", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal");
+        apisConfig.setDefault("apis.paypal.use", false);
+        apisConfig.setDefault("apis.paypal.sandbox", false);
+        apisConfig.setDefault("apis.paypal.username", "username");
+        apisConfig.setDefault("apis.paypal.password", "password");
+        apisConfig.setDefault("apis.paypal.signature", "signature");
+        apisConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
+
+        if (comConfig.configurations.getConfigurationSection("apis") != null) {
+            plugin.getPVLogger().warning("APIs configurations moved to 'apis.yml'");
+            comConfig.configurations.getConfigurationSection("apis").getKeys(true).forEach((keys -> {
+                apisConfig.configurations.set("apis." + keys, comConfig.configurations.get("apis." + keys));
+            }));
+
+            comConfig.configurations.set("apis", null);
+        }
+        apisConfig.saveConfig();
 
         //init database
         reloadVips();
@@ -240,7 +265,7 @@ public class PVConfig {
                 });
             }));
 
-            comConfig.setDefault("activeVips", null);
+            comConfig.configurations.set("activeVips", null);
             saveVips();
         }
 
@@ -258,7 +283,7 @@ public class PVConfig {
                         comConfig.configurations.getInt("keys." + key + ".uses"));
             });
 
-            comConfig.setDefault("keys", null);
+            comConfig.configurations.set("keys", null);
             saveKeys();
         }
 
@@ -268,7 +293,7 @@ public class PVConfig {
                 dataManager.addRawItemKey(key, comConfig.configurations.getStringList("itemKeys." + key + ".cmds"));
             });
 
-            comConfig.setDefault("itemKeys", null);
+            comConfig.configurations.set("itemKeys", null);
             saveKeys();
         }
 
@@ -279,6 +304,10 @@ public class PVConfig {
 
     public FileConfiguration getRoot() {
         return this.comConfig.configurations;
+    }
+
+    public FileConfiguration getApiRoot() {
+        return this.apisConfig.configurations;
     }
 
     public CommentedConfig getCommConfig() {
@@ -319,7 +348,7 @@ public class PVConfig {
     }
 
     public void addTrans(String payment, String trans, String player) {
-        if (comConfig.configurations.getBoolean("apis.in-test"))
+        if (apisConfig.configurations.getBoolean("apis.in-test"))
             return;
         dataManager.addTras(payment, trans, player);
     }
@@ -378,14 +407,14 @@ public class PVConfig {
             cmds.addAll(comConfig.configurations.getStringList("joinCmds." + uuid + ".chanceCmds"));
         }
         comConfig.setDefault("joinCmds." + uuid, null);
-        plugin.saveConfig();
+        comConfig.saveConfig();
         return cmds;
     }
 
     private void setJoinCmds(String uuid, List<String> cmds, List<String> chanceCmds) {
         comConfig.setDefault("joinCmds." + uuid + ".cmds", cmds);
         comConfig.setDefault("joinCmds." + uuid + ".chanceCmds", chanceCmds);
-        plugin.saveConfig();
+        comConfig.saveConfig();
     }
 
     public void addKey(String key, String group, long millis, int uses) {
@@ -402,7 +431,7 @@ public class PVConfig {
     private void saveConfigAll() {
         saveVips();
         saveKeys();
-        plugin.saveConfig();
+        comConfig.saveConfig();
         plugin.getPVBungee().sendBungeeSync();
     }
 

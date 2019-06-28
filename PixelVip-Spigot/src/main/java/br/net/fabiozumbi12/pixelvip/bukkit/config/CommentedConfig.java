@@ -1,6 +1,5 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.config;
 
-import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -16,12 +15,10 @@ public class CommentedConfig {
     private final HashMap<String, String> comments;
     public FileConfiguration configurations;
     private String header;
-    private PixelVip plugin;
     private File config;
 
-    CommentedConfig(PixelVip plugin, File config, FileConfiguration configurations, String header) {
+    CommentedConfig(File config, FileConfiguration configurations, String header) {
         this.config = config;
-        this.plugin = plugin;
         this.comments = new HashMap<>();
         this.configurations = configurations;
         this.header = "# " + header.replace("\n", "\n# ");

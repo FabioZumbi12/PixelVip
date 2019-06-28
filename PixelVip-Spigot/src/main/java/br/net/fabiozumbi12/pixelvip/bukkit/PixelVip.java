@@ -170,19 +170,19 @@ public class PixelVip extends JavaPlugin implements Listener {
     private void setupPayments() {
         payments = new ArrayList<>();
         //pagseguro
-        if (getPVConfig().getRoot().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
+        if (getPVConfig().getApiRoot().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
             this.payments.add(new PagSeguroHook(this));
             logger.info("-> PagSeguroAPI found and hooked.");
         }
 
         //mercadopago
-        if (getPVConfig().getRoot().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
+        if (getPVConfig().getApiRoot().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
             this.payments.add(new MercadoPagoHook(this));
             logger.info("-> MercadoPagoAPI found and hooked.");
         }
 
         //paypal
-        if (getPVConfig().getRoot().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
+        if (getPVConfig().getApiRoot().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
             this.payments.add(new PayPalHook(this));
             logger.info("-> PayPalAPI found and hooked.");
         }

@@ -20,13 +20,13 @@ public class PayPalHook implements PaymentModel {
 
     public PayPalHook(PixelVip plugin) {
         this.plugin = plugin;
-        this.sandbox = plugin.getPVConfig().getRoot().getBoolean("apis.paypal.sandbox");
+        this.sandbox = plugin.getPVConfig().getApiRoot().getBoolean("apis.paypal.sandbox");
         try {
             Map<String, String> customProperties = new HashMap<String, String>() {{
                 put("mode", sandbox ? "sandbox" : "live");
-                put("acct1.UserName", plugin.getPVConfig().getRoot().getString("apis.paypal.username"));
-                put("acct1.Password", plugin.getPVConfig().getRoot().getString("apis.paypal.password"));
-                put("acct1.Signature", plugin.getPVConfig().getRoot().getString("apis.paypal.signature"));
+                put("acct1.UserName", plugin.getPVConfig().getApiRoot().getString("apis.paypal.username"));
+                put("acct1.Password", plugin.getPVConfig().getApiRoot().getString("apis.paypal.password"));
+                put("acct1.Signature", plugin.getPVConfig().getApiRoot().getString("apis.paypal.signature"));
             }};
 
             payPalAPIInterfaceServiceService = new PayPalAPIInterfaceServiceService(customProperties);
@@ -71,7 +71,7 @@ public class PayPalHook implements PaymentModel {
             }
 
             //check if expired
-            Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getPVConfig().getRoot().getString("apis.paypal.ignoreOldest"));
+            Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getPVConfig().getApiRoot().getString("apis.paypal.ignoreOldest"));
             Date payCf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(trans.getPaymentTransactionDetails().getPaymentInfo().getPaymentDate());
             if (payCf.compareTo(oldCf) < 0) {
                 player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.expired").replace("{payment}", getPayname())));

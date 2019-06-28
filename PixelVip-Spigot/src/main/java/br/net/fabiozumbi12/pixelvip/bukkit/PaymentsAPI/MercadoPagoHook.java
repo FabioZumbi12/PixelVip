@@ -20,8 +20,8 @@ public class MercadoPagoHook implements PaymentModel {
 
     public MercadoPagoHook(PixelVip plugin) {
         this.plugin = plugin;
-        this.sandbox = plugin.getPVConfig().getRoot().getBoolean("apis.mercadopago.sandbox");
-        String accToken = plugin.getPVConfig().getRoot().getString("apis.mercadopago.access-token");
+        this.sandbox = plugin.getPVConfig().getApiRoot().getBoolean("apis.mercadopago.sandbox");
+        String accToken = plugin.getPVConfig().getApiRoot().getString("apis.mercadopago.access-token");
 
         try {
             MercadoPago.SDK.setAccessToken(accToken);
@@ -44,12 +44,11 @@ public class MercadoPagoHook implements PaymentModel {
             return true;
         }
 
-        boolean test = plugin.getPVConfig().getRoot().getBoolean("apis.in-test");
+        boolean test = plugin.getPVConfig().getApiRoot().getBoolean("apis.in-test");
         boolean success;
         try {
             JsonElement payment_info = MercadoPago.SDK.Get(this.sandbox ? "/sandbox" : "" + "/v1/payments/" + transCode).getJsonElementResponse();
 
-            //plugin.getPVLogger().severe("All: " + payment_info);
             if (payment_info.getAsJsonObject().getAsJsonPrimitive("status").getAsString().equals("404")) {
                 return false;
             }
@@ -62,7 +61,7 @@ public class MercadoPagoHook implements PaymentModel {
 
             //check if expired
             try {
-                Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getPVConfig().getRoot().getString("apis.mercadopago.ignoreOldest"));
+                Date oldCf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(plugin.getPVConfig().getApiRoot().getString("apis.mercadopago.ignoreOldest"));
                 Date transCf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(payment_info.getAsJsonObject().getAsJsonPrimitive("date_last_updated").getAsString());
                 if (transCf.compareTo(oldCf) < 0) {
                     player.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "payment.expired").replace("{payment}", getPayname())));
@@ -89,12 +88,12 @@ public class MercadoPagoHook implements PaymentModel {
             HashMap<String, Integer> items = new HashMap<>();
             for (JsonElement item : jItems) {
                 String id = null;
-                if (plugin.getPVConfig().getRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("DESCRICAO")) {
+                if (plugin.getPVConfig().getApiRoot().getString("apis.mercadopago.product-id-location").equalsIgnoreCase("ID")) {
+                    id = item.getAsJsonObject().get("id").getAsString();
+                } else {
                     Optional<String> optId = Arrays.stream(item.getAsJsonObject().get("title").getAsString().split(" ")).filter(i -> i.startsWith("#")).findFirst();
                     if (optId.isPresent())
-                        id = optId.get();
-                } else {
-                    id = item.getAsJsonObject().get("id").getAsString();
+                        id = optId.get().substring(1);
                 }
                 items.put(id, item.getAsJsonObject().get("quantity").getAsInt());
 
