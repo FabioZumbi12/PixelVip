@@ -254,7 +254,13 @@ public class PVCommands {
                     Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                         if (args.getOne("key").isPresent()) {
                             String key = args.<String>getOne("key").get();
-                            if (plugin.getConfig().delKey(key, 1) || plugin.getConfig().delItemKey(key)) {
+                            boolean removed = false;
+                            if (plugin.getConfig().delKey(key, 1))
+                                removed = true;
+                            if (plugin.getConfig().delItemKey(key))
+                                removed = true;
+
+                            if (removed) {
                                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.keyRemoved + key));
                             } else {
                                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.noKeyRemoved));

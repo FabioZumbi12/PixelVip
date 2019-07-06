@@ -534,7 +534,13 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
     private boolean delKey(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            if (plugin.getPVConfig().delKey(args[0], 1) || plugin.getPVConfig().delItemKey(args[0])) {
+            boolean removed = false;
+            if (plugin.getPVConfig().delKey(args[0], 1))
+                removed = true;
+            if (plugin.getPVConfig().delItemKey(args[0]))
+                removed = true;
+
+            if (removed) {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "keyRemoved") + args[0]));
             } else {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noKeyRemoved")));
