@@ -44,7 +44,7 @@ public class PVConfig {
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
                 "- {days} = Days of activated Vip");
-        if (!comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()) {
+        if (comConfig.configurations.contains("groups") && !comConfig.configurations.getConfigurationSection("groups").getKeys(false).isEmpty()) {
             comConfig.configurations.getConfigurationSection("groups").getKeys(false).forEach(g -> {
                 comConfig.setDefault("groups." + g + ".title", g);
                 comConfig.setDefault("groups." + g + ".commands", new ArrayList<>());

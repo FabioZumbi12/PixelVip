@@ -47,4 +47,9 @@ public class PixelPHAPI extends PlaceholderExpansion {
     public String getVersion() {
         return plugin.pdf.getVersion();
     }
+
+    @Override
+    public boolean canRegister(){
+        return true;
+    }
 }
