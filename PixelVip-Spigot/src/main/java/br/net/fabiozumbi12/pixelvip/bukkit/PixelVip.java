@@ -8,6 +8,7 @@ import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
 import br.net.fabiozumbi12.pixelvip.bukkit.config.PVConfig;
+import br.net.fabiozumbi12.pixelvip.bukkit.metrics.Metrics;
 import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -165,6 +166,16 @@ public class PixelVip extends JavaPlugin implements Listener {
 
         logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getPVConfig().getRoot().getString("configs.database.type")));
         logger.sucess(util.toColor("PixelVip enabled!"));
+
+        // Metrics
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.addCustomChart(new Metrics.SingleLineChart("active_vips", () -> config.getVipList().size()));
+            if (metrics.isEnabled())
+                getLogger().info("Metrics enabled! See our stats here: https://bstats.org/plugin/bukkit/PixelVip");
+        } catch (Exception ex) {
+            getLogger().info("Metrics not enabled due errors: " + ex.getLocalizedMessage());
+        }
     }
 
     private void setupPayments() {
