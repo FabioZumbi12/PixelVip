@@ -726,12 +726,12 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
                 // Command alert
                 if (plugin.getPVConfig().getRoot().getBoolean("configs.useKeyWarning") && p.isOnline() && !key.isEmpty()) {
-                    if (!plugin.getPVConfig().comandAlert.containsKey(p.getName()) || !plugin.getPVConfig().comandAlert.get(p.getName()).equalsIgnoreCase(key)) {
-                        plugin.getPVConfig().comandAlert.put(p.getName(), key);
+                    if (!plugin.getPVConfig().commandAlert.containsKey(p.getName()) || !plugin.getPVConfig().commandAlert.get(p.getName()).equalsIgnoreCase(key)) {
+                        plugin.getPVConfig().commandAlert.put(p.getName(), key);
                         p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "confirmUsekey")));
                         return true;
                     }
-                    plugin.getPVConfig().comandAlert.remove(p.getName());
+                    plugin.getPVConfig().commandAlert.remove(p.getName());
                 }
 
                 if (!plugin.getPayments().isEmpty()) {

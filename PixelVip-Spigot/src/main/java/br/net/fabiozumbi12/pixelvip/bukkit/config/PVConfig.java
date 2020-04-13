@@ -18,7 +18,7 @@ import java.util.*;
 
 public class PVConfig {
 
-    public HashMap<String, String> comandAlert = new HashMap<>();
+    public HashMap<String, String> commandAlert = new HashMap<>();
     private PixelVip plugin;
     private int delay = 0;
     private PVDataManager dataManager;
