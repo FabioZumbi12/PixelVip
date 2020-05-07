@@ -19,11 +19,11 @@ import java.util.*;
 public class PVConfig {
 
     public HashMap<String, String> commandAlert = new HashMap<>();
-    private PixelVip plugin;
+    private final PixelVip plugin;
     private int delay = 0;
     private PVDataManager dataManager;
-    private CommentedConfig comConfig;
-    private CommentedConfig apisConfig;
+    private final CommentedConfig comConfig;
+    private final CommentedConfig apisConfig;
 
     public PVConfig(PixelVip plugin) {
         this.plugin = plugin;
@@ -260,9 +260,6 @@ public class PVConfig {
             comConfig.configurations.set("apis", null);
         }
         apisConfig.saveConfig();
-
-        //init database
-        reloadVips();
 
         /*---------------------------------------------------------*/
         //move vips to new file if is in config.yml

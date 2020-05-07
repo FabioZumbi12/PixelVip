@@ -11,10 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PVDataFile implements PVDataManager {
-    private YamlConfiguration vipsFile;
-    private YamlConfiguration keysFile;
-    private YamlConfiguration transFile;
-    private PixelVip plugin;
+    private final YamlConfiguration vipsFile;
+    private final YamlConfiguration keysFile;
+    private final YamlConfiguration transFile;
+    private final PixelVip plugin;
 
     public PVDataFile(PixelVip plugin) {
         this.plugin = plugin;
