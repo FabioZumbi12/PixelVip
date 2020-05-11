@@ -312,6 +312,9 @@ public class PVConfig {
         /*---------------------------------------------------------*/
 
         comConfig.saveConfig();
+
+        //init database
+        this.reloadVips();
     }
 
     public FileConfiguration getRoot() {
@@ -344,7 +347,7 @@ public class PVConfig {
         dataManager.changeUUID(oldUUID, newUUID);
     }
 
-    public void reloadVips() {
+    private void reloadVips() {
         if (dataManager != null) {
             dataManager.closeCon();
         }

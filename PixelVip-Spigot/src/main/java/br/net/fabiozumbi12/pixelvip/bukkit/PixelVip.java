@@ -119,9 +119,6 @@ public class PixelVip extends JavaPlugin implements Listener {
         }
         this.config = new PVConfig(this);
 
-        //init database
-        this.config.reloadVips();
-
         logger.info("Init utils module...");
         this.util = new PVUtil(this);
 
