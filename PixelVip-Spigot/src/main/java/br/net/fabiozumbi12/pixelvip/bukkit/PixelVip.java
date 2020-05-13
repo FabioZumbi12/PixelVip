@@ -77,6 +77,10 @@ public class PixelVip extends JavaPlugin implements Listener {
             this.permApi = new PermsAPI(perms, this);
         }
         this.config = new PVConfig(this);
+
+        //init database
+        this.config.reloadVips();
+
         reloadVipTask();
         this.config.getCommConfig().saveConfig();
 
@@ -86,8 +90,8 @@ public class PixelVip extends JavaPlugin implements Listener {
         //package manager
         packageManager = new PackageManager(this);
 
-        sender.sendMessage(plugin.getUtil().toColor(getPVConfig().getRoot().getString("strings.reload")));
-        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + getPVConfig().getRoot().getString("configs.database.type")));
+        sender.sendMessage(plugin.getUtil().toColor(config.getRoot().getString("strings.reload")));
+        logger.warning(util.toColor("We have " + config.getVipList().size() + " active Vips on " + config.getRoot().getString("configs.database.type")));
     }
 
     public PermsAPI getPerms() {
@@ -118,6 +122,9 @@ public class PixelVip extends JavaPlugin implements Listener {
             getDataFolder().mkdir();
         }
         this.config = new PVConfig(this);
+
+        //init database
+        this.config.reloadVips();
 
         logger.info("Init utils module...");
         this.util = new PVUtil(this);
