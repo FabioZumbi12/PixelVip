@@ -1,6 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -84,31 +85,37 @@ public class PVDataFile implements PVDataManager {
     }
 
     private void saveTrans() {
-        try {
-            this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            try {
+                this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void saveKeys() {
-        File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
-        try {
-            keysFile.save(fileKeys);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
+            try {
+                keysFile.save(fileKeys);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void saveVips() {
-        File fileVips = new File(plugin.getDataFolder(), "vips.yml");
-        try {
-            vipsFile.save(fileVips);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            File fileVips = new File(plugin.getDataFolder(), "vips.yml");
+            try {
+                vipsFile.save(fileVips);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -305,7 +312,7 @@ public class PVDataFile implements PVDataManager {
         Iterator<String> it = vipsFile.getKeys(true).stream().filter(key -> key.contains(".nick")).iterator();
         while (it.hasNext()) {
             String key = it.next();
-            if (vipsFile.getString(key).equals(player)) {
+            if (Objects.equals(vipsFile.getString(key), player)) {
                 Pattern pairRegex = Pattern.compile("\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}");
                 Matcher matcher = pairRegex.matcher(key);
                 if (matcher.find()) {

@@ -240,97 +240,101 @@ public class PVDataMysql implements PVDataManager {
 
     @Override
     public void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active) {
-        if (!containsVip(uuid, group)) {
-            try {
-                StringBuilder builder = new StringBuilder();
-                for (String str : pgroup) {
-                    builder.append(str).append(",");
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (!containsVip(uuid, group)) {
+                try {
+                    StringBuilder builder = new StringBuilder();
+                    for (String str : pgroup) {
+                        builder.append(str).append(",");
+                    }
+                    String pgroupStr = "";
+                    if (builder.toString().length() > 0) {
+                        pgroupStr = builder.toString().substring(0, builder.toString().length() - 1);
+                    }
+                    PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + vipTable + "` ("
+                            + colVUUID + ","
+                            + colVVip + ","
+                            + colVPGroup + ","
+                            + colVDuration + ", "
+                            + colVNick + ", "
+                            + colVExpires + ","
+                            + colVActive + ") VALUES (?,?,?,?,?,?,?)");
+                    st.setString(1, uuid.toLowerCase());
+                    st.setString(2, group);
+                    st.setString(3, pgroupStr);
+                    st.setLong(4, duration);
+                    st.setString(5, nick);
+                    st.setString(6, expires);
+                    st.setBoolean(7, active);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                String pgroupStr = "";
-                if (builder.toString().length() > 0) {
-                    pgroupStr = builder.toString().substring(0, builder.toString().length() - 1);
+            } else {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=?, " + colVActive + "=?, " + colVExpires + "=? "
+                            + "WHERE " + colVVip + "=? AND " + colVUUID + "=?");
+                    st.setLong(1, duration);
+                    st.setBoolean(2, active);
+                    st.setString(3, expires);
+                    st.setString(4, group);
+                    st.setString(5, uuid.toLowerCase());
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + vipTable + "` ("
-                        + colVUUID + ","
-                        + colVVip + ","
-                        + colVPGroup + ","
-                        + colVDuration + ", "
-                        + colVNick + ", "
-                        + colVExpires + ","
-                        + colVActive + ") VALUES (?,?,?,?,?,?,?)");
-                st.setString(1, uuid.toLowerCase());
-                st.setString(2, group);
-                st.setString(3, pgroupStr);
-                st.setLong(4, duration);
-                st.setString(5, nick);
-                st.setString(6, expires);
-                st.setBoolean(7, active);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-        } else {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=?, " + colVActive + "=?, " + colVExpires + "=? "
-                        + "WHERE " + colVVip + "=? AND " + colVUUID + "=?");
-                st.setLong(1, duration);
-                st.setBoolean(2, active);
-                st.setString(3, expires);
-                st.setString(4, group);
-                st.setString(5, uuid.toLowerCase());
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        });
     }
 
     @Override
     public void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires) {
-        if (!containsVip(uuid, group)) {
-            try {
-                StringBuilder builder = new StringBuilder();
-                for (String str : pgroup) {
-                    builder.append(str).append(",");
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (!containsVip(uuid, group)) {
+                try {
+                    StringBuilder builder = new StringBuilder();
+                    for (String str : pgroup) {
+                        builder.append(str).append(",");
+                    }
+                    String pgroupStr = "";
+                    if (builder.toString().length() > 0) {
+                        pgroupStr = builder.toString().substring(0, builder.toString().length() - 1);
+                    }
+                    PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + vipTable + "` ("
+                            + colVUUID + ","
+                            + colVVip + ","
+                            + colVPGroup + ","
+                            + colVDuration + ", "
+                            + colVNick + ", "
+                            + colVExpires + ") VALUES (?,?,?,?,?,?)");
+                    st.setString(1, uuid.toLowerCase());
+                    st.setString(2, group);
+                    st.setString(3, pgroupStr);
+                    st.setLong(4, duration);
+                    st.setString(5, nick);
+                    st.setString(6, expires);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                String pgroupStr = "";
-                if (builder.toString().length() > 0) {
-                    pgroupStr = builder.toString().substring(0, builder.toString().length() - 1);
+            } else {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=?, " + colVExpires + "=? "
+                            + "WHERE " + colVVip + "=? AND " + colVUUID + "=?");
+                    st.setLong(1, duration);
+                    st.setString(2, expires);
+                    st.setString(3, group);
+                    st.setString(4, uuid.toLowerCase());
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-                PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + vipTable + "` ("
-                        + colVUUID + ","
-                        + colVVip + ","
-                        + colVPGroup + ","
-                        + colVDuration + ", "
-                        + colVNick + ", "
-                        + colVExpires + ") VALUES (?,?,?,?,?,?)");
-                st.setString(1, uuid.toLowerCase());
-                st.setString(2, group);
-                st.setString(3, pgroupStr);
-                st.setLong(4, duration);
-                st.setString(5, nick);
-                st.setString(6, expires);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-        } else {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=?, " + colVExpires + "=? "
-                        + "WHERE " + colVVip + "=? AND " + colVUUID + "=?");
-                st.setLong(1, duration);
-                st.setString(2, expires);
-                st.setString(3, group);
-                st.setString(4, uuid.toLowerCase());
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+        });
     }
 
     private boolean keyExist(String key) {
@@ -352,52 +356,56 @@ public class PVDataMysql implements PVDataManager {
 
     @Override
     public void addRawKey(String key, String group, long duration, int uses) {
-        try {
-            PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` ("
-                    + colKey + ","
-                    + colKGroup + ","
-                    + colKDuration + ","
-                    + colKUses + ", "
-                    + colKInfo +
-                    ") VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE "
-                    + colKGroup + "=?, "
-                    + colKDuration + "=?, "
-                    + colKUses + "=?, "
-                    + colKInfo + "=?");
-            st.setString(1, key);
-            st.setString(2, group);
-            st.setLong(3, duration);
-            st.setInt(4, uses);
-            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
-            st.setString(6, group);
-            st.setLong(7, duration);
-            st.setInt(8, uses);
-            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
-            st.executeUpdate();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            try {
+                PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` ("
+                        + colKey + ","
+                        + colKGroup + ","
+                        + colKDuration + ","
+                        + colKUses + ", "
+                        + colKInfo +
+                        ") VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE "
+                        + colKGroup + "=?, "
+                        + colKDuration + "=?, "
+                        + colKUses + "=?, "
+                        + colKInfo + "=?");
+                st.setString(1, key);
+                st.setString(2, group);
+                st.setLong(3, duration);
+                st.setInt(4, uses);
+                st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
+                st.setString(6, group);
+                st.setLong(7, duration);
+                st.setInt(8, uses);
+                st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
+                st.executeUpdate();
+                st.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void addRawItemKey(String key, List<String> cmds) {
-        try {
-            PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` (" + colKey + "," + colKCmds + ") VALUES (?,?) ON DUPLICATE KEY UPDATE " + colKCmds + "=?");
-            StringBuilder strBuilder = new StringBuilder();
-            String[] cmdsArr = cmds.toArray(new String[0]);
-            for (String aCmdsArr : cmdsArr) {
-                strBuilder.append(aCmdsArr).append(",");
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            try {
+                PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` (" + colKey + "," + colKCmds + ") VALUES (?,?) ON DUPLICATE KEY UPDATE " + colKCmds + "=?");
+                StringBuilder strBuilder = new StringBuilder();
+                String[] cmdsArr = cmds.toArray(new String[0]);
+                for (String aCmdsArr : cmdsArr) {
+                    strBuilder.append(aCmdsArr).append(",");
+                }
+                String cmdsB = strBuilder.toString().substring(0, strBuilder.toString().length() - 1);
+                st.setString(1, key);
+                st.setString(2, cmdsB);
+                st.setString(3, cmdsB);
+                st.executeUpdate();
+                st.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            String cmdsB = strBuilder.toString().substring(0, strBuilder.toString().length() - 1);
-            st.setString(1, key);
-            st.setString(2, cmdsB);
-            st.setString(3, cmdsB);
-            st.executeUpdate();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
@@ -495,15 +503,37 @@ public class PVDataMysql implements PVDataManager {
 
     @Override
     public void removeKey(String key) {
-        if (keyExist(key)) {
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (keyExist(key)) {
+                try {
+                    String query = "";
+                    if (getItemKeyCmds(key).size() > 0) {
+                        query = "UPDATE `" + keyTable + "` SET "
+                                + colKGroup + "=NULL, "
+                                + colKDuration + "=NULL, "
+                                + colKUses + "=NULL, "
+                                + colKInfo + "=NULL WHERE " + colKey + "=?";
+                    } else {
+                        query = "DELETE FROM `" + keyTable + "` WHERE " + colKey + "=?";
+                    }
+                    PreparedStatement st = this.con.prepareStatement(query);
+                    st.setString(1, key);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeItemKey(String key) {
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
             try {
                 String query = "";
-                if (getItemKeyCmds(key).size() > 0) {
-                    query = "UPDATE `" + keyTable + "` SET "
-                            + colKGroup + "=NULL, "
-                            + colKDuration + "=NULL, "
-                            + colKUses + "=NULL, "
-                            + colKInfo + "=NULL WHERE " + colKey + "=?";
+                if (getKeyInfo(key).length == 3) {
+                    query = "UPDATE `" + keyTable + "` SET " + colKCmds + "=NULL WHERE " + colKey + "=?";
                 } else {
                     query = "DELETE FROM `" + keyTable + "` WHERE " + colKey + "=?";
                 }
@@ -514,25 +544,7 @@ public class PVDataMysql implements PVDataManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Override
-    public void removeItemKey(String key) {
-        try {
-            String query = "";
-            if (getKeyInfo(key).length == 3) {
-                query = "UPDATE `" + keyTable + "` SET " + colKCmds + "=NULL WHERE " + colKey + "=?";
-            } else {
-                query = "DELETE FROM `" + keyTable + "` WHERE " + colKey + "=?";
-            }
-            PreparedStatement st = this.con.prepareStatement(query);
-            st.setString(1, key);
-            st.executeUpdate();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
@@ -591,80 +603,90 @@ public class PVDataMysql implements PVDataManager {
 
     @Override
     public void setKeyUse(String key, int uses) {
-        if (keyExist(key)) {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + keyTable + "` SET " + colKUses + "=? WHERE " + colKey + "=? AND " + colKGroup + " IS NOT NULL");
-                st.setInt(1, uses);
-                st.setString(2, key);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (keyExist(key)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + keyTable + "` SET " + colKUses + "=? WHERE " + colKey + "=? AND " + colKGroup + " IS NOT NULL");
+                    st.setInt(1, uses);
+                    st.setString(2, key);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
 
     @Override
     public void setVipActive(String uuid, String vip, boolean active) {
-        if (containsVip(uuid, vip)) {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVActive + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
-                st.setBoolean(1, active);
-                st.setString(2, uuid.toLowerCase());
-                st.setString(3, vip);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (containsVip(uuid, vip)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVActive + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
+                    st.setBoolean(1, active);
+                    st.setString(2, uuid.toLowerCase());
+                    st.setString(3, vip);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
 
     @Override
     public void setVipDuration(String uuid, String vip, long duration) {
-        if (containsVip(uuid, vip)) {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
-                st.setLong(1, duration);
-                st.setString(2, uuid.toLowerCase());
-                st.setString(3, vip);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (containsVip(uuid, vip)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVDuration + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
+                    st.setLong(1, duration);
+                    st.setString(2, uuid.toLowerCase());
+                    st.setString(3, vip);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
 
     @Override
     public void setVipKitCooldown(String uuid, String vip, long cooldown) {
-        if (containsVip(uuid, vip)) {
-            try {
-                PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVKits + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
-                st.setLong(1, cooldown);
-                st.setString(2, uuid);
-                st.setString(3, vip);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (containsVip(uuid, vip)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("UPDATE `" + vipTable + "` SET " + colVKits + "=? WHERE " + colVUUID + "=? AND " + colVVip + "=?");
+                    st.setLong(1, cooldown);
+                    st.setString(2, uuid);
+                    st.setString(3, vip);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
 
     @Override
     public void removeVip(String uuid, String vip) {
-        if (containsVip(uuid, vip)) {
-            try {
-                PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + vipTable + "` WHERE " + colVUUID + "=? AND " + colVVip + "=?");
-                st.setString(1, uuid);
-                st.setString(2, vip);
-                st.executeUpdate();
-                st.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (containsVip(uuid, vip)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + vipTable + "` WHERE " + colVUUID + "=? AND " + colVVip + "=?");
+                    st.setString(1, uuid);
+                    st.setString(2, vip);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
     }
 
     @Override
@@ -761,32 +783,36 @@ public class PVDataMysql implements PVDataManager {
 
     @Override
     public void removeTrans(String payment, String trans) {
-        if (transactionExist(payment, trans)) {
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
+            if (transactionExist(payment, trans)) {
+                try {
+                    PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + transTable + "` WHERE " + colTID + "=? AND " + colTPay + "=?");
+                    st.setString(1, trans);
+                    st.setString(2, payment);
+                    st.executeUpdate();
+                    st.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void addTras(String payment, String trans, String player) {
+        Bukkit.getScheduler().runTask(this.plugin, () -> {
             try {
-                PreparedStatement st = this.con.prepareStatement("DELETE FROM `" + transTable + "` WHERE " + colTID + "=? AND " + colTPay + "=?");
+                PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + transTable + "` (" + colTID + "," + colTPay + "," + colTNick + ") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + colTNick + "=?");
                 st.setString(1, trans);
                 st.setString(2, payment);
+                st.setString(3, player);
+                st.setString(4, player);
                 st.executeUpdate();
                 st.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Override
-    public void addTras(String payment, String trans, String player) {
-        try {
-            PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + transTable + "` (" + colTID + "," + colTPay + "," + colTNick + ") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + colTNick + "=?");
-            st.setString(1, trans);
-            st.setString(2, payment);
-            st.setString(3, player);
-            st.setString(4, player);
-            st.executeUpdate();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
