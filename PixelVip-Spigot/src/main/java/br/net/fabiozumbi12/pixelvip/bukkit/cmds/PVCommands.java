@@ -188,7 +188,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         }
 
         if (cmd.getName().equalsIgnoreCase("listvips")) {
-            success = listVips(sender);
+            success = listVips(sender, args);
         }
 
         if (cmd.getName().equalsIgnoreCase("givepackage")) {
@@ -378,20 +378,53 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         return false;
     }
 
-    private boolean listVips(CommandSender sender) {
-        HashMap<String, List<String[]>> vips = plugin.getPVConfig().getVipList();
+    private boolean listVips(CommandSender sender, String[] args) {
         sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "list-of-vips")));
         sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
-        vips.forEach((uuid, vipinfolist) -> vipinfolist.forEach((vipinfo) -> {
-            String pname = plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName();
-            if (pname == null) {
-                pname = vipinfo[4];
+
+        if (args.length == 0) {
+            HashMap<String, List<String[]>> vips = plugin.getPVConfig().getVipList();
+            vips.forEach((uuid, vipinfolist) -> vipinfolist.forEach((vipinfo) -> {
+                String pname = plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName();
+                if (pname == null) {
+                    pname = vipinfo[4];
+                }
+                sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
+                sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
+                sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
+            }));
+            sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+        }
+
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("active")) {
+                HashMap<String, List<String[]>> vips = plugin.getPVConfig().getVipList();
+                vips.forEach((uuid, vipinfolist) -> vipinfolist.forEach((vipinfo) -> {
+                    String pname = plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName();
+                    if (pname == null) {
+                        pname = vipinfo[4];
+                    }
+                    sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
+                }));
+                sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
             }
-            sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
-            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
-            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
-        }));
-        sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            if (args[0].equalsIgnoreCase("all")) {
+                HashMap<String, List<String[]>> vips = plugin.getPVConfig().getAllVips();
+                vips.forEach((uuid, vipinfolist) -> vipinfolist.forEach((vipinfo) -> {
+                    String pname = plugin.getServer().getOfflinePlayer(UUID.fromString(uuid)).getName();
+                    if (pname == null) {
+                        pname = vipinfo[4];
+                    }
+                    sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeActive") + plugin.getPVConfig().getLang(vipinfo[3])));
+                }));
+                sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            }
+        }
         return true;
     }
 
