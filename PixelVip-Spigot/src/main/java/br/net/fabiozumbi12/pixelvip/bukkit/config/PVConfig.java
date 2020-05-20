@@ -127,7 +127,7 @@ public class PVConfig {
         comConfig.setDefault("configs.commandsToRunOnChangeVip", Arrays.asList("lp user {p} parent set {newvip}",
                 "lp user {p} parent remove {oldvip}"),
                 "Run this commands on player change your vip to other.\n" +
-                        "Variables: {p} get the player name, {newvip} get the new vip, {oldvip} get the vip group before change.");
+                        "Variables: {p|player} get the player name, {newvip} get the new vip, {oldvip} get the vip group before change.");
         comConfig.setDefault("configs.queueCmdsForOfflinePlayers", false);
         Set<String> worlds = new HashSet<>(comConfig.configurations.getStringList("configs.worldCmdsAllowed"));
         for (World w : Bukkit.getWorlds()) {
