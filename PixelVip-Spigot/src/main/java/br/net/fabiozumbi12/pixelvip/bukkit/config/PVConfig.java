@@ -40,7 +40,7 @@ public class PVConfig {
 
         comConfig.setDefault("groups", null, "Group names like is in your permissions plugin (case sensitive)!\n" +
                 "Available placeholders: \n" +
-                "- {p} = Players Name\n" +
+                "- {p|player} = Players Name\n" +
                 "- {vip} = Vip Group\n" +
                 "- {playergroup} = Player Group before Vip activation\n" +
                 "- {days} = Days of activated Vip");
@@ -59,7 +59,7 @@ public class PVConfig {
             comConfig.setDefault("groups.vipExample.commands", Arrays.asList("broadcast &aThe player &6{p} &ahas acquired your &6{vip} &afor &6{days} &adays", "give {p} minecraft:diamond 10", "eco give {p} 10000"),
                     "Add the commands to run when the player use the key for activation \n" +
                             "You can use the variables:\n" +
-                            "{p} = Player name, {vip} = Vip group, {days} = Vip days, {playergroup} = Player group before activate vip");
+                            "{p|player} = Player name, {vip} = Vip group, {days} = Vip days, {playergroup} = Player group before activate vip");
             comConfig.setDefault("groups.vipExample.cmdChances", null,
                     "Add commands here to give items to players based on chances.\n" +
                             "Use 1 - 100 for add chance commands.");
@@ -123,7 +123,7 @@ public class PVConfig {
         comConfig.setDefault("configs.cmdOnRemoveVip", "lp user {p} parent remove {vip}", "Command to run when a vip is removed by command.");
         comConfig.setDefault("configs.commandsToRunOnVipFinish", Collections.singletonList("nick {p} off"),
                 "Run this commands when the vip of a player finish.\n" +
-                        "Variables: {p} get the player name, {vip} get the actual vip, {playergroup} get the group before the player activate your vip.");
+                        "Variables: {p|player} get the player name, {vip} get the actual vip, {playergroup} get the group before the player activate your vip.");
         comConfig.setDefault("configs.commandsToRunOnChangeVip", Arrays.asList("lp user {p} parent set {newvip}",
                 "lp user {p} parent remove {oldvip}"),
                 "Run this commands on player change your vip to other.\n" +
@@ -480,7 +480,9 @@ public class PVConfig {
             for (String cmd : cmds) {
                 cmdsBuilder.append(cmd).append(", ");
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> {
-                    String cmdf = cmd.replace("{p}", p.getName());
+                    String cmdf = cmd
+                            .replace("{p}", p.getName())
+                            .replace("{player}", p.getName());
                     if (p.isOnline()) {
                         plugin.getUtil().ExecuteCmd(cmdf, null);
                     }
@@ -566,7 +568,9 @@ public class PVConfig {
         //run command from vip
         comConfig.configurations.getStringList("groups." + group + ".commands").forEach((cmd) -> {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
-                String cmdf = cmd.replace("{p}", p.getName())
+                String cmdf = cmd
+                        .replace("{p}", p.getName())
+                        .replace("{player}", p.getName())
                         .replace("{vip}", group)
                         .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                         .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
@@ -589,7 +593,9 @@ public class PVConfig {
             if (rand <= chance) {
                 comConfig.configurations.getStringList("groups." + group + ".cmdChances." + chanceString).forEach((cmd) -> {
                     plugin.serv.getScheduler().runTaskLater(plugin, () -> {
-                        String cmdf = cmd.replace("{p}", p.getName())
+                        String cmdf = cmd
+                                .replace("{p}", p.getName())
+                                .replace("{player}", p.getName())
                                 .replace("{vip}", group)
                                 .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                                 .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
@@ -702,7 +708,8 @@ public class PVConfig {
                 break;
             }
 
-            String cmdf = cmd.replace("{p}", p.getName());
+            String cmdf = cmd.replace("{p}", p.getName())
+                    .replace("{player}", p.getName());
             if (oldVip != null && !oldVip.equals("") && cmdf.contains("{oldvip}")) {
                 plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay);
                 delay++;
@@ -760,7 +767,10 @@ public class PVConfig {
         plugin.addLog("RemoveVip | " + pname + " | " + group);
 
         dataManager.removeVip(uuid, group);
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip").replace("{p}", Optional.ofNullable(pname).get()).replace("{vip}", group), null), delay);
+        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip")
+                .replace("{p}", Optional.ofNullable(pname).get())
+                .replace("{player}", Optional.ofNullable(pname).get())
+                .replace("{vip}", group), null), delay);
         delay++;
 
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
@@ -803,15 +813,17 @@ public class PVConfig {
                 if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")) {
                     continue;
                 }
+                final String replace = cmd.replace("{p}", nick)
+                        .replace("{player}", nick);
                 if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                     for (String group : oldGroup) {
-                        String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                        String cmdf = replace
+                                .replace("{playergroup}", group);
                         plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                         delay++;
                     }
                 } else {
-                    String cmdf = cmd.replace("{p}", nick);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
+                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
                     delay++;
                 }
             }
@@ -820,15 +832,16 @@ public class PVConfig {
         //command to run from vip GROUP on finish
         for (String cmd : getCmdsToRunOnFinish(vipGroup)) {
             if (cmd == null || cmd.isEmpty()) continue;
+            final String replace = cmd.replace("{p}", nick)
+                    .replace("{player}", nick);
             if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                 for (String group : oldGroup) {
-                    String cmdf = cmd.replace("{p}", nick).replace("{playergroup}", group);
+                    String cmdf = replace.replace("{playergroup}", group);
                     plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                     delay++;
                 }
             } else {
-                String cmdf = cmd.replace("{p}", nick);
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
+                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
                 delay++;
             }
         }
