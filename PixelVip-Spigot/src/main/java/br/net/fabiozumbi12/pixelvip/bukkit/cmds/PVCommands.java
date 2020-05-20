@@ -417,9 +417,10 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                     if (pname == null) {
                         pname = vipinfo[4];
                     }
+                    long vipTime = vipinfo[3].equals("true") ? Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis() : Long.parseLong(vipinfo[0]);
                     sender.sendMessage(plugin.getUtil().toColor("&7> Player &3" + pname + "&7:"));
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
-                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
+                    sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(vipTime)));
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeActive") + plugin.getPVConfig().getLang(vipinfo[3])));
                 }));
                 sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
