@@ -130,90 +130,93 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 return true;
             } else {
                 cmdWait.add(sender.getName());
-                Bukkit.getScheduler().runTaskLater(plugin, () -> cmdWait.remove(sender.getName()), 20);
+                Bukkit.getScheduler().runTaskLater(plugin, () -> cmdWait.remove(sender.getName()), 200);
             }
         }
 
-        boolean success = true;
-        if (cmd.getName().equalsIgnoreCase("delkey")) {
-            success = delKey(sender, args);
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            boolean success = true;
+            if (cmd.getName().equalsIgnoreCase("delkey")) {
+                success = delKey(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("newkey")) {
-            success = newKey(sender, args, false);
-        }
+            if (cmd.getName().equalsIgnoreCase("newkey")) {
+                success = newKey(sender, args, false);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("sendkey")) {
-            success = sendKey(args);
-        }
+            if (cmd.getName().equalsIgnoreCase("sendkey")) {
+                success = sendKey(args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("newitemkey")) {
-            success = newItemKey(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("newitemkey")) {
+                success = newItemKey(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("additemkey")) {
-            success = addItemKey(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("additemkey")) {
+                success = addItemKey(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("listkeys")) {
-            success = listKeys(sender);
-        }
+            if (cmd.getName().equalsIgnoreCase("listkeys")) {
+                success = listKeys(sender);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("usekey")) {
-            success = useKey(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("usekey")) {
+                success = useKey(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("viptime")) {
-            success = vipTime(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("viptime")) {
+                success = vipTime(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("removevip")) {
-            success = removeVip(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("removevip")) {
+                success = removeVip(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("setactive")) {
-            success = setActive(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("setactive")) {
+                success = setActive(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("addvip")) {
-            success = addVip(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("addvip")) {
+                success = addVip(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("setvip")) {
-            success = setVip(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("setvip")) {
+                success = setVip(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("pixelvip")) {
-            success = mainCommand(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("pixelvip")) {
+                success = mainCommand(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("listvips")) {
-            success = listVips(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("listvips")) {
+                success = listVips(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("givepackage")) {
-            success = givePackage(sender, args, true);
-        }
+            if (cmd.getName().equalsIgnoreCase("givepackage")) {
+                success = givePackage(sender, args, true);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("getvariant")) {
-            success = getVariant(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("getvariant")) {
+                success = getVariant(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("listpackages")) {
-            success = listPackages(sender);
-        }
+            if (cmd.getName().equalsIgnoreCase("listpackages")) {
+                success = listPackages(sender);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("addpackage")) {
-            success = addPackage(sender, args);
-        }
+            if (cmd.getName().equalsIgnoreCase("addpackage")) {
+                success = addPackage(sender, args);
+            }
 
-        if (cmd.getName().equalsIgnoreCase("delpackage")) {
-            success = delPackage(sender, args);
-        }
-        if (!success) {
-            sender.sendMessage(cmd.getDescription());
-            sender.sendMessage(cmd.getUsage());
-        }
+            if (cmd.getName().equalsIgnoreCase("delpackage")) {
+                success = delPackage(sender, args);
+            }
+            if (!success) {
+                sender.sendMessage(cmd.getDescription());
+                sender.sendMessage(cmd.getUsage());
+            }
+            cmdWait.remove(sender.getName());
+        });
         return true;
     }
 
