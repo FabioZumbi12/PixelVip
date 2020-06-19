@@ -307,17 +307,15 @@ public class PVConfig {
         if (Sponge.getServer().getPlayer(p.getName()).isPresent())
             puuid = Sponge.getServer().getPlayer(p.getName()).get().getUniqueId().toString();
 
-        int count = 0;
         long durf = durMillis;
-        for (String[] k : getVipInfo(puuid)) {
-            if (k[1].equals(group)) {
-                durMillis += new Long(k[0]);
-                count++;
-                break;
+        Optional<String[]> otherVipOpt = getVipInfo(p.getUniqueId().toString()).stream().filter(v -> v[1].equals(group)).findFirst();
+        if (otherVipOpt.isPresent()) {
+            String[] otherVip = otherVipOpt.get();
+            durMillis += new Long(otherVip[0]);
+            if (otherVip[3].equals("false")) {
+                durMillis += PixelVip.get().getUtil().getNowMillis();
             }
-        }
-
-        if (count == 0) {
+        } else {
             durMillis += PixelVip.get().getUtil().getNowMillis();
         }
 
@@ -400,16 +398,14 @@ public class PVConfig {
     }
 
     public void setVip(String uuid, String group, long durMillis, String pname) {
-        int count = 0;
-        for (String[] k : getVipInfo(uuid)) {
-            if (k[1].equals(group)) {
-                durMillis += new Long(k[0]);
-                count++;
-                break;
+        Optional<String[]> otherVipOpt = getVipInfo(uuid).stream().filter(v -> v[1].equals(group)).findFirst();
+        if (otherVipOpt.isPresent()) {
+            String[] otherVip = otherVipOpt.get();
+            durMillis += new Long(otherVip[0]);
+            if (otherVip[3].equals("false")) {
+                durMillis += PixelVip.get().getUtil().getNowMillis();
             }
-        }
-
-        if (count == 0) {
+        } else {
             durMillis += PixelVip.get().getUtil().getNowMillis();
         }
 
