@@ -390,7 +390,7 @@ public class PVConfig {
 
         if (p.isOnline()) {
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.vipActivated));
-            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings.activeVip.replace("{vip}", group)));
+            p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings.activeVip.replace("{vip}", getVipTitle(group))));
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings.activeDays.replace("{days}", String.valueOf(PixelVip.get().getUtil().millisToDay(durf)))));
             p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText("&b---------------------------------------------"));
         }
