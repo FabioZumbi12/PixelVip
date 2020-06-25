@@ -269,7 +269,7 @@ public class PVConfig {
             comConfig.configurations.getConfigurationSection("activeVips").getKeys(false).forEach((group -> {
                 comConfig.configurations.getConfigurationSection("activeVips." + group).getKeys(false).forEach((id) -> {
                     dataManager.addRawVip(group, id,
-                            Arrays.asList(comConfig.configurations.getString("activeVips." + group + "." + id + ".playerGroup").split(",")),
+                            new ArrayList<>(Arrays.asList(comConfig.configurations.getString("activeVips." + group + "." + id + ".playerGroup").split(","))),
                             comConfig.configurations.getLong("activeVips." + group + "." + id + ".duration"),
                             comConfig.configurations.getString("activeVips." + group + "." + id + ".nick"),
                             comConfig.configurations.getString("activeVips." + group + "." + id + ".expires-on-exact"));
@@ -558,7 +558,6 @@ public class PVConfig {
         if (!vips.isEmpty()) {
             pGroups = new ArrayList<>(Arrays.asList(vips.get(0)[2].split(",")));
         }
-
 
         List<String> normCmds = new ArrayList<>();
         List<String> chanceCmds = new ArrayList<>();

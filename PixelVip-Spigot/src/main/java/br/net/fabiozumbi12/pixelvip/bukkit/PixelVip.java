@@ -12,7 +12,6 @@ import br.net.fabiozumbi12.pixelvip.bukkit.metrics.Metrics;
 import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -219,17 +218,23 @@ public class PixelVip extends JavaPlugin implements Listener {
         }
 
         task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
-            OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+            Player player = Bukkit.getPlayer(UUID.fromString(uuid));
             value.forEach((vipInfo) -> {
                 long dur = new Long(vipInfo[0]);
-                if (p.getName() != null && permApi.getGroups(p) != null && !Arrays.asList(permApi.getGroups(p)).contains(vipInfo[1])) {
-                    config.runChangeVipCmds(p, vipInfo[1], permApi.getGroup(p));
+
+                // Check for groups not owned by player
+                if (player != null) {
+                    String[] groups = permApi.getGroups(player);
+                    if (groups != null && !Arrays.asList(groups).contains(vipInfo[1])) {
+                        config.runChangeVipCmds(player, vipInfo[1], permApi.getGroup(player));
+                    }
                 }
+
                 if (dur <= util.getNowMillis()) {
                     getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
-                    if (p.isOnline()) {
-                        p.getPlayer().sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
-                    }
+                    if (player != null)
+                        player.sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+
                     Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
                 }
             });

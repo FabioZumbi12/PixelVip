@@ -85,37 +85,31 @@ public class PVDataFile implements PVDataManager {
     }
 
     private void saveTrans() {
-        Bukkit.getScheduler().runTask(this.plugin, () -> {
-            try {
-                this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        try {
+            this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void saveKeys() {
-        Bukkit.getScheduler().runTask(this.plugin, () -> {
-            File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
-            try {
-                keysFile.save(fileKeys);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
+        try {
+            keysFile.save(fileKeys);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void saveVips() {
-        Bukkit.getScheduler().runTask(this.plugin, () -> {
-            File fileVips = new File(plugin.getDataFolder(), "vips.yml");
-            try {
-                vipsFile.save(fileVips);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        File fileVips = new File(plugin.getDataFolder(), "vips.yml");
+        try {
+            vipsFile.save(fileVips);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -126,9 +120,8 @@ public class PVDataFile implements PVDataManager {
                 List<String[]> vipInfo = getVipInfo(uuid);
                 List<String[]> activeVips = new ArrayList<>();
                 vipInfo.stream().filter(v -> v[3] != null && v[3].equals("true")).forEach(activeVips::add);
-                if (activeVips.size() > 0) {
+                if (activeVips.size() > 0)
                     vips.put(uuid, activeVips);
-                }
             });
         });
         return vips;
@@ -210,13 +203,18 @@ public class PVDataFile implements PVDataManager {
     }
 
     @Override
-    public void addRawVip(String group, String id, List<String> pgroup, long duration, String nick, String expires) {
-        id = id.toLowerCase();
-        vipsFile.set("activeVips." + group + "." + id + ".playerGroup", pgroup);
-        vipsFile.set("activeVips." + group + "." + id + ".duration", duration);
-        vipsFile.set("activeVips." + group + "." + id + ".nick", nick);
-        vipsFile.set("activeVips." + group + "." + id + ".expires-on-exact", expires);
-        vipsFile.set("activeVips." + group + "." + id + ".active", true);
+    public void addRawVip(String group, final String id, List<String> pgroup, long duration, String nick, String expires) {
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".playerGroup", pgroup);
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".duration", duration);
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".nick", nick);
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".expires-on-exact", expires);
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".active", true);
+
+        // Set player last groups
+        vipsFile.getConfigurationSection("activeVips").getKeys(true)
+                .stream().filter(k -> k.contains(id) && k.contains("playerGroup")).forEach(k -> {
+            vipsFile.set("activeVips." + k, new ArrayList<>(pgroup));
+        });
         saveVips();
     }
 
