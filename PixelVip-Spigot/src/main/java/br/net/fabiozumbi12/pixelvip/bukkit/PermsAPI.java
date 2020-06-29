@@ -13,8 +13,8 @@ import java.util.UUID;
 public class PermsAPI {
 
     public int taskId;
-    private Permission perms;
-    private PixelVip plugin;
+    private final Permission perms;
+    private final PixelVip plugin;
     private int delay = 10;
 
     public PermsAPI(Permission perms, PixelVip plugin) {
@@ -26,8 +26,8 @@ public class PermsAPI {
 
     }
 
-    public String getGroup(OfflinePlayer player) {
-        return perms.getPrimaryGroup(null, player);
+    public String getGroup(Player player) {
+        return perms.getPrimaryGroup(player);
     }
 
     public String[] getGroups(OfflinePlayer player) {

@@ -4,7 +4,7 @@
 
     <groupId>br.net.fabiozumbi12.pixelvip</groupId>
     <artifactId>PixelVip</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.3</version>
     <packaging>pom</packaging>
 
     <name>PixelVip</name>
