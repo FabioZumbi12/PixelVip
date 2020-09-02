@@ -30,9 +30,12 @@
         </repository>
         <repository>
             <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
-
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
         <!-- Bungee repo -->
         <repository>
             <id>bungeecord-repo</id>
@@ -45,12 +48,6 @@
         </repository>
 
     </repositories>
-
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/br.com.uol.pagseguro/pagseguro-api -->
-
-
-    </dependencies>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -23,15 +23,15 @@
         </dependency>
 
         <dependency>
-            <groupId>net.milkbowl.vault</groupId>
+            <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>LATEST</version>
+            <version>2.10.6</version>
             <scope>provided</scope>
         </dependency>
 

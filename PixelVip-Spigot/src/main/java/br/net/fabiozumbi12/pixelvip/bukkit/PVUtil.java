@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class PVUtil {
-    private PixelVip plugin;
+    private final PixelVip plugin;
 
     public PVUtil(PixelVip plugin) {
         this.plugin = plugin;
@@ -35,7 +35,7 @@ public class PVUtil {
     }
 
     public long millisToDay(String millis) {
-        return TimeUnit.MILLISECONDS.toDays(Long.valueOf(millis));
+        return TimeUnit.MILLISECONDS.toDays(Long.parseLong(millis));
     }
 
     public long millisToDay(Long millis) {
@@ -69,25 +69,23 @@ public class PVUtil {
         return new String(result);
     }
 
-    public boolean sendVipTime(CommandSender src, String UUID, String name) {
+    public void sendVipTime(CommandSender src, String UUID, String name) {
         List<String[]> vips = plugin.getPVConfig().getVipInfo(UUID);
         if (vips.size() > 0) {
             src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "vipInfoFor") + name + ":"));
             src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
             vips.stream().filter(v -> v.length == 5).forEach((vipInfo) -> {
-                String time = plugin.getUtil().millisToMessage(Long.valueOf(vipInfo[0]));
+                String time = plugin.getUtil().millisToMessage(Long.parseLong(vipInfo[0]));
                 if (plugin.getPVConfig().isVipActive(vipInfo[1], UUID)) {
-                    time = plugin.getUtil().millisToMessage(Long.valueOf(vipInfo[0]) - plugin.getUtil().getNowMillis());
+                    time = plugin.getUtil().millisToMessage(Long.parseLong(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
                 src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeLeft") + time));
                 src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipInfo[1])));
                 src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeActive") + plugin.getPVConfig().getLang(vipInfo[3])));
                 src.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
             });
-            return true;
         } else {
             src.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotVip")));
-            return false;
         }
     }
 
@@ -106,7 +104,7 @@ public class PVUtil {
             msg.append("&6").append(min).append(plugin.getPVConfig().getLang("minutes")).append(", ");
         }
         try {
-            msg = msg.replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, ".").replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, plugin.getPVConfig().getLang("and"));
+            msg.replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, ".").replace(msg.lastIndexOf(","), msg.lastIndexOf(",") + 1, plugin.getPVConfig().getLang("and"));
         } catch (StringIndexOutOfBoundsException ex) {
             return plugin.getPVConfig().getLang("lessThan");
         }
