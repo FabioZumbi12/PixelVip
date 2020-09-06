@@ -24,7 +24,7 @@ public interface PVDataManager {
 
     void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires, boolean active);
 
-    void addRawKey(String key, String group, long duration, int uses);
+    void addRawKey(String key, String group, long duration, int uses, boolean unique);
 
     void addRawItemKey(String key, List<String> cmds);
 

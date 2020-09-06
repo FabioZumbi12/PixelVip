@@ -29,6 +29,11 @@ commands:
     permission: "pixelvip.cmd.newkey"
     usage: "/newkey <vip group> <days> [uses]"
     aliases: [genkey, gerarkey]
+  newukey:
+    description: "Generate a new vip unique key for groups."
+    permission: "pixelvip.cmd.newukey"
+    usage: "/newukey <vip group> <days>"
+    aliases: [genukey, gerarkeyunica]
   sendkey:
     description: "Generate a new vip key and send to player."
     permission: "pixelvip.cmd.sendkey"

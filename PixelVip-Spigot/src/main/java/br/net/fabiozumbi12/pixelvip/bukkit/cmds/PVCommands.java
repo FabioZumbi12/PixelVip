@@ -37,6 +37,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         plugin.getCommand("newkey").setExecutor(this);
         plugin.getCommand("sendkey").setExecutor(this);
         plugin.getCommand("newitemkey").setExecutor(this);
+        plugin.getCommand("newukey").setExecutor(this);
         plugin.getCommand("additemkey").setExecutor(this);
         plugin.getCommand("listkeys").setExecutor(this);
         plugin.getCommand("usekey").setExecutor(this);
@@ -58,7 +59,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 
         if (args.length == 1) {
-            if (cmd.getName().equalsIgnoreCase("newkey")) {
+            if (cmd.getName().equalsIgnoreCase("newkey") || cmd.getName().equalsIgnoreCase("newukey")) {
                 List<String> list = new ArrayList<>(plugin.getPVConfig().getGroupList(false));
                 list.replaceAll(g -> plugin.getUtil().removeColor(g));
                 return list;
@@ -142,6 +143,10 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
             if (cmd.getName().equalsIgnoreCase("newkey")) {
                 success = newKey(sender, args, false);
+            }
+
+            if (cmd.getName().equalsIgnoreCase("newukey")) {
+                success = newUniqueKey(sender, args);
             }
 
             if (cmd.getName().equalsIgnoreCase("sendkey")) {
@@ -474,7 +479,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
         plugin.getPVConfig().getListKeys().forEach(key -> {
             String[] keyInfo = plugin.getPVConfig().getKeyInfo(key);
-            dm.addRawKey(key, keyInfo[0], Long.parseLong(keyInfo[1]), Integer.parseInt(keyInfo[2]));
+            dm.addRawKey(key, keyInfo[0], Long.parseLong(keyInfo[1]), Integer.parseInt(keyInfo[2]), Boolean.getBoolean(keyInfo[3]));
         });
 
         plugin.getPVConfig().getItemListKeys().forEach(key -> {
@@ -665,6 +670,45 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         return false;
     }
 
+
+    /**
+     * Command to generate new key.
+     *
+     * @return boolean
+     */
+    private boolean newUniqueKey(CommandSender sender, String[] args) {
+        if (args.length == 2) {
+            String group = plugin.getPVConfig().getVipByTitle(args[0]);
+            long days;
+
+            try {
+                days = Long.parseLong(args[1]);
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+
+            if (days <= 0) {
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "moreThanZero")));
+                return true;
+            }
+
+            if (!plugin.getPVConfig().groupExists(group)) {
+                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noGroups") + group));
+                return true;
+            }
+            String key = plugin.getUtil().genKey(plugin.getPVConfig().getInt(10, "configs.key-size"));
+            plugin.getPVConfig().addUniqueKey(key, group, plugin.getUtil().dayToMillis(days));
+
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "uniqueKeyGenerated")));
+
+            plugin.getUtil().sendHoverKey(sender, key);
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(group)));
+            sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("totalTime") + days));
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Command to send a new key to a player.
      *
@@ -762,7 +806,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 if (plugin.getPVConfig().getRoot().getBoolean("configs.useKeyWarning") && p.isOnline() && !key.isEmpty()) {
                     if (!plugin.getPVConfig().commandAlert.containsKey(p.getName()) || !plugin.getPVConfig().commandAlert.get(p.getName()).equalsIgnoreCase(key)) {
                         plugin.getPVConfig().commandAlert.put(p.getName(), key);
-                        p.getPlayer().sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "confirmUsekey")));
+                        p.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "confirmUsekey")));
                         return true;
                     }
                     plugin.getPVConfig().commandAlert.remove(p.getName());

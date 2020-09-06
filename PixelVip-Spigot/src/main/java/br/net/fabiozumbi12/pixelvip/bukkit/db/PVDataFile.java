@@ -219,10 +219,11 @@ public class PVDataFile implements PVDataManager {
     }
 
     @Override
-    public void addRawKey(String key, String group, long duration, int uses) {
+    public void addRawKey(String key, String group, long duration, int uses, boolean unique) {
         keysFile.set("keys.keys." + key + ".group", group);
         keysFile.set("keys.keys." + key + ".duration", duration);
         keysFile.set("keys.keys." + key + ".uses", uses);
+        keysFile.set("keys.keys." + key + ".unique", unique);
         saveKeys();
     }
 
@@ -237,7 +238,8 @@ public class PVDataFile implements PVDataManager {
         if (getListKeys().contains(key)) {
             return new String[]{keysFile.getString("keys.keys." + key + ".group"),
                     keysFile.getString("keys.keys." + key + ".duration"),
-                    keysFile.getString("keys.keys." + key + ".uses")};
+                    keysFile.getString("keys.keys." + key + ".uses"),
+                    keysFile.getString("keys.keys." + key + ".unique", "false")};
         }
         return new String[0];
     }

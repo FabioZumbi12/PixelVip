@@ -24,6 +24,7 @@ public class PVConfig {
     private PVDataManager dataManager;
     private final CommentedConfig comConfig;
     private final CommentedConfig apisConfig;
+    private final CommentedConfig uniqueKeys;
 
     public PVConfig(PixelVip plugin) {
         this.plugin = plugin;
@@ -83,6 +84,7 @@ public class PVConfig {
         comConfig.setDefault("configs.database.mysql.keys.columns.group", "col_group");
         comConfig.setDefault("configs.database.mysql.keys.columns.duration", "col_duration");
         comConfig.setDefault("configs.database.mysql.keys.columns.uses", "col_uses");
+        comConfig.setDefault("configs.database.mysql.keys.columns.unique", "col_unique");
         comConfig.setDefault("configs.database.mysql.keys.columns.cmds", "col_cmds");
         comConfig.setDefault("configs.database.mysql.keys.columns.info", "col_info");
         comConfig.setDefault("configs.database.mysql.keys.columns.comments", "col_comments");
@@ -149,6 +151,7 @@ public class PVConfig {
         comConfig.setDefault("strings.playerNotVip", "&cThis player(or you) is not VIP!");
         comConfig.setDefault("strings.moreThanZero", "&cThis number need to be more than 0");
         comConfig.setDefault("strings.keyGenerated", "&aGenerated a key with the following:");
+        comConfig.setDefault("strings.uniqueKeyGenerated", "&aGenerated a unique key with the following:");
         comConfig.setDefault("strings.keySendTo", "&aYou received a key with the following:");
         comConfig.setDefault("strings.invalidKey", "&cThis key is invalid or not exists!");
         comConfig.setDefault("strings.vipActivated", "&aVip activated with success:");
@@ -162,6 +165,7 @@ public class PVConfig {
         comConfig.setDefault("strings.timeGroup", "&b- Vip: &6");
         comConfig.setDefault("strings.timeActive", "&b- In Use: &6");
         comConfig.setDefault("strings.infoUses", "&b- Uses left: &6");
+        comConfig.setDefault("strings.alreadyUsedUniqueKey", "&cYou have used this key before!");
         comConfig.setDefault("strings.activeVipSetTo", "&aYour active VIP is ");
         comConfig.setDefault("strings.noGroups", "&cNo groups with name &6");
         comConfig.setDefault("strings.days", " &bdays");
@@ -262,6 +266,13 @@ public class PVConfig {
         apisConfig.saveConfig();
 
         /*---------------------------------------------------------*/
+
+        uniqueKeys = new CommentedConfig(new File(plugin.getDataFolder(), "uniqueKeys.yml"), new YamlConfiguration(), "This keys are unique, allowed to be used only one time per player");
+        uniqueKeys.setDefault("keys", null, null);
+
+        uniqueKeys.saveConfig();
+
+        /*---------------------------------------------------------*/
         //move vips to new file if is in config.yml
 
         if (comConfig.configurations.getConfigurationSection("activeVips") != null) {
@@ -292,7 +303,7 @@ public class PVConfig {
                 dataManager.addRawKey(key,
                         comConfig.configurations.getString("keys." + key + ".group"),
                         comConfig.configurations.getLong("keys." + key + ".duration"),
-                        comConfig.configurations.getInt("keys." + key + ".uses"));
+                        comConfig.configurations.getInt("keys." + key + ".uses"), false);
             });
 
             comConfig.configurations.set("keys", null);
@@ -430,7 +441,12 @@ public class PVConfig {
     }
 
     public void addKey(String key, String group, long millis, int uses) {
-        dataManager.addRawKey(key, group, millis, uses);
+        dataManager.addRawKey(key, group, millis, uses, false);
+        saveConfigAll();
+    }
+
+    public void addUniqueKey(String key, String group, long millis) {
+        dataManager.addRawKey(key, group, millis, 1, true);
         saveConfigAll();
     }
 
@@ -461,6 +477,7 @@ public class PVConfig {
         if (dataManager.getListKeys().contains(key)) {
             if (uses <= 1) {
                 dataManager.removeKey(key);
+                removeUniqueKey(key);
             } else {
                 dataManager.setKeyUse(key, uses - 1);
             }
@@ -497,17 +514,26 @@ public class PVConfig {
             String cmdBuilded = cmdsBuilder.toString();
             plugin.addLog("ItemKey | " + p.getName() + " | " + key + " | Cmds: " + cmdBuilded.substring(0, cmdBuilded.length() - 2));
         }
-        if (dataManager.getKeyInfo(key).length == 3) {
-            String[] keyinfo = dataManager.getKeyInfo(key);
-            int uses = Integer.parseInt(keyinfo[2]);
 
-            delKey(key, uses);
+        String[] keyInfo = dataManager.getKeyInfo(key);
+        if (keyInfo.length == 4) {
+            int uses = Integer.parseInt(keyInfo[2]);
+
+            if (keyInfo[3].equalsIgnoreCase("true")) {
+                if (hasUniquePlayer(p.getName(), key)) {
+                    p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag", "alreadyUsedUniqueKey")));
+                    return false;
+                }
+                addUniquePlayerKey(p.getName(), key);
+            } else {
+                delKey(key, uses);
+            }
 
             p.getPlayer().sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
             if (uses - 1 > 0) {
                 p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag", "usesLeftActivation").replace("{uses}", "" + (uses - 1))));
             }
-            enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname, key);
+            enableVip(p, keyInfo[0], new Long(keyInfo[1]), pname, key);
             return true;
         } else if (!group.equals("")) {
             enableVip(p, group, plugin.getUtil().dayToMillis(days), pname, key);
@@ -980,5 +1006,20 @@ public class PVConfig {
 
     public String getVipUUID(String string) {
         return dataManager.getVipUUID(string);
+    }
+
+    public boolean hasUniquePlayer(String player, String key) {
+        return uniqueKeys.configurations.contains("keys." + key + "." + player);
+    }
+
+    public void addUniquePlayerKey(String player, String key) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        uniqueKeys.configurations.set("keys." + key + "." + player, sdf.format(Calendar.getInstance().getTime()));
+        uniqueKeys.saveConfig();
+    }
+
+    public void removeUniqueKey(String key) {
+        uniqueKeys.configurations.set("keys." + key, null);
+        uniqueKeys.saveConfig();
     }
 }

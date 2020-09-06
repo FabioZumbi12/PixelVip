@@ -21,6 +21,7 @@ public class PVDataMysql implements PVDataManager {
     private final String colKGroup;
     private final String colKDuration;
     private final String colKUses;
+    private final String colKUnique;
     private final String colKInfo;
     private final String colKCmds;
     private final String colKComment;
@@ -55,6 +56,7 @@ public class PVDataMysql implements PVDataManager {
         this.colKGroup = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.group");
         this.colKDuration = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.duration");
         this.colKUses = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.uses");
+        this.colKUnique = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.unique");
         this.colKInfo = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.info");
         this.colKCmds = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.cmds");
         this.colKComment = plugin.getPVConfig().getRoot().getString("configs.database.mysql.keys.columns.comments");
@@ -115,6 +117,7 @@ public class PVDataMysql implements PVDataManager {
                         + colKGroup + " varchar(128), "
                         + colKDuration + " bigint(13), "
                         + colKUses + " int(13), "
+                        + colKUnique + " tinyint(1), "
                         + colKInfo + " varchar(128), "
                         + colKCmds + " varchar(255), "
                         + colKComment + " varchar(255))");
@@ -198,17 +201,26 @@ public class PVDataMysql implements PVDataManager {
     }
 
     private boolean checkColummForAdd() throws SQLException {
+        boolean added = false;
         DatabaseMetaData md = con.getMetaData();
         ResultSet rs = md.getColumns(null, null, transTable, colTPay);
         if (!rs.next()) {
             rs.close();
-
-            PreparedStatement st = this.con.prepareStatement("ALTER TABLE " + transTable + " ADD " + colTPay + " " + "varchar(128)");
+            PreparedStatement st = this.con.prepareStatement("ALTER TABLE " + transTable + " ADD " + colTPay + " varchar(128)");
             st.executeUpdate();
             st.close();
-            return true;
+            added = true;
         }
-        return false;
+
+        rs = md.getColumns(null, null, keyTable, colKUnique);
+        if (!rs.next()) {
+            rs.close();
+            PreparedStatement st = this.con.prepareStatement("ALTER TABLE " + keyTable + " ADD " + colKUnique + " tinyint(1) DEFAULT 0");
+            st.executeUpdate();
+            st.close();
+            added = true;
+        }
+        return added;
     }
 
     @Override
@@ -358,28 +370,32 @@ public class PVDataMysql implements PVDataManager {
     }
 
     @Override
-    public void addRawKey(String key, String group, long duration, int uses) {
+    public void addRawKey(String key, String group, long duration, int uses, boolean unique) {
         try {
             PreparedStatement st = this.con.prepareStatement("INSERT INTO `" + keyTable + "` ("
                     + colKey + ","
                     + colKGroup + ","
                     + colKDuration + ","
                     + colKUses + ", "
+                    + colKUnique + ", "
                     + colKInfo +
-                    ") VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE "
+                    ") VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE "
                     + colKGroup + "=?, "
                     + colKDuration + "=?, "
                     + colKUses + "=?, "
+                    + colKUnique + "=?, "
                     + colKInfo + "=?");
             st.setString(1, key);
             st.setString(2, group);
             st.setLong(3, duration);
             st.setInt(4, uses);
-            st.setString(5, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
-            st.setString(6, group);
-            st.setLong(7, duration);
-            st.setInt(8, uses);
-            st.setString(9, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
+            st.setBoolean(5, unique);
+            st.setString(6, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
+            st.setString(7, group);
+            st.setLong(8, duration);
+            st.setInt(9, uses);
+            st.setBoolean(10, unique);
+            st.setString(11, plugin.getUtil().millisToDay(duration) + plugin.getPVConfig().getRoot().getString("strings.days"));
             st.executeUpdate();
             st.close();
         } catch (SQLException e) {
@@ -396,7 +412,7 @@ public class PVDataMysql implements PVDataManager {
             for (String aCmdsArr : cmdsArr) {
                 strBuilder.append(aCmdsArr).append(",");
             }
-            String cmdsB = strBuilder.toString().substring(0, strBuilder.toString().length() - 1);
+            String cmdsB = strBuilder.substring(0, strBuilder.toString().length() - 1);
             st.setString(1, key);
             st.setString(2, cmdsB);
             st.setString(3, cmdsB);
@@ -582,11 +598,11 @@ public class PVDataMysql implements PVDataManager {
         String[] info = new String[0];
         if (keyExist(key)) {
             try {
-                PreparedStatement st = this.con.prepareStatement("SELECT " + colKGroup + ", " + colKDuration + ", " + colKUses + " FROM `" + keyTable + "` WHERE " + colKey + "=? AND " + colKGroup + " IS NOT NULL");
+                PreparedStatement st = this.con.prepareStatement("SELECT " + colKGroup + ", " + colKDuration + ", " + colKUses + ", " + colKUnique + " FROM `" + keyTable + "` WHERE " + colKey + "=? AND " + colKGroup + " IS NOT NULL");
                 st.setString(1, key);
                 ResultSet rs = st.executeQuery();
                 if (rs.next()) {
-                    info = new String[]{rs.getString(colKGroup), String.valueOf(rs.getLong(colKDuration)), String.valueOf(rs.getInt(colKUses))};
+                    info = new String[]{rs.getString(colKGroup), String.valueOf(rs.getLong(colKDuration)), String.valueOf(rs.getInt(colKUses)), String.valueOf(rs.getBoolean(colKUnique))};
                 }
                 st.close();
                 rs.close();
