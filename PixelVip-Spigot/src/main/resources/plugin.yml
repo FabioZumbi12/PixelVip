@@ -4,6 +4,8 @@ version: ${project.version}
 author: FabioZumbi12
 description: ${project.description}
 softdepend: [Vault, Essentials, PagSeguroAPI, PayPalAPI, MercadoPagoAPI, PlaceholderAPI]
+api-version: 1.13
+
 commands:
   pixelvip:
     description: "Main command for PixelVip."
@@ -104,6 +106,7 @@ commands:
     permission: "pixelvip.cmd.delpackage"
     usage: "/delpackage <id>"
     aliases: [delp]
+    
 permissions:
   pixelvip.normal:
     description: "Player commands."
