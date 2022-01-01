@@ -388,7 +388,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
     private boolean listVips(CommandSender sender, String[] args) {
         sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "list-of-vips")));
-        sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+        sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
 
         if (args.length == 0) {
             HashMap<String, List<String[]>> vips = plugin.getPVConfig().getVipList();
@@ -401,7 +401,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                 sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
                 sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
             }));
-            sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
         }
 
         if (args.length == 1) {
@@ -416,7 +416,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeGroup") + plugin.getPVConfig().getVipTitle(vipinfo[1])));
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(Long.parseLong(vipinfo[0]) - plugin.getUtil().getNowMillis())));
                 }));
-                sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+                sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
             }
             if (args[0].equalsIgnoreCase("all")) {
                 HashMap<String, List<String[]>> vips = plugin.getPVConfig().getAllVips();
@@ -431,7 +431,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeLeft") + plugin.getUtil().millisToMessage(vipTime)));
                     sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("timeActive") + plugin.getPVConfig().getLang(vipinfo[3])));
                 }));
-                sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+                sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
             }
         }
         return true;
@@ -761,7 +761,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         Collection<String> itemKeys = plugin.getPVConfig().getItemListKeys();
         int i = 0;
         if (keys.size() > 0) {
-            sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "listKeys")));
             for (Object key : keys) {
                 String[] keyinfo = plugin.getPVConfig().getKeyInfo(key.toString());
@@ -772,7 +772,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         }
 
         if (itemKeys.size() > 0) {
-            sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "listItemKeys")));
             for (Object key : itemKeys) {
                 List<String> cmds = plugin.getPVConfig().getItemKeyCmds(key.toString());
@@ -786,7 +786,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         if (i == 0) {
             sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "noKeys")));
         } else {
-            sender.sendMessage(plugin.getUtil().toColor("&b---------------------------------------------"));
+            sender.sendMessage(plugin.getUtil().toColor("  " + plugin.getPVConfig().getLang("headingLine")));
         }
         return true;
     }
