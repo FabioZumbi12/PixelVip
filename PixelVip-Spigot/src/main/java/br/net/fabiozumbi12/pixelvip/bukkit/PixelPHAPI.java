@@ -52,4 +52,9 @@ public class PixelPHAPI extends PlaceholderExpansion {
     public boolean canRegister(){
         return true;
     }
+    
+    @Override
+    public boolean persist() {
+        return true;
+    }
 }

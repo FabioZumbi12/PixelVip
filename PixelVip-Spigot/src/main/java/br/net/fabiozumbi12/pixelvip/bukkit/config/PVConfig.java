@@ -156,6 +156,7 @@ public class PVConfig {
         comConfig.setDefault("strings.invalidKey", "&cThis key is invalid or not exists!");
         comConfig.setDefault("strings.vipActivated", "&aVip activated with success:");
         comConfig.setDefault("strings.usesLeftActivation", "&bThis key can be used for more: &6{uses} &btimes.");
+        comConfig.setDefault("strings.headingLine", "&b---------------------------------------------");
         comConfig.setDefault("strings.activeVip", "&b- Vip: &6{vip}");
         comConfig.setDefault("strings.activeDays", "&b- Days: &6{days} &bdays");
         comConfig.setDefault("strings.timeLeft", "&b- Time left: &6");
