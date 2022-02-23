@@ -85,31 +85,37 @@ public class PVDataFile implements PVDataManager {
     }
 
     private void saveTrans() {
-        try {
-            this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        plugin.serv.getScheduler().runTask(plugin, () ->{
+            try {
+                this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void saveKeys() {
-        File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
-        try {
-            keysFile.save(fileKeys);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        plugin.serv.getScheduler().runTask(plugin, () ->{
+            File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
+            try {
+                keysFile.save(fileKeys);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
     public void saveVips() {
-        File fileVips = new File(plugin.getDataFolder(), "vips.yml");
-        try {
-            vipsFile.save(fileVips);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        plugin.serv.getScheduler().runTask(plugin, () ->{
+            File fileVips = new File(plugin.getDataFolder(), "vips.yml");
+            try {
+                vipsFile.save(fileVips);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

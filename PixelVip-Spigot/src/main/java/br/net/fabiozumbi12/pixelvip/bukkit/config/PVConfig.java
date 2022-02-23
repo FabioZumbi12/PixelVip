@@ -809,8 +809,13 @@ public class PVConfig {
         if (vipInfo.size() > 0) {
             for (String[] key : vipInfo) {
                 vipGroup = key[1];
-                oldGroup = Arrays.asList(key[2].split(","));
-                nick = key[4];
+                try {
+                    oldGroup = Arrays.asList(key[2].split(","));
+                    nick = key[4];
+                } catch (Exception ex) {
+                    plugin.getPVLogger().warning("Error on removeVip: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
                 if (vipInfo.size() > 1) {
                     if (optg.isPresent()) {
                         if (optg.get().equals(vipGroup)) {

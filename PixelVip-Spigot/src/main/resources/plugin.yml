@@ -33,7 +33,7 @@ commands:
     description: "Generate a new vip unique key for groups."
     permission: "pixelvip.cmd.newukey"
     usage: "/newukey <vip group> <days>"
-    aliases: [genukey, gerarkeyunica]
+    aliases: [genukey, gerarukey]
   sendkey:
     description: "Generate a new vip key and send to player."
     permission: "pixelvip.cmd.sendkey"
