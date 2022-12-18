@@ -43,7 +43,7 @@ public class PVUtil {
     }
 
     public long millisToDay(String millis) {
-        return TimeUnit.MILLISECONDS.toDays(new Long(millis));
+        return TimeUnit.MILLISECONDS.toDays(Long.parseLong(millis));
     }
 
     public long millisToDay(Long millis) {
@@ -78,9 +78,9 @@ public class PVUtil {
             src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings._pluginTag + plugin.getConfig().root().strings.vipInfoFor + name + ":"));
             src.sendMessage(plugin.getUtil().toText("&b---------------------------------------------"));
             vips.stream().filter(v -> v.length == 5).forEach((vipInfo) -> {
-                String time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]));
+                String time = plugin.getUtil().millisToMessage(Long.parseLong(vipInfo[0]));
                 if (plugin.getConfig().isVipActive(vipInfo[1], UUID)) {
-                    time = plugin.getUtil().millisToMessage(new Long(vipInfo[0]) - plugin.getUtil().getNowMillis());
+                    time = plugin.getUtil().millisToMessage(Long.parseLong(vipInfo[0]) - plugin.getUtil().getNowMillis());
                 }
                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings.timeLeft + time));
                 src.sendMessage(plugin.getUtil().toText(plugin.getConfig().root().strings.timeGroup + plugin.getConfig().getVipTitle(vipInfo[1])));

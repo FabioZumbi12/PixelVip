@@ -49,6 +49,7 @@ public class CommentedConfig {
         comments.put(key, comment);
     }
 
+    @SuppressWarnings("deprecation")
     public void saveConfig() {
         StringBuilder b = new StringBuilder();
         configurations.options().header(null);
@@ -94,7 +95,7 @@ public class CommentedConfig {
         }
 
         try {
-            Files.write(b, config, Charsets.UTF_8);
+            Files.asCharSink(config, Charsets.UTF_8).write(b);
         } catch (IOException e) {
             e.printStackTrace();
         }

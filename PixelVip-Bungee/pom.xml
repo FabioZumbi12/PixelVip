@@ -4,7 +4,7 @@
     <parent>
         <groupId>br.net.fabiozumbi12.pixelvip</groupId>
         <artifactId>PixelVip</artifactId>
-        <version>3.0.3</version>
+        <version>3.0.5</version>
     </parent>
     <artifactId>PixelVip-Bungee</artifactId>
 
@@ -12,14 +12,14 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.16-R0.5-SNAPSHOT</version>
+            <version>1.19-R0.1-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.16-R0.5-SNAPSHOT</version>
+            <version>1.19-R0.1-SNAPSHOT</version>
             <type>javadoc</type>
             <scope>provided</scope>
         </dependency>

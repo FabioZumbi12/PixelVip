@@ -220,7 +220,7 @@ public class PixelVip extends JavaPlugin implements Listener {
         task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
             Player player = Bukkit.getPlayer(UUID.fromString(uuid));
             value.forEach((vipInfo) -> {
-                long dur = new Long(vipInfo[0]);
+                long dur = Long.parseLong(vipInfo[0]);
 
                 // Check for groups not owned by player
                 if (player != null) {

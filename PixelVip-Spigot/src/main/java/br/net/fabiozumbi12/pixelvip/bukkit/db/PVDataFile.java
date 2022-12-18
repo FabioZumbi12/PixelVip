@@ -1,7 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.db;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
-import org.bukkit.Bukkit;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -74,7 +74,7 @@ public class PVDataFile implements PVDataManager {
         for (String payment : this.transFile.getKeys(false)) {
             //trans: player
             for (Map<?, ?> tr : this.transFile.getMapList(payment)) {
-                for (Map.Entry tv : tr.entrySet()) {
+                for (Map.Entry<?, ?> tv : tr.entrySet()) {
                     trans.put(payment, new HashMap<String, String>() {{
                         put(tv.getKey().toString(), tv.getValue().toString());
                     }});
