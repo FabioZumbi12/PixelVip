@@ -45,7 +45,6 @@
         <repository>
             <id>EssentialsX</id>
 			<url>https://repo.essentialsx.net/releases/</url>
-            <!-- <url>https://ci.ender.zone/plugin/repository/everything/</url> -->
         </repository>
 
     </repositories>
@@ -122,6 +121,6 @@
         <module>PixelVip-Bungee</module>
         <module>PixelVip-Spigot</module>
         <module>PixelVip-Sponge-56</module>
-        <!-- <module>PixelVip-Sponge-78</module> -->
+        <module>PixelVip-Sponge-78</module>
     </modules>
 </project>
