@@ -271,7 +271,7 @@ public class PVConfig {
             if (uses - 1 > 0) {
                 p.getPlayer().get().sendMessage(PixelVip.get().getUtil().toText(PixelVip.get().getConfig().root.strings._pluginTag + PixelVip.get().getConfig().root.strings.usesLeftActivation.replace("{uses}", "" + (uses - 1))));
             }
-            enableVip(p, keyinfo[0], new Long(keyinfo[1]), pname);
+            enableVip(p, keyinfo[0], Long.parseLong(keyinfo[1]), pname);
             return Text.of();
         } else if (!group.equals("")) {
             enableVip(p, group, PixelVip.get().getUtil().dayToMillis(days), pname);
@@ -311,7 +311,7 @@ public class PVConfig {
         Optional<String[]> otherVipOpt = getVipInfo(p.getUniqueId().toString()).stream().filter(v -> v[1].equals(group)).findFirst();
         if (otherVipOpt.isPresent()) {
             String[] otherVip = otherVipOpt.get();
-            durMillis += new Long(otherVip[0]);
+            durMillis += Long.parseLong(otherVip[0]);
             if (otherVip[3].equals("false")) {
                 durMillis += PixelVip.get().getUtil().getNowMillis();
             }
@@ -401,7 +401,7 @@ public class PVConfig {
         Optional<String[]> otherVipOpt = getVipInfo(uuid).stream().filter(v -> v[1].equals(group)).findFirst();
         if (otherVipOpt.isPresent()) {
             String[] otherVip = otherVipOpt.get();
-            durMillis += new Long(otherVip[0]);
+            durMillis += Long.parseLong(otherVip[0]);
             if (otherVip[3].equals("false")) {
                 durMillis += PixelVip.get().getUtil().getNowMillis();
             }

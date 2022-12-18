@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 public interface PVDataManager {
+    
     void saveVips();
 
     void saveKeys();
-
 
     void removeTrans(String payment, String trans);
 
@@ -18,7 +18,6 @@ public interface PVDataManager {
     boolean transactionExist(String payment, String trans);
 
     HashMap<String, Map<String, String>> getAllTrans();
-
 
     void addRawVip(String group, String uuid, List<String> pgroup, long duration, String nick, String expires);
 

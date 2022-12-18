@@ -245,8 +245,7 @@ public class PVConfig {
         apisConfig.setDefault("apis.paypal.use", false);
         apisConfig.setDefault("apis.paypal.sandbox", false);
         apisConfig.setDefault("apis.paypal.username", "username");
-        apisConfig.setDefault("apis.paypal.password", "password");
-        apisConfig.setDefault("apis.paypal.signature", "signature");
+        apisConfig.setDefault("apis.paypal.token", "ACCESS-TOKEN");
         apisConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
         apisConfig.setDefault("apis.paypal.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
                 "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
@@ -534,7 +533,7 @@ public class PVConfig {
             if (uses - 1 > 0) {
                 p.getPlayer().sendMessage(plugin.getUtil().toColor(getLang("_pluginTag", "usesLeftActivation").replace("{uses}", "" + (uses - 1))));
             }
-            enableVip(p, keyInfo[0], new Long(keyInfo[1]), pname, key);
+            enableVip(p, keyInfo[0], Long.parseLong(keyInfo[1]), pname, key);
             return true;
         } else if (!group.equals("")) {
             enableVip(p, group, plugin.getUtil().dayToMillis(days), pname, key);
@@ -571,7 +570,7 @@ public class PVConfig {
         Optional<String[]> otherVipOpt = getVipInfo(p.getUniqueId().toString()).stream().filter(v -> v[1].equals(group)).findFirst();
         if (otherVipOpt.isPresent()) {
             String[] otherVip = otherVipOpt.get();
-            durMillis += new Long(otherVip[0]);
+            durMillis += Long.parseLong(otherVip[0]);
             if (otherVip[3].equals("false")) {
                 durMillis += plugin.getUtil().getNowMillis();
             }
@@ -664,7 +663,7 @@ public class PVConfig {
         Optional<String[]> otherVipOpt = getVipInfo(uuid).stream().filter(v -> v[1].equals(group)).findFirst();
         if (otherVipOpt.isPresent()) {
             String[] otherVip = otherVipOpt.get();
-            durMillis += new Long(otherVip[0]);
+            durMillis += Long.parseLong(otherVip[0]);
             if (otherVip[3].equals("false")) {
                 durMillis += plugin.getUtil().getNowMillis();
             }

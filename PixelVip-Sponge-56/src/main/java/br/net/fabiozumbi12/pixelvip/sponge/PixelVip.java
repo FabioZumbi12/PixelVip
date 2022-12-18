@@ -207,10 +207,10 @@ public class PixelVip {
             logger.info("Sponge version " + v);
 
             if (v.startsWith("5") || v.startsWith("6")) {
-                this.perms = (PVPermsAPI) Class.forName("br.net.fabiozumbi12.pixelvip.sponge.PVPermsAPI56").newInstance();
+                this.perms = (PVPermsAPI) Class.forName("br.net.fabiozumbi12.pixelvip.sponge.PVPermsAPI56").getConstructor().newInstance();
             }
             if (v.startsWith("7") || v.startsWith("8")) {
-                this.perms = (PVPermsAPI) Class.forName("br.net.fabiozumbi12.pixelvip.sponge.PVPermsAPI78").newInstance();
+                this.perms = (PVPermsAPI) Class.forName("br.net.fabiozumbi12.pixelvip.sponge.PVPermsAPI78").getConstructor().newInstance();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,7 +288,7 @@ public class PixelVip {
             getConfig().getVipList().forEach((uuid, value) -> {
                 Optional<User> p = util.getUser(UUID.fromString(uuid));
                 getConfig().getVipList().get(uuid).forEach((vipInfo) -> {
-                    long dur = new Long(vipInfo[0]);
+                    long dur = Long.parseLong(vipInfo[0]);
                     if (p.isPresent()) {
                         User user = p.get();
                         if (!perms.getPlayerGroups(user).contains(vipInfo[1])) {

@@ -4,7 +4,7 @@
     <parent>
         <groupId>br.net.fabiozumbi12.pixelvip</groupId>
         <artifactId>PixelVip</artifactId>
-        <version>3.0.3</version>
+        <version>3.0.5</version>
     </parent>
     <artifactId>PixelVip-Sponge-56</artifactId>
 
@@ -24,27 +24,24 @@
         </dependency>
 
         <dependency>
-            <groupId>PagSeguro</groupId>
-            <artifactId>PagSeguro</artifactId>
-            <version>v1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../apis/PagSeguro-4.3.2.jar</systemPath>
+            <groupId>br.com.uol.pagseguro</groupId>
+            <artifactId>pagseguro-api</artifactId>
+            <version>4.3.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>PayPal</groupId>
-            <artifactId>PayPal</artifactId>
-            <version>v1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../apis/PayPal-0.0.1.4.jar</systemPath>
+            <groupId>com.paypal.sdk</groupId>
+			<artifactId>checkout-sdk</artifactId>
+			<version>2.0.0</version>
+			<scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>MercadoPago</groupId>
-            <artifactId>MercadoPago</artifactId>
-            <version>v1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../apis/MercadoPago-1.0.36.jar</systemPath>
+            <groupId>com.mercadopago</groupId>
+            <artifactId>sdk-java</artifactId>
+            <version>2.1.4</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

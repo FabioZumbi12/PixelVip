@@ -243,6 +243,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     private boolean addPackage(CommandSender sender, String[] args) {
         PackageManager packages = plugin.getPackageManager();
         //itemstack: /addpackage <id> hand|command [command1, command2]
