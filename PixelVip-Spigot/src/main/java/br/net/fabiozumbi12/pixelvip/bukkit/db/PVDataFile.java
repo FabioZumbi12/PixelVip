@@ -3,6 +3,7 @@ package br.net.fabiozumbi12.pixelvip.bukkit.db;
 import br.net.fabiozumbi12.pixelvip.bukkit.PixelVip;
 
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PVDataFile implements PVDataManager {
     private final YamlConfiguration vipsFile;
@@ -102,18 +104,32 @@ public class PVDataFile implements PVDataManager {
                 keysFile.save(fileKeys);
             } catch (IOException e) {
                 e.printStackTrace();
+                plugin.getPVLogger().warning("Error on save file Keys.yml, backing up latest valid config...");
+                try {
+                    keysFile.load(fileKeys);
+                } catch (IOException | InvalidConfigurationException e1) {
+                    plugin.getPVLogger().severe("Error on load latest saved file Keys.yml. Check this file for null groups or invalid formats!");
+                    e.printStackTrace();
+                }
             }
         });
     }
 
     @Override
     public void saveVips() {
+        File fileVips = new File(plugin.getDataFolder(), "vips.yml");
         plugin.serv.getScheduler().runTask(plugin, () ->{
-            File fileVips = new File(plugin.getDataFolder(), "vips.yml");
             try {
                 vipsFile.save(fileVips);
             } catch (IOException e) {
                 e.printStackTrace();
+                plugin.getPVLogger().warning("Error on save file Vips.yml, backing up latest valid config...");
+                try {
+                    vipsFile.load(fileVips);
+                } catch (IOException | InvalidConfigurationException e1) {
+                    plugin.getPVLogger().severe("Error on load latest saved file Vips.yml. Check this file for null groups or invalid formats!");
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -150,11 +166,11 @@ public class PVDataFile implements PVDataManager {
         List<String[]> vips = new ArrayList<>();
         plugin.getPVConfig().getGroupList(true).stream().filter(k -> vipsFile.get("activeVips." + k + "." + puuid + ".active") != null).forEach(key -> {
             StringBuilder builder = new StringBuilder();
-            for (String str : vipsFile.getStringList("activeVips." + key + "." + puuid + ".playerGroup")) {
+            for (String str : vipsFile.getStringList("activeVips." + key + "." + puuid + ".playerGroup").stream().filter(Objects::nonNull).collect(Collectors.toList())) {
                 builder.append(str).append(",");
             }
 
-            String pgroup = vipsFile.getString("activeVips." + key + "." + puuid + ".playerGroup");
+            String pgroup = vipsFile.getString("activeVips." + key + "." + puuid + ".playerGroup", "");
             if (builder.toString().length() > 0) {
                 pgroup = builder.toString().substring(0, builder.toString().length() - 1);
             }
@@ -210,7 +226,8 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public void addRawVip(String group, final String id, List<String> pgroup, long duration, String nick, String expires) {
-        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".playerGroup", pgroup);
+        List<String> plGroup = pgroup.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".playerGroup", plGroup);
         vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".duration", duration);
         vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".nick", nick);
         vipsFile.set("activeVips." + group + "." + id.toLowerCase() + ".expires-on-exact", expires);
@@ -219,8 +236,8 @@ public class PVDataFile implements PVDataManager {
         // Set player last groups
         vipsFile.getConfigurationSection("activeVips").getKeys(true)
                 .stream().filter(k -> k.contains(id) && k.contains("playerGroup")).forEach(k -> {
-            vipsFile.set("activeVips." + k, new ArrayList<>(pgroup));
-        });
+                    vipsFile.set("activeVips." + k, new ArrayList<>(plGroup));
+                });
         saveVips();
     }
 
