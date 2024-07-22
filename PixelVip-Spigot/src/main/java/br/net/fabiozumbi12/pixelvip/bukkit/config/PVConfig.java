@@ -597,8 +597,8 @@ public class PVConfig {
                         .replace("{vip}", group)
                         .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                         .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
-                if (p.isOnline()) {
-                    plugin.getUtil().ExecuteCmd(cmdf, null);
+                if (p.isOnline() || cmdf.startsWith("%run-instant%")) {
+                    plugin.getUtil().ExecuteCmd(cmdf.replace("%run-instant%",""), null);
                 } else {
                     normCmds.add(cmdf);
                 }
@@ -622,8 +622,8 @@ public class PVConfig {
                                 .replace("{vip}", group)
                                 .replace("{playergroup}", pdGroup.isEmpty() ? "" : pdGroup.get(0))
                                 .replace("{days}", String.valueOf(plugin.getUtil().millisToDay(durf)));
-                        if (p.isOnline()) {
-                            plugin.getUtil().ExecuteCmd(cmdf, null);
+                        if (p.isOnline() || cmdf.startsWith("%run-instant%")) {
+                            plugin.getUtil().ExecuteCmd(cmdf.replace("%run-instant%",""), null);
                         } else {
                             chanceCmds.add(cmdf);
                         }
@@ -633,7 +633,7 @@ public class PVConfig {
             }
         });
 
-        if (queueCmds() && (normCmds.size() > 0 || chanceCmds.size() > 0)) {
+        if (queueCmds() && (!normCmds.isEmpty() || !chanceCmds.isEmpty())) {
             plugin.serv.getScheduler().runTaskLater(plugin, () -> {
                 plugin.getLogger().info("Queued cmds for player " + p.getName() + " to run on join.");
                 setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
