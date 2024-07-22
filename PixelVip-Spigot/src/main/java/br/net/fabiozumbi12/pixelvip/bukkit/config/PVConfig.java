@@ -13,6 +13,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -190,70 +193,58 @@ public class PVConfig {
         comConfig.setDefault("strings.false", "&cfalse");
         comConfig.setDefault("strings.reload", "&aPixelvip reloaded with success!");
         comConfig.setDefault("strings.wait-cmd", "&cWait before use a pixelvip command again!");
-        comConfig.setDefault("strings.confirmUsekey", "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items. &6Use the same command again to confirm!");
+        comConfig.setDefault("strings.confirmUsekey", "&4Warning: &cMake sure you have free space on your inventory to use this key for your vip or items.\n&6Use the same command again to confirm!");
         comConfig.setDefault("strings.pendent", "&cYou have some pendent activation(s) to use. Please select one before continue!");
 
         comConfig.setDefault("strings.payment.waiting", "&c{payment}: Your purchase has not yet been approved!");
         comConfig.setDefault("strings.payment.codeused", "&c{payment}: This code has already been used!");
         comConfig.setDefault("strings.payment.expired", "&c{payment}: This code has expired!");
         comConfig.setDefault("strings.payment.noitems", "&c{payment}: No items delivered. Code: {transaction} - Print this message and send to an Administrator!");
+        comConfig.setDefault("strings.payment.delivered", "&a{payment}: You received: &b{item}");
+        comConfig.setDefault("strings.payment.notfound", "&c{payment}: Item id {id}({item}) not found to deliver, print this!");
         /*---------------------------------------------------------*/
 
         // Apis configs
-        String apiHeader = "=============== PixelVip Payment APIs Options ================\n" +
+        String apiHeader = "=============== PixelVip E-Commerce Options ================\n" +
                 "The configuration is commented! If you need more help or have issues, use our github:\n" +
-                "https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs\n" +
+                "https://github.com/FabioZumbi12/PixelVip/wiki\n" +
                 "\n" +
                 "Pixelvip by FabioZumbi12";
-        apisConfig = new CommentedConfig(new File(plugin.getDataFolder(), "apis.yml"), new YamlConfiguration(), apiHeader);
+        var fileApis = new File(plugin.getDataFolder(), "apis.yml");
+        var newFileApis = new File(plugin.getDataFolder(), "paymentApis.yml");
+        if (fileApis.exists() && !fileApis.isDirectory()) {
+            try {
+                Files.copy(fileApis.toPath(), newFileApis.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.delete(fileApis.toPath());
+            } catch (IOException e) {
+                plugin.getPVLogger()
+                        .severe("Error on move file apis.yml to new format: " + e.getMessage());
+            }
+        }
+
+        apisConfig = new CommentedConfig(newFileApis, new YamlConfiguration(), apiHeader);
+
+        apisConfig.configurations.set("apis.paypal", null);
+        apisConfig.configurations.set("apis.mercadopago", null);
+        apisConfig.configurations.set("apis.pagseguro", null);
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         apisConfig.setDefault("apis.in-test", false, "Set this to true until you is testing the APIs.\n" +
                 "In test, we will not save the transaction codes.\n" +
                 "DONT FORGET TO SET THIS TO FALSE WHEN DONE YOUR TESTS!!");
 
-        apisConfig.setDefault("apis.pagseguro", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#pagseguro-brazil");
-        apisConfig.setDefault("apis.pagseguro.use", false);
-        apisConfig.setDefault("apis.pagseguro.sandbox", false);
-        apisConfig.setDefault("apis.pagseguro.email", "your@email.com");
-        apisConfig.setDefault("apis.pagseguro.token", "yourtoken");
-        apisConfig.setDefault("apis.pagseguro.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
-        apisConfig.setDefault("apis.pagseguro.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
-                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
-                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
-                "Exemplo com código de pacote do PixelVip 999: \n" +
-                " - \"999 - Vip4 Elite\"\n" +
-                " - \"Vip4 Elite #999\"");
+        apisConfig.setDefault("apis.commandIds", null, "The list of your product or variable IDs like is in your E-Commerce (not the order id).\n" +
+                "Always set the quantity to 1, as the amount bought in your E-Commerce will be multiplied by this command,\n" +
+                "except for vip days, where you can sell packages of 15 or more days, then you can set 15 on command.");
+        apisConfig.setDefault("apis.commandIds.1", "darvip {p} Vip1 15");
 
-
-        apisConfig.setDefault("apis.mercadopago", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#mercadopago");
-        apisConfig.setDefault("apis.mercadopago.use", false);
-        apisConfig.setDefault("apis.mercadopago.sandbox", false);
-        apisConfig.setDefault("apis.mercadopago.access-token", "ACCESS-TOKEN");
-        apisConfig.setDefault("apis.mercadopago.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
-        apisConfig.setDefault("apis.mercadopago.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
-                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
-                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
-                "Exemplo com código de pacote do PixelVip 999: \n" +
-                " - \"999 - Vip4 Elite\"\n" +
-                " - \"Vip4 Elite #999\"");
-
-
-        apisConfig.setDefault("apis.paypal", null, "Wiki: https://github.com/FabioZumbi12/PixelVip/wiki/(2)-Payments-APIs#paypal");
-        apisConfig.setDefault("apis.paypal.use", false);
-        apisConfig.setDefault("apis.paypal.sandbox", false);
-        apisConfig.setDefault("apis.paypal.username", "username");
-        apisConfig.setDefault("apis.paypal.token", "ACCESS-TOKEN");
-        apisConfig.setDefault("apis.paypal.ignoreOldest", sdf.format(Calendar.getInstance().getTime()));
-        apisConfig.setDefault("apis.paypal.product-id-location", "ID", "Define se a identificação do produto vai ser pelo ID ou pela descrição.\n" +
-                "As opções são: \"ID\" ou \"DESCRICAO\"\n" +
-                "ID: Iremos verificar o REF, SKU ou ID do produto\n" +
-                "DESCRICAO: Iremos verificar se na descrição do produto, a primeira palavra é o id, ou se o id esta no meio da descrição iniciado com #\n" +
-                "Exemplo com código de pacote do PixelVip 999: \n" +
-                " - \"999 - Vip4 Elite\"\n" +
-                " - \"Vip4 Elite #999\"");
+        apisConfig.setDefault("apis.woocommerce", null, "How to generate WooCommerce consumer Key and Secret: https://woolentor.com/doc/how-to-find-woocommerce-consumer-key/");
+        apisConfig.setDefault("apis.woocommerce.use", false);
+        apisConfig.setDefault("apis.woocommerce.shopurl", "","Your WooCommerce site url (e.g. http://woocommerce.com).\nPay attention for your shop url, if your shop is located on www.mysite.com/myshop/ or on root.");
+        apisConfig.setDefault("apis.woocommerce.consumerkey", "","WooCommerce consumer key");
+        apisConfig.setDefault("apis.woocommerce.consumersecret", "","WooCommerce consumer secret");
+        apisConfig.setDefault("apis.woocommerce.ordercompleted", "completed","Status name for completed orders");
+        apisConfig.setDefault("apis.woocommerce.ignoreOldest", sdf.format(Calendar.getInstance().getTime()), "Ignore orders oldest than this date");
 
         if (comConfig.configurations.getConfigurationSection("apis") != null) {
             plugin.getPVLogger().warning("APIs configurations moved to 'apis.yml'");

@@ -119,7 +119,9 @@ public class PVUtil {
 
     public void ExecuteCmd(String cmd, Player player) {
         if (cmd == null || cmd.isEmpty()) return;
-        if (player != null) cmd = cmd.replace("{p}", player.getName());
+        if (player != null) cmd = cmd
+                .replace("{p}", player.getName())
+                .replace("{player}", player.getName());
 
         plugin.addLog("Running Command - \"" + cmd + "\"");
         String finalCmd = cmd;

@@ -1,10 +1,7 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.Packages.PackageManager;
-import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.MercadoPagoHook;
-import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PagSeguroHook;
-import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PayPalHook;
-import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.PaymentModel;
+import br.net.fabiozumbi12.pixelvip.bukkit.PaymentsAPI.*;
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
 import br.net.fabiozumbi12.pixelvip.bukkit.config.PVConfig;
@@ -186,22 +183,11 @@ public class PixelVip extends JavaPlugin implements Listener {
 
     private void setupPayments() {
         payments = new ArrayList<>();
-        //pagseguro
-        if (getPVConfig().getApiRoot().getBoolean("apis.pagseguro.use") && Bukkit.getPluginManager().getPlugin("PagSeguroAPI") != null) {
-            this.payments.add(new PagSeguroHook(this));
-            logger.info("-> PagSeguroAPI found and hooked.");
-        }
 
-        //mercadopago
-        if (getPVConfig().getApiRoot().getBoolean("apis.mercadopago.use") && Bukkit.getPluginManager().getPlugin("MercadoPagoAPI") != null) {
-            this.payments.add(new MercadoPagoHook(this));
-            logger.info("-> MercadoPagoAPI found and hooked.");
-        }
-
-        //paypal
-        if (getPVConfig().getApiRoot().getBoolean("apis.paypal.use") && Bukkit.getPluginManager().getPlugin("PayPalAPI") != null) {
-            this.payments.add(new PayPalHook(this));
-            logger.info("-> PayPalAPI found and hooked.");
+        //woocommerce
+        if (getPVConfig().getApiRoot().getBoolean("apis.woocommerce.use")) {
+            this.payments.add(new WooCommerceHook(this));
+            logger.info("-> WooCommerce ready to use.");
         }
     }
 

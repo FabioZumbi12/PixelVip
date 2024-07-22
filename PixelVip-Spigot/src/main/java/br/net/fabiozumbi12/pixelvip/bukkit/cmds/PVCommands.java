@@ -815,7 +815,7 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
                 if (!plugin.getPayments().isEmpty()) {
                     for (PaymentModel pay : plugin.getPayments()) {
-                        plugin.processTrans.put(pay.getPayname(), key);
+                        plugin.processTrans.put(pay.getPayName(), key);
                         if (pay.checkTransaction(p, key)) {
                             return true;
                         }

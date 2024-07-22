@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 
 public interface PaymentModel {
 
-    String getPayname();
+    String getPayName();
 
     boolean checkTransaction(Player player, String transCode);
 }
