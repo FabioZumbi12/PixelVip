@@ -10,23 +10,11 @@
     <name>PixelVip</name>
 
     <repositories>
-        <!-- Sponge repos -->
-        <repository>
-            <id>sponge-maven-repo</id>
-            <name>Sponge maven repo</name>
-            <url>https://repo.spongepowered.org/maven</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
 
         <!-- Spigot repos -->
         <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
         <repository>
             <id>placeholderapi</id>
@@ -120,7 +108,5 @@
     <modules>
         <module>PixelVip-Bungee</module>
         <module>PixelVip-Spigot</module>
-        <module>PixelVip-Sponge-56</module>
-        <module>PixelVip-Sponge-78</module>
     </modules>
 </project>
