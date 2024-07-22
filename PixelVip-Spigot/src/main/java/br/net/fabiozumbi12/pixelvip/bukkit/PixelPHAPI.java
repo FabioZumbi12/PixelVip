@@ -33,8 +33,18 @@ public class PixelPHAPI extends PlaceholderExpansion {
         var list = plugin.getPVConfig().getVipInfo(p.getName());
         if (!list.isEmpty()){
             if (arg.equals("inactive")) {
-                list.removeIf(v -> v[3].equals("true"));
+                list.removeIf(v -> !v[3].equals("true"));
             }
+            var b = new StringBuilder();
+            var sep = "";
+            for (var l : list){
+                if (l[1] != null){
+                    b.append(sep);
+                    b.append(l[1]);
+                    sep = ", ";
+                }
+            }
+            text = b.toString();
         }
         return text;
     }
