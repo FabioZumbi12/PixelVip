@@ -26,8 +26,14 @@ public class PixelPHAPI extends PlaceholderExpansion {
             if (arg.equals("expiration_desc")) {
                 text = plugin.getUtil().millisToMessage(Long.parseLong(exp) - plugin.getUtil().getNowMillis());
             }
-            if (arg.equals("active_vip")) {
+            if (arg.equals("active_vip") && vipInfo[1] != null) {
                 text = vipInfo[1];
+            }
+        }
+        var list = plugin.getPVConfig().getVipInfo(p.getName());
+        if (!list.isEmpty()){
+            if (arg.equals("inactive")) {
+                list.removeIf(v -> v[3].equals("true"));
             }
         }
         return text;

@@ -12,13 +12,14 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>${mineVersion}</version>
+            <version>1.20.6-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>${mineVersion}</version>
+            <version>1.20.6-R0.1-SNAPSHOT</version>
             <classifier>javadoc</classifier>
         </dependency>
 
@@ -65,11 +66,49 @@
 
     </dependencies>
 
-    <properties>
-        <mineVersion>1.18.1-R0.1-SNAPSHOT</mineVersion>
-    </properties>
 
     <build>
         <finalName>DONT-DOWNLOAD-Spigot-Reference</finalName>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>br.net.fabiozumbi12.pixelvip:PixelVip-Bungee</include>
+                                    <include>br.net.fabiozumbi12.pixelvip:PixelVip-Spigot</include>
+
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>br.net.fabiozumbi12.pixelvip:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
+                            <outputFile>
+                                ${project.basedir}/target/PixelVip-${project.version}-b${BUILD_NUMBER}-Universal.jar
+                            </outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
+            </plugin>
+
+        </plugins>
     </build>
+
 </project>
