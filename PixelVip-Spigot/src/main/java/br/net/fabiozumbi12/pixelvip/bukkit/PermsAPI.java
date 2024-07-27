@@ -40,7 +40,7 @@ public class PermsAPI {
 
     public void addGroup(String uuid, String group) {
         delay = 10;
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+        plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
                 Player p = Bukkit.getPlayer(UUID.fromString(uuid));
                 perms.playerAddGroup(null, p, group);
@@ -50,12 +50,12 @@ public class PermsAPI {
                     perms.playerAddGroup(null, p, group);
                 }
             }
-        }, (1 + delay) * 10);
+        }, (1 + delay) * 10L);
     }
 
     public void setGroup(String uuid, String group) {
         delay = 10;
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+        plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
                 Player p = Bukkit.getPlayer(UUID.fromString(uuid));
                 String[] groups = getGroups(p);
@@ -73,12 +73,12 @@ public class PermsAPI {
                     perms.playerAddGroup(null, p, group);
                 }
             }
-        }, (1 + delay) * 10);
+        }, (1 + delay) * 10L);
     }
 
     public void removeGroup(String uuid, String group) {
         if (plugin.getPVConfig().getGroupList(true).contains(group)) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+            plugin.serv.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
                 if (Bukkit.getPlayer(UUID.fromString(uuid)) != null) {
                     perms.playerRemoveGroup(null, Bukkit.getPlayer(UUID.fromString(uuid)), group);
                 } else {
@@ -87,7 +87,7 @@ public class PermsAPI {
                         perms.playerRemoveGroup(null, p, group);
                     }
                 }
-            }, (1 + delay) * 10);
+            }, (1 + delay) * 10L);
         }
     }
 }

@@ -825,7 +825,7 @@ public class PVConfig {
         }
 
         //commands to run on vip finish
-        if (getVipInfo(uuid).size() == 0) {
+        if (getVipInfo(uuid).isEmpty()) {
             for (String cmd : comConfig.configurations.getStringList("configs.commandsToRunOnVipFinish")) {
                 if (cmd == null || cmd.isEmpty() || cmd.contains("{vip}")) {
                     continue;
