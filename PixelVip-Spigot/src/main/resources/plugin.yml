@@ -59,7 +59,7 @@ commands:
     description: "Use to remove a vip of player."
     permission: "pixelvip.cmd.removevip"
     usage: "/removevip <player> [vip group]"
-    aliases: [delvip]
+    aliases: [delvip, tirarvip]
   setactive:
     description: "Use to change your active VIP, if more keys activated."
     permission: "pixelvip.cmd.player"
