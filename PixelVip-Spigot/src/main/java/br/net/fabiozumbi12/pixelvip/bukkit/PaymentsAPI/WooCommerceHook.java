@@ -40,7 +40,7 @@ public class WooCommerceHook  implements PaymentModel {
 
     @Override
     public boolean checkTransaction(Player player, String transCode) {
-        var test = _plugin.getPVConfig().getApiRoot().getBoolean("apis.in-test");
+        boolean test = _plugin.getPVConfig().getApiRoot().getBoolean("apis.in-test");
 
         // check if used
         if (_plugin.getPVConfig().transExist(getPayName(), transCode)) {
@@ -51,7 +51,7 @@ public class WooCommerceHook  implements PaymentModel {
 
         try {
             int id = Integer.parseInt(transCode);
-            var list = wooCommerce.get(EndpointBaseType.ORDERS.getValue(), id);
+            Map list = wooCommerce.get(EndpointBaseType.ORDERS.getValue(), id);
             if (!list.isEmpty()) {
 
                 if (test){
@@ -69,9 +69,9 @@ public class WooCommerceHook  implements PaymentModel {
                 }
 
                 // check if expired
-                var dtConfig = LocalDateTime.parse(Objects.requireNonNull(_plugin.getPVConfig().getApiRoot()
+                LocalDateTime dtConfig = LocalDateTime.parse(Objects.requireNonNull(_plugin.getPVConfig().getApiRoot()
                         .getString("apis.woocommerce.ignoreOldest")), FORMATTER);
-                var dtOrder = LocalDateTime.parse(list.get("date_completed").toString());
+                LocalDateTime dtOrder = LocalDateTime.parse(list.get("date_completed").toString());
                 if (dtOrder.isBefore(dtConfig)){
                     player.sendMessage(_plugin.getUtil()
                             .toColor(_plugin.getPVConfig().getLang("_pluginTag", "payment.expired")
@@ -80,12 +80,12 @@ public class WooCommerceHook  implements PaymentModel {
                 }
 
                 // handle items
-                var items = (List<Map>)list.get("line_items");
+                List<Map> items = (List<Map>)list.get("line_items");
                 if (!items.isEmpty()){
-                    for (var item : items){
-                        var idItem = item.get("product_id").toString();
-                        var qtdItem = (int)item.get("quantity");
-                        var nameItem = item.get("name").toString();
+                    for (Map item : items){
+                        String idItem = item.get("product_id").toString();
+                        int qtdItem = (int)item.get("quantity");
+                        String nameItem = item.get("name").toString();
 
                         // no items delivered
                         if (qtdItem == 0) {
@@ -103,7 +103,7 @@ public class WooCommerceHook  implements PaymentModel {
                             _plugin.getPVLogger().severe("Item quantity: " + qtdItem);
                         }
 
-                        var cmd = _plugin.getPVConfig().getApiRoot().getString("apis.commandIds." + idItem);
+                        String cmd = _plugin.getPVConfig().getApiRoot().getString("apis.commandIds." + idItem);
                         if (cmd != null){
                             _plugin.getPVLogger().info("Running \""+ cmd +"\" for player " + player.getName() + " from E-Commerce integration: " + getPayName());
                             for (int i = 0; i < qtdItem; i++) {

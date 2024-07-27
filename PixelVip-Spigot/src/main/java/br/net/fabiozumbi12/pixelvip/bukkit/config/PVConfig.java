@@ -210,8 +210,8 @@ public class PVConfig {
                 "https://github.com/FabioZumbi12/PixelVip/wiki\n" +
                 "\n" +
                 "Pixelvip by FabioZumbi12";
-        var fileApis = new File(plugin.getDataFolder(), "apis.yml");
-        var newFileApis = new File(plugin.getDataFolder(), "paymentApis.yml");
+        File fileApis = new File(plugin.getDataFolder(), "apis.yml");
+        File newFileApis = new File(plugin.getDataFolder(), "paymentApis.yml");
         if (fileApis.exists() && !fileApis.isDirectory()) {
             try {
                 Files.copy(fileApis.toPath(), newFileApis.toPath(), StandardCopyOption.REPLACE_EXISTING);

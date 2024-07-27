@@ -3,6 +3,8 @@ package br.net.fabiozumbi12.pixelvip.bukkit;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 
+import java.util.List;
+
 public class PixelPHAPI extends PlaceholderExpansion {
 
     private PixelVip plugin;
@@ -30,14 +32,14 @@ public class PixelPHAPI extends PlaceholderExpansion {
                 text = vipInfo[1];
             }
         }
-        var list = plugin.getPVConfig().getVipInfo(p.getName());
+        List<String[]> list = plugin.getPVConfig().getVipInfo(p.getName());
         if (!list.isEmpty()){
             if (arg.equals("inactive")) {
                 list.removeIf(v -> !v[3].equals("true"));
             }
-            var b = new StringBuilder();
-            var sep = "";
-            for (var l : list){
+            StringBuilder b = new StringBuilder();
+            String sep = "";
+            for (String[] l : list){
                 if (l[1] != null){
                     b.append(sep);
                     b.append(l[1]);
