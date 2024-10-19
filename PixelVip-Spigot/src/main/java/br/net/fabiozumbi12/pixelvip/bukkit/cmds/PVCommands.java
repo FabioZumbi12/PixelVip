@@ -877,8 +877,12 @@ public class PVCommands implements CommandExecutor, TabCompleter, Listener {
 
             String uuid = plugin.getPVConfig().getVipUUID(args[0]);
             if (uuid != null) {
-                plugin.getPVConfig().removeVip(uuid, group);
-                sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "vipsRemoved")));
+                if (plugin.getPVConfig().containsVip(uuid, group.get())) {
+                    plugin.getPVConfig().removeVip(uuid, group);
+                    sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "vipsRemoved")));
+                } else {
+                    sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotThisVip")));
+                }
             } else {
                 sender.sendMessage(plugin.getUtil().toColor(plugin.getPVConfig().getLang("_pluginTag", "playerNotVip")));
             }
