@@ -152,6 +152,7 @@ public class PVConfig {
         comConfig.setDefault("strings.listItemKeys", "&aList of Item Keys:");
         comConfig.setDefault("strings.vipInfoFor", "&aVip info for ");
         comConfig.setDefault("strings.playerNotVip", "&cThis player(or you) is not VIP!");
+        comConfig.setDefault("strings.playerNotThisVip", "&cThis player(or you) does not have this VIP.");
         comConfig.setDefault("strings.moreThanZero", "&cThis number need to be more than 0");
         comConfig.setDefault("strings.keyGenerated", "&aGenerated a key with the following:");
         comConfig.setDefault("strings.uniqueKeyGenerated", "&aGenerated a unique key with the following:");
@@ -906,6 +907,10 @@ public class PVConfig {
 
     public boolean groupExists(String group) {
         return comConfig.configurations.contains("groups." + group);
+    }
+
+    public boolean containsVip(String uuid, String vip) {
+        return dataManager.containsVip(uuid, vip);
     }
 
     public Set<String> getCmdChances(String vip) {
