@@ -12,14 +12,14 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.6-R0.1-SNAPSHOT</version>
+            <version>1.21.10-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.6-R0.1-SNAPSHOT</version>
+            <version>1.21.10-R0.1-SNAPSHOT</version>
             <classifier>javadoc</classifier>
         </dependency>
 
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.11.2</version>
+            <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
 
@@ -41,27 +41,6 @@
             <artifactId>EssentialsX</artifactId>
             <version>2.19.7</version>
 			<scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>br.com.uol.pagseguro</groupId>
-            <artifactId>pagseguro-api</artifactId>
-            <version>4.3.2</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.paypal.sdk</groupId>
-			<artifactId>checkout-sdk</artifactId>
-			<version>2.0.0</version>
-			<scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mercadopago</groupId>
-            <artifactId>sdk-java</artifactId>
-            <version>2.1.24</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -113,7 +92,7 @@
                                 </filter>
                             </filters>
                             <outputFile>
-                                ${project.basedir}/target/PixelVip-${project.version}-b${BUILD_NUMBER}-Universal.jar
+                                ${project.basedir}/target/PixelVip-${project.version}.jar
                             </outputFile>
                         </configuration>
                     </execution>
