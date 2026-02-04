@@ -1,7 +1,6 @@
 package br.net.fabiozumbi12.pixelvip.bukkit;
 
 import br.net.fabiozumbi12.pixelvip.bukkit.bungee.SpigotText;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -125,7 +124,7 @@ public class PVUtil {
 
         plugin.addLog("Running Command - \"" + cmd + "\"");
         String finalCmd = cmd;
-        Bukkit.getScheduler().runTask(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), finalCmd));
+        plugin.getScheduler().runSync(() -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), finalCmd));
     }
 
     public boolean paymentItems(HashMap<String, Integer> items, Player player, String payment, String transCode) {

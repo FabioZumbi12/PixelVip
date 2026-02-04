@@ -36,7 +36,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
             return;
         }
 
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+        plugin.getScheduler().runSyncLater(() -> {
 
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
             try {
@@ -145,7 +145,7 @@ public class PixelVipBungee implements PluginMessageListener, Listener {
             return;
         }
         Player p = e.getPlayer();
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+        plugin.getScheduler().runEntityLater(p, () -> {
             if (p.isOnline()) {
                 for (byte[] b : pendentBytes) {
                     p.sendPluginMessage(plugin, "PixelVipBungee", b);

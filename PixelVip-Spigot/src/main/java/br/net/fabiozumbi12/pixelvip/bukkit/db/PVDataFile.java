@@ -87,7 +87,7 @@ public class PVDataFile implements PVDataManager {
     }
 
     private void saveTrans() {
-        plugin.serv.getScheduler().runTask(plugin, () ->{
+        plugin.getScheduler().runSync( () ->{
             try {
                 this.transFile.save(new File(plugin.getDataFolder(), "transactions.yml"));
             } catch (IOException e) {
@@ -98,7 +98,7 @@ public class PVDataFile implements PVDataManager {
 
     @Override
     public void saveKeys() {
-        plugin.serv.getScheduler().runTask(plugin, () ->{
+        plugin.getScheduler().runSync( () ->{
             File fileKeys = new File(plugin.getDataFolder(), "keys.yml");
             try {
                 keysFile.save(fileKeys);
@@ -118,7 +118,7 @@ public class PVDataFile implements PVDataManager {
     @Override
     public void saveVips() {
         File fileVips = new File(plugin.getDataFolder(), "vips.yml");
-        plugin.serv.getScheduler().runTask(plugin, () ->{
+        plugin.getScheduler().runSync( () ->{
             try {
                 vipsFile.save(fileVips);
             } catch (IOException e) {
@@ -346,3 +346,4 @@ public class PVDataFile implements PVDataManager {
         return null;
     }
 }
+

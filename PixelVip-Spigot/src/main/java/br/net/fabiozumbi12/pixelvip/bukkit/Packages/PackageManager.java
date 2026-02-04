@@ -7,12 +7,15 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class PackageManager {
 
     private YamlConfiguration packages;
     private PixelVip plugin;
     private File fPack;
+    private final ConcurrentMap<String, Boolean> pendingCache = new ConcurrentHashMap<>();
 
     public PackageManager(PixelVip plugin) {
         this.plugin = plugin;
@@ -56,6 +59,8 @@ public class PackageManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        refreshPendingCache();
     }
 
     public void save() {
@@ -70,8 +75,30 @@ public class PackageManager {
         return !packages.getStringList("pending-variants." + player.getName()).isEmpty();
     }
 
+    public boolean hasPendingPlayer(String playerName) {
+        return pendingCache.getOrDefault(playerName, Boolean.FALSE);
+    }
+
     public List<String> getPendingVariant(Player player) {
         return this.packages.getStringList("pending-variants." + player.getName());
+    }
+
+    public List<String> getPendingVariant(String playerName) {
+        return this.packages.getStringList("pending-variants." + playerName);
+    }
+
+    public void refreshPending(String playerName) {
+        pendingCache.put(playerName, !packages.getStringList("pending-variants." + playerName).isEmpty());
+    }
+
+    private void refreshPendingCache() {
+        pendingCache.clear();
+        if (packages.getConfigurationSection("pending-variants") == null) {
+            return;
+        }
+        for (String key : packages.getConfigurationSection("pending-variants").getKeys(false)) {
+            pendingCache.put(key, !packages.getStringList("pending-variants." + key).isEmpty());
+        }
     }
 
     public YamlConfiguration getPackages() {

@@ -6,6 +6,9 @@ import br.net.fabiozumbi12.pixelvip.bukkit.bungee.PixelVipBungee;
 import br.net.fabiozumbi12.pixelvip.bukkit.cmds.PVCommands;
 import br.net.fabiozumbi12.pixelvip.bukkit.config.PVConfig;
 import br.net.fabiozumbi12.pixelvip.bukkit.metrics.Metrics;
+import br.net.fabiozumbi12.pixelvip.compat.SchedulerCompat;
+import br.net.fabiozumbi12.pixelvip.compat.SchedulerCompatProvider;
+import br.net.fabiozumbi12.pixelvip.compat.TaskHandle;
 import com.earth2me.essentials.Essentials;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -34,7 +37,7 @@ public class PixelVip extends JavaPlugin implements Listener {
     public Essentials ess;
     public HashMap<String, String> processTrans;
     private PVLogger logger;
-    private int task = 0;
+    private TaskHandle task;
     private List<PaymentModel> payments;
     private PVUtil util;
     private Permission perms;
@@ -42,6 +45,7 @@ public class PixelVip extends JavaPlugin implements Listener {
     private PermsAPI permApi;
     private PixelVipBungee pvBungee;
     private PackageManager packageManager;
+    private SchedulerCompat scheduler;
 
     public PackageManager getPackageManager() {
         return this.packageManager;
@@ -53,6 +57,10 @@ public class PixelVip extends JavaPlugin implements Listener {
 
     public PVUtil getUtil() {
         return this.util;
+    }
+
+    public SchedulerCompat getScheduler() {
+        return this.scheduler;
     }
 
     public PVLogger getPVLogger() {
@@ -69,7 +77,7 @@ public class PixelVip extends JavaPlugin implements Listener {
             config.closeCon();
         }
         if (this.permApi != null) {
-            Bukkit.getScheduler().cancelTask(this.permApi.taskId);
+            scheduler.cancel(this.permApi.task);
             this.permApi = new PermsAPI(perms, this);
         }
         this.config = new PVConfig(this);
@@ -101,6 +109,7 @@ public class PixelVip extends JavaPlugin implements Listener {
     public void onEnable() {
         plugin = this;
         serv = getServer();
+        scheduler = SchedulerCompatProvider.create(this);
         serv.getPluginManager().registerEvents(this, this);
         processTrans = new HashMap<>();
 
@@ -192,39 +201,45 @@ public class PixelVip extends JavaPlugin implements Listener {
     }
 
     public void onDisable() {
-        Bukkit.getScheduler().cancelTasks(plugin);
+        if (scheduler != null) {
+            scheduler.cancelAll();
+        }
         logger.severe(util.toColor("PixelVip disabled!"));
     }
 
     private void reloadVipTask() {
         logger.info("Reloading tasks...");
-        if (task != 0) {
-            Bukkit.getScheduler().cancelTask(task);
+        if (task != null) {
+            scheduler.cancel(task);
             logger.info("-> Task stopped");
         }
 
-        task = serv.getScheduler().runTaskTimer(plugin, () -> getPVConfig().getVipList().forEach((uuid, value) -> {
+        task = scheduler.runSyncTimer(() -> getPVConfig().getVipList().forEach((uuid, value) -> {
             Player player = Bukkit.getPlayer(UUID.fromString(uuid));
             value.forEach((vipInfo) -> {
                 long dur = Long.parseLong(vipInfo[0]);
 
                 // Check for groups not owned by player
                 if (player != null) {
-                    String[] groups = permApi.getGroups(player);
-                    if (groups != null && !Arrays.asList(groups).contains(vipInfo[1])) {
-                        config.runChangeVipCmds(player, vipInfo[1], permApi.getGroup(player));
-                    }
+                    scheduler.runEntity(player, () -> {
+                        String[] groups = permApi.getGroups(player);
+                        if (groups != null && !Arrays.asList(groups).contains(vipInfo[1])) {
+                            config.runChangeVipCmds(player, vipInfo[1], permApi.getGroup(player));
+                        }
+                    });
                 }
 
                 if (dur <= util.getNowMillis()) {
                     getPVConfig().removeVip(uuid, Optional.of(vipInfo[1]));
-                    if (player != null)
-                        player.sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1])));
+                    if (player != null) {
+                        scheduler.runEntity(player, () ->
+                                player.sendMessage(util.toColor(config.getLang("_pluginTag", "vipEnded").replace("{vip}", vipInfo[1]))));
+                    }
 
                     Bukkit.getConsoleSender().sendMessage(util.toColor(config.getLang("_pluginTag") + "&bThe vip &6" + vipInfo[1] + "&b of player &6" + vipInfo[4] + " &bhas ended!"));
                 }
             });
-        }), 0, 20 * 60).getTaskId();
+        }), 0, 20 * 60);
         logger.info("-> Task started");
     }
 
@@ -233,18 +248,20 @@ public class PixelVip extends JavaPlugin implements Listener {
         Player p = e.getPlayer();
 
         //check player uuid async
-        Bukkit.getScheduler().runTaskAsynchronously(this, () ->
+        String playerName = p.getName();
+        String playerUuid = p.getUniqueId().toString();
+        scheduler.runSync(() ->
                 getPVConfig().getVipList().forEach((key, value) -> {
                     for (String[] vipInfo : value) {
-                        String oldUUid = getPVConfig().getVipUUID(p.getName());
-                        if (vipInfo[4].equals(p.getName()) && !p.getUniqueId().toString().equals(oldUUid)) {
-                            getPVConfig().changeUUIDs(oldUUid, p.getUniqueId().toString());
+                        String oldUUid = getPVConfig().getVipUUID(playerName);
+                        if (vipInfo[4].equals(playerName) && !playerUuid.equals(oldUUid)) {
+                            getPVConfig().changeUUIDs(oldUUid, playerUuid);
                         }
                     }
                 }));
 
         //check player groups if is on vip group without vip info
-        serv.getScheduler().runTaskLater(plugin, () -> {
+        scheduler.runEntityLater(p, () -> {
             if (permApi.getGroups(p) != null) {
                 for (String g : permApi.getGroups(p)) {
                     if (getPVConfig().getGroupList(true).contains(g) && getPVConfig().getVipInfo(p.getUniqueId().toString()).isEmpty()) {
@@ -255,10 +272,10 @@ public class PixelVip extends JavaPlugin implements Listener {
         }, 40);
 
         if (getPVConfig().queueCmds()) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+            scheduler.runEntityLater(p, () -> {
                 List<String> qcmds = getPVConfig().getQueueCmds(p.getUniqueId().toString());
                 qcmds.forEach((cmd) -> {
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd), 10);
+                    scheduler.runEntityLater(p, () -> plugin.serv.dispatchCommand(plugin.serv.getConsoleSender(), cmd), 10);
                 });
             }, 60);
         }

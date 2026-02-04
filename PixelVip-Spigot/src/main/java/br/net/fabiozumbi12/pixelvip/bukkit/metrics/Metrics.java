@@ -27,9 +27,9 @@
 package br.net.fabiozumbi12.pixelvip.bukkit.metrics;
 
 import com.google.gson.JsonArray;
+import org.bukkit.Bukkit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -157,7 +157,7 @@ public class Metrics {
         if (enabled) {
             boolean found = false;
             // Search for all other bStats Metrics classes to see if we are the first one
-            for (Class<?> service : Bukkit.getServicesManager().getKnownServices()) {
+            for (Class<?> service : plugin.getServer().getServicesManager().getKnownServices()) {
                 try {
                     service.getField("B_STATS_VERSION"); // Our identifier :)
                     found = true; // We aren't the first
@@ -166,7 +166,7 @@ public class Metrics {
                 catch (NoSuchFieldException ignored) {}
             }
             // Register our service
-            Bukkit.getServicesManager().register(Metrics.class, this, plugin,
+            plugin.getServer().getServicesManager().register(Metrics.class, this, plugin,
                     ServicePriority.Normal);
             if (!found) {
                 // We are the first!
@@ -213,13 +213,27 @@ public class Metrics {
                 // the Bukkit scheduler
                 // Don't be afraid! The connection to the bStats server is still async, only the
                 // stats collection is sync ;)
-                Bukkit.getScheduler().runTask(plugin, () -> submitData());
+                runSync(() -> submitData());
             }
         }, 1000 * 60 * 5, 1000 * 60 * 30);
         // Submit the data every 30 minutes, first time after 5 minutes to give other plugins enough
         // time to start
         // WARNING: Changing the frequency has no effect but your plugin WILL be blocked/deleted!
         // WARNING: Just don't do it!
+    }
+
+    private void runSync(Runnable task) {
+        try {
+            Method getScheduler = plugin.getClass().getMethod("getScheduler");
+            Object scheduler = getScheduler.invoke(plugin);
+            if (scheduler != null) {
+                Method runSync = scheduler.getClass().getMethod("runSync", Runnable.class);
+                runSync.invoke(scheduler, task);
+                return;
+            }
+        } catch (Exception ignored) {
+        }
+        Bukkit.getScheduler().runTask(plugin, task);
     }
     
     /**

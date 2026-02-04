@@ -64,5 +64,6 @@ public class PVPackage {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        plugin.getPackageManager().refreshPending(player.getName());
     }
 }

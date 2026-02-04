@@ -10,6 +10,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>br.net.fabiozumbi12.pixelvip</groupId>
+            <artifactId>PixelVip-Folia</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.21.10-R0.1-SNAPSHOT</version>
@@ -69,6 +74,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
+                                    <include>br.net.fabiozumbi12.pixelvip:PixelVip-Folia</include>
                                     <include>br.net.fabiozumbi12.pixelvip:PixelVip-Bungee</include>
                                     <include>br.net.fabiozumbi12.pixelvip:PixelVip-Spigot</include>
                                     <include>com.fasterxml.jackson.core:jackson-core</include>
@@ -106,3 +112,4 @@
     </build>
 
 </project>
+

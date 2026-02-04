@@ -487,7 +487,7 @@ public class PVConfig {
             List<String> cmds = dataManager.getItemKeyCmds(key);
             for (String cmd : cmds) {
                 cmdsBuilder.append(cmd).append(", ");
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getScheduler().runSyncLater( () -> {
                     String cmdf = cmd
                             .replace("{p}", p.getName())
                             .replace("{player}", p.getName());
@@ -581,7 +581,7 @@ public class PVConfig {
 
         //run command from vip
         comConfig.configurations.getStringList("groups." + group + ".commands").forEach((cmd) -> {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getScheduler().runSyncLater( () -> {
                 String cmdf = cmd
                         .replace("{p}", p.getName())
                         .replace("{player}", p.getName())
@@ -606,7 +606,7 @@ public class PVConfig {
             //test chance
             if (rand <= chance) {
                 comConfig.configurations.getStringList("groups." + group + ".cmdChances." + chanceString).forEach((cmd) -> {
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+                    plugin.getScheduler().runSyncLater( () -> {
                         String cmdf = cmd
                                 .replace("{p}", p.getName())
                                 .replace("{player}", p.getName())
@@ -625,7 +625,7 @@ public class PVConfig {
         });
 
         if (queueCmds() && (!normCmds.isEmpty() || !chanceCmds.isEmpty())) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getScheduler().runSyncLater( () -> {
                 plugin.getLogger().info("Queued cmds for player " + p.getName() + " to run on join.");
                 setJoinCmds(p.getUniqueId().toString(), normCmds, chanceCmds);
             }, delay);
@@ -723,18 +723,18 @@ public class PVConfig {
             String cmdf = cmd.replace("{p}", p.getName())
                     .replace("{player}", p.getName());
             if (oldVip != null && !oldVip.equals("") && cmdf.contains("{oldvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay);
+                plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{oldvip}", oldVip), null), delay);
                 delay++;
             } else if (!newVip.equals("") && cmdf.contains("{newvip}")) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip), null), delay);
+                plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(cmdf.replace("{newvip}", newVip), null), delay);
                 delay++;
             } else {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
+                plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                 delay++;
             }
         }
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getScheduler().runSyncLater( () -> {
                 if (oldVip != null && !oldVip.isEmpty() && !oldVip.equals(newVip)) {
                     plugin.getPerms().removeGroup(p.getUniqueId().toString(), oldVip);
                 }
@@ -779,14 +779,14 @@ public class PVConfig {
         plugin.addLog("RemoveVip | " + pname + " | " + group);
 
         dataManager.removeVip(uuid, group);
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip")
+        plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdOnRemoveVip")
                 .replace("{p}", Optional.ofNullable(pname).get())
                 .replace("{player}", Optional.ofNullable(pname).get())
                 .replace("{vip}", group), null), delay);
         delay++;
 
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
-            plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().removeGroup(uuid, group), delay);
+            plugin.getScheduler().runSyncLater( () -> plugin.getPerms().removeGroup(uuid, group), delay);
             delay++;
         }
     }
@@ -836,11 +836,11 @@ public class PVConfig {
                     for (String group : oldGroup) {
                         String cmdf = replace
                                 .replace("{playergroup}", group);
-                        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
+                        plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                         delay++;
                     }
                 } else {
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
+                    plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
                     delay++;
                 }
             }
@@ -854,11 +854,11 @@ public class PVConfig {
             if (!oldGroup.isEmpty() && cmd.contains("{playergroup}")) {
                 for (String group : oldGroup) {
                     String cmdf = replace.replace("{playergroup}", group);
-                    plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
+                    plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(cmdf, null), delay);
                     delay++;
                 }
             } else {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
+                plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(replace, null), delay);
                 delay++;
             }
         }
@@ -866,7 +866,7 @@ public class PVConfig {
         //use vault to add back oldgroup
         if (comConfig.configurations.getBoolean("configs.Vault.use")) {
             for (String group : oldGroup) {
-                plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getPerms().addGroup(uuid, group), delay);
+                plugin.getScheduler().runSyncLater( () -> plugin.getPerms().addGroup(uuid, group), delay);
                 delay++;
             }
         } else {
@@ -876,7 +876,7 @@ public class PVConfig {
     }
 
     public void reloadPerms() {
-        plugin.serv.getScheduler().runTaskLater(plugin, () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin"), null), delay);
+        plugin.getScheduler().runSyncLater( () -> plugin.getUtil().ExecuteCmd(getString("", "configs.cmdToReloadPermPlugin"), null), delay);
         delay = 0;
     }
 
@@ -1019,3 +1019,4 @@ public class PVConfig {
         uniqueKeys.saveConfig();
     }
 }
+

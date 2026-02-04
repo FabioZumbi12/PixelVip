@@ -111,6 +111,8 @@
 
     <modules>
         <module>PixelVip-Bungee</module>
+        <module>PixelVip-Folia</module>
         <module>PixelVip-Spigot</module>
     </modules>
 </project>
+
